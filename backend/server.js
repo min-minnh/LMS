@@ -22,10 +22,10 @@ app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Connect Database
 mongoose.connect(process.env.MONGO_URI || "mongodb+srv://caom2k6_db_user:1412kaitokid@cluster0.ylpbpan.mongodb.net/lms")
-.then(async () => {
-  console.log("DB connected");
-})
-.catch(err => console.log("DB error:", err));
+  .then(async () => {
+    console.log("DB connected");
+  })
+  .catch(err => console.log("DB error:", err));
 
 // Register Routes
 app.use('/auth', authRoutes);
@@ -43,5 +43,5 @@ app.get('/', (req, res) => {
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`Server running at http://localhost:${PORT}`);
+  console.log(`Server running at https://lms-gzty.onrender.com:${PORT}`);
 });
