@@ -34,7 +34,6 @@
       color: var(--text-main);
     }
 
-    /* Sidebar */
     .sidebar {
       width: 260px;
       background: var(--sidebar-bg);
@@ -94,7 +93,6 @@
       border-radius: 0;
     }
 
-    /* Main Area */
     .main {
       flex: 1;
       padding: 40px 60px;
@@ -122,7 +120,6 @@
       font-weight: 400;
     }
 
-    /* Results Table */
     .card {
       background: var(--surface);
       padding: 0;
@@ -187,7 +184,6 @@
       color: #b91c1c;
     }
 
-    /* Modal for Results Detail */
     .modal-overlay {
       display: none;
       position: fixed;
@@ -260,7 +256,6 @@
       gap: 30px;
     }
 
-    /* Detailed Question Styles */
     .detail-card {
       background: var(--surface);
       border: 2px solid #e2e8f0;
@@ -326,7 +321,6 @@
 </head>
 
 <body>
-
   <div class="sidebar">
     <div class="logo"><span>🎓</span> Student</div>
     <a onclick="go('student-dashboard')">🏠 Dashboard</a>
@@ -344,7 +338,6 @@
       <h1>📊 Lịch Sử Làm Bài</h1>
       <p>Xem lại điểm số bài thi và nhấp vào từng bài để xem chi tiết đáp án.</p>
     </div>
-
     <div class="card">
       <table id="dataTable">
         <thead>
@@ -364,7 +357,6 @@
     </div>
   </div>
 
-  <!-- Details Modal -->
   <div class="modal-overlay" id="detailModal">
     <div class="modal-content">
       <div class="modal-header">
@@ -378,6 +370,10 @@
   </div>
 
   <script>
+    // ── CONFIG ──────────────────────────────────────────────
+    const BASE_URL = 'https://lms-gzty.onrender.com';
+    // ────────────────────────────────────────────────────────
+
     const token = localStorage.getItem("token");
     const userStr = localStorage.getItem("user");
     if (!token || !userStr) window.location.href = "index.html";
@@ -388,70 +384,69 @@
     function logout() { localStorage.clear(); window.location.href = "index.html"; }
     function go(page) { window.location.href = page + ".html"; }
 
+    // Hàm gọi API thống nhất — giống apiFetch() bên Admin
+    async function apiFetch(path) {
+      const res = await fetch(BASE_URL + path, {
+        headers: { 'Authorization': 'Bearer ' + token }
+      });
+      return res.json();
+    }
+
     function escapeHTML(str) {
       if (!str) return '';
       return String(str)
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
+        .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;").replace(/'/g, "&#039;");
     }
 
     async function fetchMyResults() {
       try {
-        const res = await fetch('http://lms-gzty.onrender.com/results?limit=100', {
-          headers: { 'Authorization': 'Bearer ' + token }
-        });
-        const data = await res.json();
+        const data = await apiFetch('/results?limit=100');
         const tbody = document.getElementById('tableBody');
 
-        if (!data.success || data.data.results.length === 0) {
+        if (!data.success || !data.data || !data.data.results || data.data.results.length === 0) {
           tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#64748b;">Chưa có kết quả nào. Hãy làm bài kiểm tra trước!</td></tr>';
           return;
         }
 
         tbody.innerHTML = data.data.results.map(r => {
-          const isPass = r.score >= (r.total / 2); // Assume 50% is pass
+          const isPass = r.score >= (r.total / 2);
           const badgeClass = isPass ? 'score-pass' : 'score-fail';
           const dateStr = r.submittedAt ? new Date(r.submittedAt).toLocaleString() : 'Chưa nộp';
-
           return `
-      <tr class="result-row" onclick="viewDetails('${r._id}')">
-        <td style="font-weight: 600; color: #1e3a8a;">${r.quizId?.title || 'Unknown Quiz'}</td>
-        <td><span class="score-badge ${badgeClass}">${r.score} / ${r.total}</span></td>
-        <td style="color: var(--text-muted);">${dateStr}</td>
-        <td><button style="padding: 6px 12px; background: #eef2ff; color: var(--primary); border: none; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer;">Xem chi tiết ➡</button></td>
-      </tr>
-    `}).join('');
+            <tr class="result-row" onclick="viewDetails('${r._id}')">
+              <td style="font-weight:600; color:#1e3a8a;">${r.quizId?.title || 'Unknown Quiz'}</td>
+              <td><span class="score-badge ${badgeClass}">${r.score} / ${r.total}</span></td>
+              <td style="color:var(--text-muted);">${dateStr}</td>
+              <td><button style="padding:6px 12px; background:#eef2ff; color:var(--primary); border:none; border-radius:8px; font-weight:600; font-size:13px; cursor:pointer;">Xem chi tiết ➡</button></td>
+            </tr>`;
+        }).join('');
       } catch (err) {
         console.error(err);
-        document.getElementById('tableBody').innerHTML = '<tr><td colspan="4" style="text-align:center; color:#ef4444;">Lỗi khi tải kết quả.</td></tr>';
+        document.getElementById('tableBody').innerHTML = '<tr><td colspan="4" style="text-align:center; color:#ef4444;">Lỗi khi tải kết quả. Vui lòng thử lại.</td></tr>';
       }
     }
 
     async function viewDetails(resultId) {
       document.getElementById('detailModal').style.display = 'flex';
-      document.getElementById('modalBody').innerHTML = '<p style="text-align:center; color: var(--text-muted);">Đang tải chi tiết bài làm...</p>';
+      document.getElementById('modalBody').innerHTML = '<p style="text-align:center; color:var(--text-muted);">Đang tải chi tiết bài làm...</p>';
       document.getElementById('modalTitle').innerText = 'Chi tiết bài thi';
 
       try {
-        const res = await fetch('http://lms-gzty.onrender.com/results/' + resultId, {
-          headers: { 'Authorization': 'Bearer ' + token }
-        });
-        const data = await res.json();
+        const data = await apiFetch('/results/' + resultId);
+
         if (!data.success) {
-          document.getElementById('modalBody').innerHTML = `<p style="text-align:center; color: red;">Lỗi từ máy chủ: ${data.message}</p>`;
+          document.getElementById('modalBody').innerHTML = `<p style="text-align:center; color:red;">Lỗi từ máy chủ: ${data.message}</p>`;
           return;
         }
 
         const { score, total, answers, quizId } = data.data || {};
         if (!quizId) {
-          document.getElementById('modalBody').innerHTML = '<p style="text-align:center; color: red;">Bài kiểm tra gốc đã bị xoá khỏi hệ thống nên không thể xem lại chi tiết câu hỏi.</p>';
+          document.getElementById('modalBody').innerHTML = '<p style="text-align:center; color:red;">Bài kiểm tra gốc đã bị xoá khỏi hệ thống.</p>';
           return;
         }
-        const questions = quizId.questions || [];
 
+        const questions = quizId.questions || [];
         document.getElementById('modalTitle').innerText = `Kết quả: ${score}/${total} - ${quizId.title}`;
 
         if (questions.length === 0) {
@@ -459,62 +454,50 @@
           return;
         }
 
-        // Validate we have what we need
         const safeAnswers = answers || [];
-
         let html = '';
+
         questions.forEach((q, idx) => {
-          // Find what the user answered
           const studentAns = safeAnswers.find(a => a.questionId && q._id && a.questionId.toString() === q._id.toString());
           const selected = studentAns ? studentAns.selected : null;
           const isCorrect = studentAns ? studentAns.isCorrect : false;
 
-          // Card style based on correctness
           const cardClass = isCorrect ? 'correct-q' : 'wrong-q';
           let icon = isCorrect ? '✅' : '❌';
           if (!selected) icon = '⚠️ (Bỏ trống)';
 
           const optsParams = [
-            { key: 'A', val: q.optionA },
-            { key: 'B', val: q.optionB },
-            { key: 'C', val: q.optionC },
-            { key: 'D', val: q.optionD }
+            { key: 'A', val: q.optionA }, { key: 'B', val: q.optionB },
+            { key: 'C', val: q.optionC }, { key: 'D', val: q.optionD }
           ].filter(o => o.val);
 
           html += `<div class="detail-card ${cardClass}">
-                 <div class="q-title">${icon} Câu ${idx + 1}: ${escapeHTML(q.question)}</div>
-                 <div class="q-options">
-      `;
+                     <div class="q-title">${icon} Câu ${idx + 1}: ${escapeHTML(q.question)}</div>
+                     <div class="q-options">`;
 
           optsParams.forEach(opt => {
             let optClass = 'opt-row';
             let badges = '';
-
             const correctAns = q.correct ? q.correct.toUpperCase() : '';
             const selectedAns = selected ? selected.toUpperCase() : '';
             const currentOpt = opt.key.toUpperCase();
 
-            // If this option is the TRUE correct answer
             if (correctAns && currentOpt === correctAns) {
               optClass = 'opt-row opt-correct';
               badges += `<span class="opt-selected-badge" style="background:#059669; color:white;">Đáp án đúng</span>`;
             }
-
-            // If user selected this option AND it is wrong
             if (selectedAns && currentOpt === selectedAns && currentOpt !== correctAns) {
               optClass = 'opt-row opt-wrong';
               badges += `<span class="opt-selected-badge" style="background:#dc2626; color:white;">Bạn chọn</span>`;
             }
-
-            // If user selected this option AND it is correct
             if (selectedAns && currentOpt === selectedAns && currentOpt === correctAns) {
               badges += `<span class="opt-selected-badge" style="background:white; color:#059669;">Bạn chọn</span>`;
             }
 
             html += `<div class="${optClass}">
-                    <span><strong>${opt.key}.</strong> ${escapeHTML(opt.val)}</span>
-                    <div>${badges}</div>
-                  </div>`;
+                       <span><strong>${opt.key}.</strong> ${escapeHTML(opt.val)}</span>
+                       <div>${badges}</div>
+                     </div>`;
           });
 
           html += `</div></div>`;
@@ -524,17 +507,14 @@
 
       } catch (err) {
         console.error(err);
-        document.getElementById('modalBody').innerHTML = `<p style="text-align:center; color: red;">Lỗi: ${err.message || "Lỗi không xác định"}. Có thể dữ liệu câu hỏi bị lỗi hoặc hệ thống mất kết nối.</p>`;
+        document.getElementById('modalBody').innerHTML = `<p style="text-align:center; color:red;">Lỗi: ${err.message || "Lỗi không xác định"}.</p>`;
       }
     }
 
-    function closeModal() {
-      document.getElementById('detailModal').style.display = 'none';
-    }
+    function closeModal() { document.getElementById('detailModal').style.display = 'none'; }
 
     fetchMyResults();
   </script>
-
 </body>
 
 </html>
