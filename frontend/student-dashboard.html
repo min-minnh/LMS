@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>AstraLMS - Bảng Điều Khiển Năng Lực</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --primary: #5c9eff;
+      --primary-hover: #4b89ea;
+      --sidebar-bg: #82b3f4;
+      --bg: #f4f8fc;
+      --surface: #ffffff;
+      --text-main: #1e293b;
+      --text-muted: #64748b;
+      --text-sidebar: #ffffff;
+    }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Outfit', sans-serif; }
+    body { display: flex; min-height: 100vh; background: var(--bg); color: var(--text-main); }
+    
+    /* Unified Sidebar */
+    .sidebar { width: 260px; background: var(--sidebar-bg); padding: 30px 20px; display: flex; flex-direction: column; flex-shrink: 0; box-shadow: 2px 0 10px rgba(0,0,0,0.05); }
+    .sidebar .logo { font-weight: 700; font-size: 20px; margin-bottom: 40px; color: var(--text-sidebar); display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .sidebar .logo span { font-size: 24px; }
+    .sidebar a { display: flex; align-items: center; gap: 14px; margin: 5px 0; padding: 12px 18px; color: rgba(255,255,255,0.9); text-decoration: none; cursor: pointer; border-radius: 10px; transition: all 0.2s ease; font-size: 15px; font-weight: 500; }
+    .sidebar a:hover { background: rgba(255,255,255,0.1); color: #fff; }
+    .sidebar a.active { background: rgba(255, 255, 255, 0.25); color: #fff; font-weight: 600; }
+    #admin-link { display: none; margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 20px; border-radius: 0; }
+    
+    /* Main Area */
+    .main { flex: 1; padding: 40px 60px; overflow-y: auto; display: flex; flex-direction: column; align-items: stretch; }
+    
+    /* Welcome Banner */
+    .welcome-banner {
+      background: linear-gradient(135deg, #a78bfa 0%, #6366f1 100%);
+      border-radius: 24px; padding: 40px 50px; color: white; display: flex; flex-direction: column;
+      box-shadow: 0 15px 30px rgba(99,102,241,0.2); position: relative; overflow: hidden; margin-bottom: 40px;
+    }
+    .welcome-banner::after {
+      content: '🚀'; position: absolute; right: 50px; bottom: -20px; font-size: 120px; opacity: 0.15;
+    }
+    .welcome-banner h1 { font-size: 36px; font-weight: 800; margin-bottom: 15px; text-shadow: 0 2px 10px rgba(0,0,0,0.1); z-index: 10;}
+    .welcome-banner p { font-size: 18px; font-weight: 400; opacity: 0.9; max-width: 600px; line-height: 1.6; z-index: 10;}
+
+    /* Quote of the Day */
+    .quote-box {
+      background: var(--surface); border-left: 6px solid var(--primary); padding: 25px 30px;
+      border-radius: 16px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); margin-bottom: 40px;
+    }
+    .quote-text { font-size: 20px; font-style: italic; color: #334155; font-weight: 500; margin-bottom: 10px; }
+    .quote-author { font-size: 14px; font-weight: 600; color: var(--primary); text-transform: uppercase; letter-spacing: 1px; }
+
+    /* Action Grid */
+    .action-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 25px; width: 100%; }
+    .action-card {
+      background: var(--surface); border: 1px solid #e2e8f0; border-radius: 20px; padding: 35px 25px; text-align: center;
+      cursor: pointer; transition: all 0.3s ease; display: flex; flex-direction: column; align-items: center; justify-content: center;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.02); position: relative; overflow: hidden;
+    }
+    .action-card::before {
+      content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 6px;
+      background: var(--primary); transform: scaleX(0); transition: 0.3s ease; transform-origin: left;
+    }
+    .action-card:hover { transform: translateY(-5px); box-shadow: 0 15px 30px rgba(92,158,255,0.15); border-color: transparent; }
+    .action-card:hover::before { transform: scaleX(1); }
+    .action-icon { font-size: 50px; margin-bottom: 20px; display: inline-block; filter: drop-shadow(0 4px 4px rgba(0,0,0,0.05)); }
+    .action-title { font-size: 20px; font-weight: 700; color: var(--text-main); margin-bottom: 10px; }
+    .action-desc { font-size: 14px; color: var(--text-muted); }
+  </style>
+</head>
+<body>
+
+<div class="sidebar">
+  <div class="logo"><span>🎓</span> Student</div>
+  <a onclick="go('student-dashboard')" class="active">🏠 Dashboard</a>
+  <a onclick="go('vocab')">📚 Vocabulary</a>
+  <a onclick="go('lesson')">📖 Theory</a>
+  <a onclick="go('quizzes-student')">📝 Quizzes</a>
+  <a onclick="go('my-results')">📊 My Results</a>
+  <div style="flex-grow: 1;"></div>
+  <a id="admin-link" onclick="go('dashboard')">⚙️ Admin Control Panel</a>
+  <a onclick="logout()">🚪 Logout</a>
+</div>
+
+<div class="main">
+  <!-- Banner -->
+  <div class="welcome-banner">
+    <h1 id="welcome-msg">Hi, Siêu Nhân!</h1>
+    <p>Hành trình ngàn dặm bắt đầu từ một bước chân. Hãy tiếp tục khám phá kho tàng kiến thức và phá vỡ mọi giới hạn của bản thân ngày hôm nay nhé!</p>
+  </div>
+
+  <!-- Motivational Quote -->
+  <div class="quote-box">
+    <div class="quote-text" id="quote-text">"Sự đầu tư vào tri thức luôn mang lại lợi nhuận cao nhất."</div>
+    <div class="quote-author" id="quote-author">— Benjamin Franklin</div>
+  </div>
+
+  <!-- Quick Navigation -->
+  <h2 style="font-size: 22px; font-weight: 700; color: var(--text-main); margin-bottom: 20px;">Lựa Chọn Mục Tiêu Của Bạn 🎯</h2>
+  <div class="action-grid">
+    
+    <div class="action-card" onclick="go('vocab')">
+      <span class="action-icon">📚</span>
+      <div class="action-title">Từ Vựng (Vocabulary)</div>
+      <div class="action-desc">Mở rộng vốn từ vựng thông qua Flashcard và luyện tập gõ phím.</div>
+    </div>
+    
+    <div class="action-card" onclick="go('lesson')">
+      <span class="action-icon">📖</span>
+      <div class="action-title">Lý Thuyết (Theory)</div>
+      <div class="action-desc">Khám phá các bài học mới được soạn thảo cực kỳ chất lượng.</div>
+    </div>
+    
+    <div class="action-card" onclick="go('quizzes-student')">
+      <span class="action-icon">📝</span>
+      <div class="action-title">Bài Kiểm Tra (Quizzes)</div>
+      <div class="action-desc">Đánh giá nhanh xem bạn đã ghi nhớ bài được bao nhiêu %.</div>
+    </div>
+    
+  </div>
+</div>
+
+<script>
+const token = localStorage.getItem("token");
+const userStr = localStorage.getItem("user");
+if (!token || !userStr) window.location.href = "index.html";
+
+const user = JSON.parse(userStr);
+if (user.role === 'admin') document.getElementById('admin-link').style.display = "flex";
+
+// Set name dynamically
+document.getElementById('welcome-msg').innerText = `Hi ${user.name || user.email.split('@')[0]} 👋`;
+
+// Randomly change motivational quotes
+const quotes = [
+  { text: "Đừng nói bạn không có đủ thời gian. Bạn có số giờ mỗi ngày hoàn toàn bằng với Helen Keller, Pasteur, Michaelangelo, Mẹ Teresa, Leonardo da Vinci, Thomas Jefferson và Albert Einstein.", author: "H. Jackson Brown Jr." },
+  { text: "Thành công không phải là chìa khóa mở cánh cửa hạnh phúc. Hạnh phúc là chìa khóa dẫn tới thành công. Nếu bạn yêu điều bạn đang làm, bạn sẽ thành công.", author: "Albert Schweitzer" },
+  { text: "Giáo dục là vũ khí mạnh nhất mà người ta có thể sử dụng để thay đổi thế giới.", author: "Nelson Mandela" },
+  { text: "Học tập không bao giờ làm suy kiệt trí tuệ.", author: "Leonardo da Vinci" },
+  { text: "Tương lai thuộc về những ai tin vào vẻ đẹp trong những giấc mơ của họ.", author: "Eleanor Roosevelt" }
+];
+const q = quotes[Math.floor(Math.random() * quotes.length)];
+document.getElementById('quote-text').innerText = `"${q.text}"`;
+document.getElementById('quote-author').innerText = `— ${q.author}`;
+
+
+function logout() { localStorage.clear(); window.location.href = "index.html"; }
+function go(page) { window.location.href = page + ".html"; }
+
+</script>
+
+</body>
+</html>

@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Topics Management</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+    body { display: flex; min-height: 100vh; background: #f8fafc; color: #0f172a; }
+    .sidebar { width: 260px; background: #ffffff; border-right: 1px solid #e2e8f0; padding: 30px 20px; display: flex; flex-direction: column; }
+    .sidebar .logo { font-weight: 700; font-size: 24px; margin-bottom: 40px; color: #1e293b; display: flex; align-items: center; gap: 10px; }
+    .sidebar a { display: flex; align-items: center; gap: 12px; margin: 8px 0; padding: 12px 16px; color: #64748b; text-decoration: none; border-radius: 12px; font-weight: 500; }
+    .sidebar a:hover { background: #f1f5f9; color: #1e293b; }
+    .sidebar a.active { background: #fee2e2; color: #ef4444; }
+    
+    .main { flex: 1; padding: 40px; overflow-y: auto; }
+    .card { background: white; padding: 25px; border-radius: 12px; border: 1px solid #e2e8f0; margin-bottom: 20px; }
+    
+    input { width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 6px; border: 1px solid #e2e8f0; }
+    button { padding: 10px 15px; background: #6366f1; color: white; border: none; border-radius: 6px; cursor: pointer; }
+    button.del { background: #ef4444; padding: 5px 10px; font-size: 12px; }
+  </style>
+  <script src="admin-core.js"></script>
+</head>
+<body onload="checkAdmin(); loadData(1)">
+
+<div class="sidebar">
+  <div class="logo">Admin Panel</div>
+  <a href="dashboard.html">🏠 Dashboard</a>
+  <a href="topics.html" class="active">📁 Topics</a>
+  <a href="vocabulary.html">📚 Vocabulary</a>
+  <a href="lessons.html">📖 Lessons</a>
+  <a href="quizzes.html">📝 Quizzes</a>
+  <a href="results.html">📊 Student Results</a>
+</div>
+
+<div class="main">
+  <h2>Topics Management</h2>
+  
+  <div class="card" style="margin-top: 20px;">
+    <h3>Add New Topic</h3>
+    <input type="text" id="topicName" placeholder="Enter topic name..." />
+    <button onclick="addTopic()">Save Topic</button>
+  </div>
+
+  <table id="dataTable">
+    <thead>
+      <tr><th>Name</th><th>Actions</th></tr>
+    </thead>
+    <tbody id="tableBody"></tbody>
+  </table>
+  <div id="pagination" class="pagination"></div>
+</div>
+
+<script>
+  let editingId = null;
+
+  async function loadData(page = 1) {
+    renderSkeleton('tableBody', 2);
+    const res = await apiFetch(`/topics?page=${page}`);
+    if(!res.success) return showToast(res.message, false);
+    
+    const tbody = document.getElementById('tableBody');
+    if (res.data.topics.length === 0) {
+      renderEmptyState('tableBody', 2, "No topics yet");
+      document.getElementById('pagination').innerHTML = '';
+      return;
+    }
+
+    tbody.innerHTML = res.data.topics.map(t => `
+      <tr>
+        <td>${t.name}</td>
+        <td><button class="del" onclick="deleteTopic('${t._id}')">Delete</button></td>
+      </tr>
+    `).join('');
+    
+    buildPagination(res.data.page, res.data.totalPages, loadData);
+  }
+
+  async function addTopic() {
+    const name = document.getElementById('topicName').value;
+    if (!name) return showToast("Name is required", false);
+    
+    const res = await apiFetch('/topics', {
+      method: 'POST',
+      body: JSON.stringify({ name })
+    });
+
+    if (res.success) {
+      showToast("Topic added!");
+      document.getElementById('topicName').value = '';
+      loadData(1);
+    } else {
+      showToast(res.message, false);
+    }
+  }
+
+  async function deleteTopic(id) {
+    if(!confirm("Are you sure?")) return;
+    const res = await apiFetch(`/topics/${id}`, { method: 'DELETE' });
+    if(res.success) { showToast("Topic deleted"); loadData(1); }
+    else { showToast(res.message, false); }
+  }
+</script>
+</body>
+</html>

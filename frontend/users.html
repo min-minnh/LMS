@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Users List</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+    body { display: flex; min-height: 100vh; background: #f8fafc; color: #0f172a; }
+    
+    .sidebar { width: 260px; background: #ffffff; border-right: 1px solid #e2e8f0; padding: 30px 20px; display: flex; flex-direction: column; flex-shrink: 0; }
+    .sidebar .logo { font-weight: 700; font-size: 24px; margin-bottom: 40px; color: #1e293b; display: flex; align-items: center; gap: 10px; }
+    .sidebar .logo span { width: 32px; height: 32px; background: linear-gradient(135deg, #6366f1, #a855f7); border-radius: 8px; color: white; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+    .sidebar a { display: flex; align-items: center; gap: 12px; margin: 8px 0; padding: 12px 16px; color: #64748b; text-decoration: none; cursor: pointer; border-radius: 12px; transition: all 0.2s ease; font-size: 15px; font-weight: 500; }
+    .sidebar a:hover { background: #f1f5f9; color: #1e293b; }
+    .sidebar a.active { background: #fee2e2; color: #ef4444; }
+
+    .main { flex: 1; padding: 40px; overflow-y: auto; }
+    .card { background: white; padding: 25px; border-radius: 12px; border: 1px solid #e2e8f0; margin-bottom: 20px; }
+    button.del { background: #ef4444; color: white; padding: 5px 10px; font-size: 12px; border: none; border-radius: 6px; cursor: pointer; }
+    /* Skeleton CSS injected by admin-core.js applies to tables */
+  </style>
+  <script src="admin-core.js"></script>
+</head>
+<body onload="checkAdmin(); fetchUsers(1)">
+
+<div class="sidebar">
+  <div class="logo"><span>A</span> Admin Panel</div>
+  <a href="dashboard.html">🏠 Dashboard</a>
+  <a href="vocabulary.html">📚 Vocabulary</a>
+  <a href="lessons.html">📖 Lessons</a>
+  <a href="users.html" class="active">👥 Users List</a>
+  <a href="quizzes.html">📝 Quizzes</a>
+  <a href="results.html">📊 Student Results</a>
+  <div style="flex-grow: 1;"></div>
+  <a href="index.html" onclick="localStorage.clear()" style="color: #ef4444;">🚪 Logout</a>
+</div>
+
+<div class="main">
+  <h2>👥 Users Management</h2>
+  
+  <div class="card" style="margin-top: 20px; background: #fafafa; border: 1px dashed #cbd5e1;">
+    <h3 style="font-size: 16px; margin-bottom: 10px; color: #1e293b;">Create New User</h3>
+    <div style="display:flex; gap:10px; flex-wrap:wrap;">
+      <input type="text" id="newName" placeholder="Name" style="flex:1; min-width: 150px; padding: 10px; border-radius: 6px; border: 1px solid #e2e8f0;">
+      <input type="email" id="newEmail" placeholder="Email" style="flex:1; min-width: 150px; padding: 10px; border-radius: 6px; border: 1px solid #e2e8f0;">
+      <input type="password" id="newPassword" placeholder="Password" style="flex:1; min-width: 150px; padding: 10px; border-radius: 6px; border: 1px solid #e2e8f0;">
+      <select id="newRole" style="flex:0.5; min-width: 100px; padding: 10px; border-radius: 6px; border: 1px solid #e2e8f0;">
+        <option value="student">Student</option>
+        <option value="admin">Admin</option>
+      </select>
+      <button onclick="addUser()" style="background: #6366f1; color: white; padding: 10px 15px; border: none; border-radius: 6px; cursor: pointer; font-weight: 500;">Create User</button>
+    </div>
+  </div>
+
+  <div class="card" style="margin-top: 20px;">
+    <h3>Student & Admin Accounts</h3>
+    <table style="margin-top:20px; width:100%; text-align: left;">
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Email</th>
+          <th>Role</th>
+          <th>Joined</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+    <div id="pagination" class="pagination"></div>
+  </div>
+</div>
+
+<script>
+  async function fetchUsers(page = 1) {
+    if (typeof renderSkeleton === 'function') renderSkeleton('tableBody', 5);
+    const res = await apiFetch(`/users?page=${page}`);
+    if (!res.success) return showToast(res.message, false);
+
+    const tbody = document.getElementById('tableBody');
+    if (!res.data.users || res.data.users.length === 0) {
+      if (typeof renderEmptyState === 'function') renderEmptyState('tableBody', 5, "No users found.");
+      document.getElementById('pagination').innerHTML = '';
+      return;
+    }
+
+    tbody.innerHTML = res.data.users.map(u => `
+      <tr>
+        <td><strong>${u.name || '-'}</strong></td>
+        <td>${u.email}</td>
+        <td>
+          <select onchange="updateRole('${u._id}', this.value)" style="padding: 4px; border-radius: 4px; border: 1px solid #cbd5e1; font-size: 12px; text-transform: capitalize; font-weight: 600; cursor: pointer; background: ${u.role === 'admin' ? '#fee2e2' : '#eef2ff'}; color: ${u.role === 'admin' ? '#ef4444' : '#4f46e5'}">
+             <option value="student" ${u.role === 'student' ? 'selected' : ''}>Student</option>
+             <option value="admin" ${u.role === 'admin' ? 'selected' : ''}>Admin</option>
+          </select>
+        </td>
+        <td>${new Date(u.createdAt).toLocaleDateString()}</td>
+        <td><button class="del" onclick="deleteUser('${u._id}')">Remove</button></td>
+      </tr>
+    `).join('');
+
+    if (typeof buildPagination === 'function') buildPagination(res.data.page, res.data.totalPages, fetchUsers);
+  }
+
+  async function addUser() {
+    const name = document.getElementById('newName').value;
+    const email = document.getElementById('newEmail').value;
+    const password = document.getElementById('newPassword').value;
+    const role = document.getElementById('newRole').value;
+
+    if (!email || !password) return showToast("Email and password required", false);
+
+    const res = await apiFetch('/users', {
+      method: 'POST',
+      body: JSON.stringify({ name, email, password, role })
+    });
+    if (res.success) {
+      showToast("User created successfully!");
+      document.getElementById('newName').value = '';
+      document.getElementById('newEmail').value = '';
+      document.getElementById('newPassword').value = '';
+      fetchUsers(1);
+    } else { showToast(res.message, false); }
+  }
+
+  async function updateRole(id, role) {
+    const res = await apiFetch(`/users/${id}/role`, {
+      method: 'PUT',
+      body: JSON.stringify({ role })
+    });
+    if (res.success) {
+      showToast("Role updated!");
+    } else {
+      showToast(res.message, false);
+      fetchUsers(1); // revert on UI
+    }
+  }
+
+  async function deleteUser(id) {
+    if (!confirm("Are you sure you want to delete this user and all their results?")) return;
+    const res = await apiFetch(`/users/${id}`, { method: 'DELETE' });
+    if (res.success) {
+      showToast("User deleted successfully!");
+      fetchUsers(1);
+    } else {
+      showToast(res.message, false);
+    }
+  }
+</script>
+</body>
+</html>

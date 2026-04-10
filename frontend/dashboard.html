@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Admin Dashboard</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+    body { display: flex; min-height: 100vh; background: #f8fafc; color: #0f172a; }
+    
+    .sidebar { width: 260px; background: #ffffff; border-right: 1px solid #e2e8f0; padding: 30px 20px; display: flex; flex-direction: column; flex-shrink: 0; }
+    .sidebar .logo { font-weight: 700; font-size: 24px; margin-bottom: 40px; color: #1e293b; display: flex; align-items: center; gap: 10px; }
+    .sidebar .logo span { width: 32px; height: 32px; background: linear-gradient(135deg, #6366f1, #a855f7); border-radius: 8px; color: white; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+    .sidebar a { display: flex; align-items: center; gap: 12px; margin: 8px 0; padding: 12px 16px; color: #64748b; text-decoration: none; cursor: pointer; border-radius: 12px; transition: all 0.2s ease; font-size: 15px; font-weight: 500; }
+    .sidebar a:hover { background: #f1f5f9; color: #1e293b; }
+    .sidebar a.active { background: #fee2e2; color: #ef4444; }
+    
+    .main { flex: 1; padding: 40px; overflow-y: auto; }
+    .header { margin-bottom: 30px; }
+    .header h1 { font-size: 30px; font-weight: 700; color: #1e293b; }
+
+    .stats-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+    .stat-card { background: white; padding: 25px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 1px 3px rgba(0,0,0,0.05); }
+    .stat-card h3 { color: #64748b; font-size: 14px; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 10px; }
+    .stat-card .value { font-size: 32px; font-weight: 700; color: #1e293b; }
+  </style>
+  <script src="admin-core.js"></script>
+</head>
+<body onload="checkAdmin(); loadStats()">
+
+<div class="sidebar">
+  <div class="logo"><span>A</span> Admin Panel</div>
+  <a href="dashboard.html" class="active">🏠 Dashboard</a>
+  <a href="vocabulary.html">📚 Vocabulary</a>
+  <a href="lessons.html">📖 Lessons</a>
+  <a href="users.html">👥 Users List</a>
+  <a href="quizzes.html">📝 Quizzes</a>
+  <a href="results.html">📊 Student Results</a>
+  <div style="flex-grow: 1;"></div>
+  <a href="index.html" onclick="localStorage.clear()" style="color: #ef4444;">🚪 Logout</a>
+</div>
+
+<div class="main">
+  <div class="header">
+    <h1>System Overview</h1>
+  </div>
+  <div class="stats-grid">
+    <div class="stat-card"><h3>Total Users</h3><div class="value" id="stat-users">-</div></div>
+    <div class="stat-card"><h3>Total Vocabulary</h3><div class="value" id="stat-vocab">-</div></div>
+    <div class="stat-card"><h3>Total Lessons</h3><div class="value" id="stat-lessons">-</div></div>
+    <div class="stat-card"><h3>Total Quizzes</h3><div class="value" id="stat-quizzes">-</div></div>
+  </div>
+</div>
+
+<script>
+  async function loadStats() {
+    const resUsers = await apiFetch('/users?limit=1');
+    if (resUsers.success) document.getElementById('stat-users').innerText = resUsers.data.total;
+    
+    const resVocab = await apiFetch('/vocabulary?limit=1');
+    if (resVocab.success) document.getElementById('stat-vocab').innerText = resVocab.data.total;
+
+    const resLessons = await apiFetch('/lessons?limit=1');
+    if (resLessons.success) document.getElementById('stat-lessons').innerText = resLessons.data.total;
+    
+    const resQuizz = await apiFetch('/quizzes?limit=1');
+    if (resQuizz.success) document.getElementById('stat-quizzes').innerText = resQuizz.data.total;
+  }
+</script>
+</body>
+</html>

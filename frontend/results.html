@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Student Results</title>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+    body { display: flex; min-height: 100vh; background: #f8fafc; color: #0f172a; }
+    
+    .sidebar { width: 260px; background: #ffffff; border-right: 1px solid #e2e8f0; padding: 30px 20px; display: flex; flex-direction: column; flex-shrink: 0; }
+    .sidebar .logo { font-weight: 700; font-size: 24px; margin-bottom: 40px; color: #1e293b; display: flex; align-items: center; gap: 10px; }
+    .sidebar .logo span { width: 32px; height: 32px; background: linear-gradient(135deg, #6366f1, #a855f7); border-radius: 8px; color: white; display: flex; align-items: center; justify-content: center; font-size: 18px; }
+    .sidebar a { display: flex; align-items: center; gap: 12px; margin: 8px 0; padding: 12px 16px; color: #64748b; text-decoration: none; cursor: pointer; border-radius: 12px; transition: all 0.2s ease; font-size: 15px; font-weight: 500; }
+    .sidebar a:hover { background: #f1f5f9; color: #1e293b; }
+    .sidebar a.active { background: #fee2e2; color: #ef4444; }
+
+    .main { flex: 1; padding: 40px; overflow-y: auto; }
+    .card { background: white; padding: 25px; border-radius: 12px; border: 1px solid #e2e8f0; margin-bottom: 20px; }
+    
+    button.back-btn { background: #f1f5f9; color: #1e293b; border: 1px solid #cbd5e1; margin-bottom: 20px; padding: 10px 15px; border-radius: 6px; cursor: pointer;}
+    .sort-btn { padding: 8px 12px; font-size:12px; background: white; border: 1px solid #cbd5e1; border-radius: 4px; cursor: pointer; margin-right: 10px;}
+    .sort-btn.active { background: #e0e7ff; border-color: #6366f1; color: #4f46e5; font-weight: bold; }
+    
+    @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+    .pulsing-red { color: #ef4444; animation: pulse 1s infinite; display: inline-block; font-weight: 700; font-size: 13px;}
+
+    .topic-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 20px; margin-top: 20px; }
+    .topic-folder { background: #ffffff; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; text-align: center; cursor: pointer; transition: all 0.2s; box-shadow: 0 2px 4px rgba(0,0,0,0.05);}
+    .topic-folder:hover { transform: translateY(-3px); box-shadow: 0 4px 12px rgba(0,0,0,0.1); border-color: #f59e0b; }
+    .topic-folder h3 { color: #1e293b; font-size: 16px; font-weight: 600; margin: 10px 0;}
+    .topic-folder span.icon { font-size: 40px; display: block; margin-bottom: 10px;}
+
+    /* Modal for Results Detail */
+    .modal-overlay {
+      display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(4px); z-index: 1000;
+      justify-content: center; align-items: center; padding: 40px;
+    }
+    .modal-content {
+      background: #ffffff; border-radius: 20px; width: 100%; max-width: 800px;
+      max-height: 90vh; overflow-y: auto; display: flex; flex-direction: column;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1); position: relative;
+    }
+    .modal-header {
+      padding: 25px 35px; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0;
+      background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); z-index: 10;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .modal-title { font-size: 20px; font-weight: 700; color: #1e3a8a; }
+    .close-btn { 
+      background: #f1f5f9; border: none; width: 32px; height: 32px; border-radius: 50%;
+      cursor: pointer; font-size: 14px; color: #64748b; transition: 0.2s; 
+    }
+    .close-btn:hover { background: #e2e8f0; color: #ef4444; transform: rotate(90deg); }
+
+    .modal-body { padding: 35px; display: flex; flex-direction: column; gap: 20px; }
+    
+    .detail-card { background: #ffffff; border: 2px solid #e2e8f0; border-radius: 12px; padding: 20px; }
+    .detail-card.correct-q { border-color: #a7f3d0; background: #ecfdf5; }
+    .detail-card.wrong-q { border-color: #fecaca; background: #fef2f2; }
+    .q-title { font-size: 15px; font-weight: 600; color: #1e293b; margin-bottom: 10px; }
+    .q-options { display: flex; flex-direction: column; gap: 8px; }
+    .opt-row {
+      padding: 10px 14px; border-radius: 6px; font-size: 14px; background: white; border: 1px solid #e2e8f0;
+      display: flex; justify-content: space-between;
+    }
+    .opt-correct { background: #d1fae5; border-color: #10b981; color: #065f46; font-weight: 600; }
+    .opt-wrong { background: #fee2e2; border-color: #ef4444; color: #991b1b; font-weight: 600; }
+    .opt-selected-badge { font-size: 11px; padding: 2px 6px; border-radius: 10px; background: rgba(0,0,0,0.1); margin-left: 10px;}
+  </style>
+  <script src="admin-core.js"></script>
+</head>
+<body onload="checkAdmin(); initView()">
+
+<div class="sidebar">
+  <div class="logo"><span>A</span> Admin Panel</div>
+  <a href="dashboard.html">🏠 Dashboard</a>
+  <a href="vocabulary.html">📚 Vocabulary</a>
+  <a href="lessons.html">📖 Lessons</a>
+  <a href="users.html">👥 Users List</a>
+  <a href="quizzes.html">📝 Quizzes</a>
+  <a href="results.html" class="active">📊 Student Results</a>
+  <div style="flex-grow: 1;"></div>
+  <a href="index.html" onclick="localStorage.clear()" style="color: #ef4444;">🚪 Logout</a>
+</div>
+
+<div class="main">
+  
+  <!-- VIEW 1: QUIZZES ROOT -->
+  <div id="quizzesView">
+    <h2>1. Select Quiz to view Results</h2>
+    <div class="topic-grid" id="quizGrid"></div>
+    <div id="quizPagination" class="pagination"></div>
+  </div>
+
+  <!-- VIEW 2: RESULTS For QUIZ -->
+  <div id="resultsDetailView" style="display: none;">
+    <button class="back-btn" onclick="goBackToQuizzes()">⬅ Back to Quizzes</button>
+    <h2 id="currentQuizTitle" style="color: #f59e0b; margin-bottom: 10px;">Results for: ---</h2>
+    
+    <div style="margin-bottom: 15px;">
+      <span style="font-size:14px; font-weight:bold; margin-right: 10px;">Sort by:</span>
+      <button class="sort-btn active" id="sort-date-desc" onclick="setSort('date-desc')">🗓 Newest First</button>
+      <button class="sort-btn" id="sort-date-asc" onclick="setSort('date-asc')">🗓 Oldest First</button>
+      <button class="sort-btn" id="sort-score-desc" onclick="setSort('score-desc')">⭐ Highest Score</button>
+      <button class="sort-btn" id="sort-score-asc" onclick="setSort('score-asc')">⭐ Lowest Score</button>
+    </div>
+
+    <table id="dataTable" style="width:100%; text-align:left;">
+      <thead><tr><th>Student Name</th><th>Email</th><th>Score</th><th>Total</th><th>Date Submitted</th><th>Actions</th></tr></thead>
+      <tbody id="tableBody"></tbody>
+    </table>
+    <div id="pagination" class="pagination"></div>
+  </div>
+
+</div>
+
+<!-- Details Modal -->
+<div class="modal-overlay" id="detailModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <div class="modal-title" id="modalTitle">Chi tiết bài thi</div>
+      <button class="close-btn" onclick="closeModal()">✖</button>
+    </div>
+    <div class="modal-body" id="modalBody">
+      <p style="text-align:center; color: #64748b;">Đang tải chi tiết...</p>
+    </div>
+  </div>
+</div>
+
+<script>
+  let currentQuizId = null;
+  let allResultsData = [];
+  let currentSort = 'date-desc';
+  let monitoringInterval = null;
+
+  function initView() {
+    if(monitoringInterval) clearInterval(monitoringInterval);
+    document.getElementById('quizzesView').style.display = 'block';
+    document.getElementById('resultsDetailView').style.display = 'none';
+    loadQuizzes(1);
+  }
+
+  async function loadQuizzes(page = 1) {
+    const res = await apiFetch(`/quizzes?page=${page}&limit=50`); // get more for results overview
+    if(!res.success) return showToast(res.message, false);
+    
+    const grid = document.getElementById('quizGrid');
+    if (res.data.quizzes.length === 0) {
+      grid.innerHTML = '<p style="color:#64748b;">No quizzes available.</p>';
+      return;
+    }
+
+    grid.innerHTML = res.data.quizzes.map(q => `
+      <div class="topic-folder" onclick="openQuiz('${q._id}', '${q.title.replace(/'/g, "\\'")}')">
+        <span class="icon">🏆</span>
+        <h3>${q.title}</h3>
+        <small style="color:#64748b;">Click to view submissions & monitoring</small>
+      </div>
+    `).join('');
+  }
+
+  function openQuiz(id, title) {
+    currentQuizId = id;
+    document.getElementById('quizzesView').style.display = 'none';
+    document.getElementById('resultsDetailView').style.display = 'block';
+    document.getElementById('currentQuizTitle').innerText = '🏆 Results: ' + title;
+    fetchResults();
+    
+    // Live monitoring every 5 seconds
+    if(monitoringInterval) clearInterval(monitoringInterval);
+    monitoringInterval = setInterval(fetchResultsSilent, 5000);
+  }
+
+  function goBackToQuizzes() { currentQuizId = null; initView(); }
+
+  async function fetchResults() {
+    renderSkeleton('tableBody', 5);
+    // get all results for this quiz to do JS sorting easily
+    const res = await apiFetch(`/results?quizId=${currentQuizId}&limit=1000`);
+    if(!res.success) return showToast(res.message, false);
+    
+    allResultsData = res.data.results || [];
+    applySortAndRender();
+  }
+  
+  async function fetchResultsSilent() {
+    if(!currentQuizId) return;
+    const res = await apiFetch(`/results?quizId=${currentQuizId}&limit=1000`);
+    if(res.success) {
+      allResultsData = res.data.results || [];
+      applySortAndRender();
+    }
+  }
+
+  function setSort(type) {
+    document.querySelectorAll('.sort-btn').forEach(btn => btn.classList.remove('active'));
+    document.getElementById('sort-' + type).classList.add('active');
+    currentSort = type;
+    applySortAndRender();
+  }
+
+  function applySortAndRender() {
+    const tbody = document.getElementById('tableBody');
+    if (allResultsData.length === 0) {
+      renderEmptyState('tableBody', 5, "No submissions for this quiz yet.");
+      return;
+    }
+
+    let sorted = [...allResultsData];
+    if (currentSort === 'score-desc') sorted.sort((a,b) => b.score - a.score);
+    if (currentSort === 'score-asc') sorted.sort((a,b) => a.score - b.score);
+    if (currentSort === 'date-desc') sorted.sort((a,b) => new Date(b.submittedAt) - new Date(a.submittedAt));
+    if (currentSort === 'date-asc') sorted.sort((a,b) => new Date(a.submittedAt) - new Date(b.submittedAt));
+
+    tbody.innerHTML = sorted.map(r => {
+      const isDoing = r.submittedAt ? false : true;
+      const scoreColor = isDoing ? '#ef4444' : (r.score >= (r.total/2) ? '#10b981' : '#ef4444');
+      const scoreView = isDoing ? '<span class="pulsing-red">🔴 Đang Thi...</span>' : r.score;
+      const dateView = isDoing ? '<span style="color:#f59e0b;font-weight:600;">System is monitoring...</span>' : new Date(r.submittedAt).toLocaleString();
+
+      return `
+      <tr style="${isDoing ? 'background:#fef2f2;' : ''}">
+        <td><strong>${r.userId?.name || 'Unknown'}</strong></td>
+        <td><small style="${isDoing ? 'color:#ef4444;font-weight:bold;' : 'color:#64748b;'}">${r.userId?.email || 'N/A'}</small></td>
+        <td style="font-weight:bold; color: ${scoreColor};">${scoreView}</td>
+        <td>${r.total}</td>
+        <td>${dateView}</td>
+        <td>
+           ${isDoing ? '' : `<button style="padding: 6px 12px; background: #eef2ff; color: #4f46e5; border: none; border-radius: 6px; font-weight: 600; font-size: 12px; cursor: pointer;" onclick="viewDetails('${r._id}')">Chi tiết</button>`}
+        </td>
+      </tr>
+      `;
+    }).join('');
+  }
+
+  function escapeHTML(str) {
+    if (!str) return '';
+    return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+  }
+
+  function closeModal() { document.getElementById('detailModal').style.display = 'none'; }
+
+  async function viewDetails(resultId) {
+    document.getElementById('detailModal').style.display = 'flex';
+    document.getElementById('modalBody').innerHTML = '<p style="text-align:center; color: #64748b;">Đang tải chi tiết bài làm...</p>';
+    document.getElementById('modalTitle').innerText = 'Chi tiết bài thi của học sinh';
+
+    try {
+      const res = await apiFetch(`/results/${resultId}`);
+      if (!res.success) {
+        document.getElementById('modalBody').innerHTML = `<p style="text-align:center; color: red;">Lỗi từ máy chủ: ${res.message}</p>`;
+        return;
+      }
+
+      const { score, total, answers, quizId } = res.data || {};
+      if (!quizId) {
+        document.getElementById('modalBody').innerHTML = '<p style="text-align:center; color: red;">Bài kiểm tra gốc đã bị xoá khỏi hệ thống.</p>';
+        return;
+      }
+      const questions = quizId.questions || [];
+      document.getElementById('modalTitle').innerText = `Kết quả: ${score}/${total} - ${quizId.title}`;
+
+      if (questions.length === 0) {
+        document.getElementById('modalBody').innerHTML = '<p>Không tìm thấy dữ liệu câu hỏi.</p>';
+        return;
+      }
+      const safeAnswers = answers || [];
+      let html = '';
+      questions.forEach((q, idx) => {
+        const studentAns = safeAnswers.find(a => a.questionId && q._id && a.questionId.toString() === q._id.toString());
+        const selected = studentAns ? studentAns.selected : null;
+        const isCorrect = studentAns ? studentAns.isCorrect : false;
+
+        const cardClass = isCorrect ? 'correct-q' : 'wrong-q';
+        let icon = isCorrect ? '✅' : '❌';
+        if(!selected) icon = '⚠️ (Bỏ trống)';
+
+        const optsParams = [{ key: 'A', val: q.optionA }, { key: 'B', val: q.optionB }, { key: 'C', val: q.optionC }, { key: 'D', val: q.optionD }].filter(o => o.val);
+
+        html += `<div class="detail-card ${cardClass}"><div class="q-title">${icon} Câu ${idx + 1}: ${escapeHTML(q.question)}</div><div class="q-options">`;
+        optsParams.forEach(opt => {
+           let optClass = 'opt-row';
+           let badges = '';
+           const correctAns = q.correct ? q.correct.toUpperCase() : '';
+           const selectedAns = selected ? selected.toUpperCase() : '';
+           const currentOpt = opt.key.toUpperCase();
+
+           if (correctAns && currentOpt === correctAns) {
+             optClass = 'opt-row opt-correct';
+             badges += `<span class="opt-selected-badge" style="background:#059669; color:white;">Đáp án đúng</span>`;
+           }
+           if (selectedAns && currentOpt === selectedAns && currentOpt !== correctAns) {
+             optClass = 'opt-row opt-wrong';
+             badges += `<span class="opt-selected-badge" style="background:#dc2626; color:white;">Học sinh chọn</span>`;
+           }
+           if (selectedAns && currentOpt === selectedAns && currentOpt === correctAns) {
+             badges += `<span class="opt-selected-badge" style="background:white; color:#059669;">Học sinh chọn</span>`;
+           }
+           html += `<div class="${optClass}"><span><strong>${opt.key}.</strong> ${escapeHTML(opt.val)}</span><div>${badges}</div></div>`;
+        });
+        html += `</div></div>`;
+      });
+      document.getElementById('modalBody').innerHTML = html;
+    } catch(err) {
+      document.getElementById('modalBody').innerHTML = `<p style="text-align:center; color: red;">Lỗi: ${err.message}</p>`;
+    }
+  }
+</script>
+</body>
+</html>
