@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <title>AstraLMS - Lịch Sử Làm Bài</title>
@@ -19,173 +20,403 @@
       --warning: #f59e0b;
     }
 
-    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Outfit', sans-serif; }
-    body { display: flex; min-height: 100vh; background: var(--bg); color: var(--text-main); }
-    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Outfit', sans-serif;
+    }
+
+    body {
+      display: flex;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text-main);
+    }
+
     /* Sidebar */
-    .sidebar { width: 260px; background: var(--sidebar-bg); padding: 30px 20px; display: flex; flex-direction: column; flex-shrink: 0; box-shadow: 2px 0 10px rgba(0,0,0,0.05); }
-    .sidebar .logo { font-weight: 700; font-size: 20px; margin-bottom: 40px; color: var(--text-sidebar); display: flex; align-items: center; justify-content: center; gap: 8px; }
-    .sidebar .logo span { font-size: 24px; }
-    .sidebar a { display: flex; align-items: center; gap: 14px; margin: 5px 0; padding: 12px 18px; color: rgba(255,255,255,0.9); text-decoration: none; cursor: pointer; border-radius: 10px; transition: all 0.2s ease; font-size: 15px; font-weight: 500; }
-    .sidebar a:hover { background: rgba(255,255,255,0.1); color: #fff; }
-    .sidebar a.active { background: rgba(255, 255, 255, 0.25); color: #fff; font-weight: 600; }
-    #admin-link { display: none; margin-top: 20px; border-top: 1px solid rgba(255,255,255,0.2); padding-top: 20px; border-radius: 0; }
-    
+    .sidebar {
+      width: 260px;
+      background: var(--sidebar-bg);
+      padding: 30px 20px;
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .sidebar .logo {
+      font-weight: 700;
+      font-size: 20px;
+      margin-bottom: 40px;
+      color: var(--text-sidebar);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+    }
+
+    .sidebar .logo span {
+      font-size: 24px;
+    }
+
+    .sidebar a {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin: 5px 0;
+      padding: 12px 18px;
+      color: rgba(255, 255, 255, 0.9);
+      text-decoration: none;
+      cursor: pointer;
+      border-radius: 10px;
+      transition: all 0.2s ease;
+      font-size: 15px;
+      font-weight: 500;
+    }
+
+    .sidebar a:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+    }
+
+    .sidebar a.active {
+      background: rgba(255, 255, 255, 0.25);
+      color: #fff;
+      font-weight: 600;
+    }
+
+    #admin-link {
+      display: none;
+      margin-top: 20px;
+      border-top: 1px solid rgba(255, 255, 255, 0.2);
+      padding-top: 20px;
+      border-radius: 0;
+    }
+
     /* Main Area */
-    .main { flex: 1; padding: 40px 60px; overflow-y: auto; display: flex; flex-direction: column; align-items: flex-start; }
-    .header { width: 100%; margin-bottom: 30px; }
-    .header h1 { font-size: 28px; font-weight: 700; color: #1e3a8a; margin-bottom: 8px; }
-    .header p { color: var(--text-muted); font-size: 15px; font-weight: 400; }
+    .main {
+      flex: 1;
+      padding: 40px 60px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .header {
+      width: 100%;
+      margin-bottom: 30px;
+    }
+
+    .header h1 {
+      font-size: 28px;
+      font-weight: 700;
+      color: #1e3a8a;
+      margin-bottom: 8px;
+    }
+
+    .header p {
+      color: var(--text-muted);
+      font-size: 15px;
+      font-weight: 400;
+    }
 
     /* Results Table */
-    .card { background: var(--surface); padding: 0; border-radius: 16px; border: 1px solid #e2e8f0; width: 100%; max-width: 1000px; overflow: hidden; box-shadow: 0 4px 10px rgba(0,0,0,0.03); }
-    
-    table { width: 100%; border-collapse: collapse; text-align: left; }
-    th { background: #f8fafc; padding: 18px 24px; font-size: 14px; font-weight: 600; color: #475569; border-bottom: 1px solid #e2e8f0; }
-    td { padding: 20px 24px; border-bottom: 1px solid #f1f5f9; font-size: 15px; color: #1e293b; }
-    tr.result-row { cursor: pointer; transition: background 0.2s; }
-    tr.result-row:hover { background: #f1f5f9; }
-    tr:last-child td { border-bottom: none; }
-    
-    .score-badge { font-weight: 700; padding: 6px 16px; border-radius: 20px; font-size: 14px; display: inline-block; }
-    .score-pass { background: #d1fae5; color: #047857; }
-    .score-fail { background: #fee2e2; color: #b91c1c; }
+    .card {
+      background: var(--surface);
+      padding: 0;
+      border-radius: 16px;
+      border: 1px solid #e2e8f0;
+      width: 100%;
+      max-width: 1000px;
+      overflow: hidden;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.03);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+    }
+
+    th {
+      background: #f8fafc;
+      padding: 18px 24px;
+      font-size: 14px;
+      font-weight: 600;
+      color: #475569;
+      border-bottom: 1px solid #e2e8f0;
+    }
+
+    td {
+      padding: 20px 24px;
+      border-bottom: 1px solid #f1f5f9;
+      font-size: 15px;
+      color: #1e293b;
+    }
+
+    tr.result-row {
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    tr.result-row:hover {
+      background: #f1f5f9;
+    }
+
+    tr:last-child td {
+      border-bottom: none;
+    }
+
+    .score-badge {
+      font-weight: 700;
+      padding: 6px 16px;
+      border-radius: 20px;
+      font-size: 14px;
+      display: inline-block;
+    }
+
+    .score-pass {
+      background: #d1fae5;
+      color: #047857;
+    }
+
+    .score-fail {
+      background: #fee2e2;
+      color: #b91c1c;
+    }
 
     /* Modal for Results Detail */
     .modal-overlay {
-      display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
-      background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(4px); z-index: 1000;
-      justify-content: center; align-items: center; padding: 40px;
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(15, 23, 42, 0.4);
+      backdrop-filter: blur(4px);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+      padding: 40px;
     }
-    .modal-content {
-      background: var(--surface); border-radius: 24px; width: 100%; max-width: 800px;
-      max-height: 90vh; overflow-y: auto; display: flex; flex-direction: column;
-      box-shadow: 0 20px 40px rgba(0,0,0,0.1); position: relative;
-    }
-    .modal-header {
-      padding: 30px 40px; border-bottom: 1px solid #e2e8f0; position: sticky; top: 0;
-      background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); z-index: 10;
-      display: flex; justify-content: space-between; align-items: center;
-    }
-    .modal-title { font-size: 22px; font-weight: 700; color: #1e3a8a; }
-    .close-btn { 
-      background: #f1f5f9; border: none; width: 36px; height: 36px; border-radius: 50%;
-      cursor: pointer; font-size: 16px; color: var(--text-muted); transition: 0.2s; 
-    }
-    .close-btn:hover { background: #e2e8f0; color: var(--danger); transform: rotate(90deg); }
 
-    .modal-body { padding: 40px; display: flex; flex-direction: column; gap: 30px; }
-    
+    .modal-content {
+      background: var(--surface);
+      border-radius: 24px;
+      width: 100%;
+      max-width: 800px;
+      max-height: 90vh;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+      position: relative;
+    }
+
+    .modal-header {
+      padding: 30px 40px;
+      border-bottom: 1px solid #e2e8f0;
+      position: sticky;
+      top: 0;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      z-index: 10;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-title {
+      font-size: 22px;
+      font-weight: 700;
+      color: #1e3a8a;
+    }
+
+    .close-btn {
+      background: #f1f5f9;
+      border: none;
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      cursor: pointer;
+      font-size: 16px;
+      color: var(--text-muted);
+      transition: 0.2s;
+    }
+
+    .close-btn:hover {
+      background: #e2e8f0;
+      color: var(--danger);
+      transform: rotate(90deg);
+    }
+
+    .modal-body {
+      padding: 40px;
+      display: flex;
+      flex-direction: column;
+      gap: 30px;
+    }
+
     /* Detailed Question Styles */
     .detail-card {
-      background: var(--surface); border: 2px solid #e2e8f0; border-radius: 16px; padding: 25px;
+      background: var(--surface);
+      border: 2px solid #e2e8f0;
+      border-radius: 16px;
+      padding: 25px;
     }
-    .detail-card.correct-q { border-color: #a7f3d0; background: #ecfdf5; }
-    .detail-card.wrong-q { border-color: #fecaca; background: #fef2f2; }
-    
-    .q-title { font-size: 16px; font-weight: 600; color: var(--text-main); margin-bottom: 15px; }
-    .q-options { display: flex; flex-direction: column; gap: 10px; }
-    
-    .opt-row {
-      padding: 12px 16px; border-radius: 8px; font-size: 15px; background: white; border: 1px solid #e2e8f0;
-      display: flex; justify-content: space-between;
-    }
-    .opt-correct { background: #d1fae5; border-color: #10b981; color: #065f46; font-weight: 600; }
-    .opt-wrong { background: #fee2e2; border-color: #ef4444; color: #991b1b; font-weight: 600; }
-    .opt-selected-badge { font-size: 12px; padding: 2px 8px; border-radius: 12px; background: rgba(0,0,0,0.1); margin-left: 10px;}
 
+    .detail-card.correct-q {
+      border-color: #a7f3d0;
+      background: #ecfdf5;
+    }
+
+    .detail-card.wrong-q {
+      border-color: #fecaca;
+      background: #fef2f2;
+    }
+
+    .q-title {
+      font-size: 16px;
+      font-weight: 600;
+      color: var(--text-main);
+      margin-bottom: 15px;
+    }
+
+    .q-options {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    .opt-row {
+      padding: 12px 16px;
+      border-radius: 8px;
+      font-size: 15px;
+      background: white;
+      border: 1px solid #e2e8f0;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .opt-correct {
+      background: #d1fae5;
+      border-color: #10b981;
+      color: #065f46;
+      font-weight: 600;
+    }
+
+    .opt-wrong {
+      background: #fee2e2;
+      border-color: #ef4444;
+      color: #991b1b;
+      font-weight: 600;
+    }
+
+    .opt-selected-badge {
+      font-size: 12px;
+      padding: 2px 8px;
+      border-radius: 12px;
+      background: rgba(0, 0, 0, 0.1);
+      margin-left: 10px;
+    }
   </style>
 </head>
+
 <body>
 
-<div class="sidebar">
-  <div class="logo"><span>🎓</span> Student</div>
-  <a onclick="go('student-dashboard')">🏠 Dashboard</a>
-  <a onclick="go('vocab')">📚 Vocabulary</a>
-  <a onclick="go('lesson')">📖 Theory</a>
-  <a onclick="go('quizzes-student')">📝 Quizzes</a>
-  <a onclick="go('my-results')" class="active">📊 My Results</a>
-  <div style="flex-grow: 1;"></div>
-  <a id="admin-link" onclick="go('dashboard')">⚙️ Admin Control Panel</a>
-  <a onclick="logout()">🚪 Logout</a>
-</div>
-
-<div class="main">
-  <div class="header">
-    <h1>📊 Lịch Sử Làm Bài</h1>
-    <p>Xem lại điểm số bài thi và nhấp vào từng bài để xem chi tiết đáp án.</p>
+  <div class="sidebar">
+    <div class="logo"><span>🎓</span> Student</div>
+    <a onclick="go('student-dashboard')">🏠 Dashboard</a>
+    <a onclick="go('vocab')">📚 Vocabulary</a>
+    <a onclick="go('lesson')">📖 Theory</a>
+    <a onclick="go('quizzes-student')">📝 Quizzes</a>
+    <a onclick="go('my-results')" class="active">📊 My Results</a>
+    <div style="flex-grow: 1;"></div>
+    <a id="admin-link" onclick="go('dashboard')">⚙️ Admin Control Panel</a>
+    <a onclick="logout()">🚪 Logout</a>
   </div>
-  
-  <div class="card">
-    <table id="dataTable">
-      <thead>
-        <tr>
-          <th>Tên bài kiểm tra</th>
-          <th>Điểm số</th>
-          <th>Thời gian nộp bài</th>
-          <th>Thao tác</th>
-        </tr>
-      </thead>
-      <tbody id="tableBody">
-        <tr><td colspan="4" style="text-align:center; color:#64748b;">Đang tải dữ liệu...</td></tr>
-      </tbody>
-    </table>
-  </div>
-</div>
 
-<!-- Details Modal -->
-<div class="modal-overlay" id="detailModal">
-  <div class="modal-content">
-    <div class="modal-header">
-      <div class="modal-title" id="modalTitle">Chi tiết bài thi</div>
-      <button class="close-btn" onclick="closeModal()">✖</button>
+  <div class="main">
+    <div class="header">
+      <h1>📊 Lịch Sử Làm Bài</h1>
+      <p>Xem lại điểm số bài thi và nhấp vào từng bài để xem chi tiết đáp án.</p>
     </div>
-    <div class="modal-body" id="modalBody">
-      <p style="text-align:center; color: var(--text-muted);">Đang tải chi tiết...</p>
+
+    <div class="card">
+      <table id="dataTable">
+        <thead>
+          <tr>
+            <th>Tên bài kiểm tra</th>
+            <th>Điểm số</th>
+            <th>Thời gian nộp bài</th>
+            <th>Thao tác</th>
+          </tr>
+        </thead>
+        <tbody id="tableBody">
+          <tr>
+            <td colspan="4" style="text-align:center; color:#64748b;">Đang tải dữ liệu...</td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
-</div>
 
-<script>
-const token = localStorage.getItem("token");
-const userStr = localStorage.getItem("user");
-if (!token || !userStr) window.location.href = "index.html";
+  <!-- Details Modal -->
+  <div class="modal-overlay" id="detailModal">
+    <div class="modal-content">
+      <div class="modal-header">
+        <div class="modal-title" id="modalTitle">Chi tiết bài thi</div>
+        <button class="close-btn" onclick="closeModal()">✖</button>
+      </div>
+      <div class="modal-body" id="modalBody">
+        <p style="text-align:center; color: var(--text-muted);">Đang tải chi tiết...</p>
+      </div>
+    </div>
+  </div>
 
-const user = JSON.parse(userStr);
-if (user.role === 'admin') document.getElementById('admin-link').style.display = "flex";
+  <script>
+    const token = localStorage.getItem("token");
+    const userStr = localStorage.getItem("user");
+    if (!token || !userStr) window.location.href = "index.html";
 
-function logout() { localStorage.clear(); window.location.href = "index.html"; }
-function go(page) { window.location.href = page + ".html"; }
+    const user = JSON.parse(userStr);
+    if (user.role === 'admin') document.getElementById('admin-link').style.display = "flex";
 
-function escapeHTML(str) {
-  if (!str) return '';
-  return String(str)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
-}
+    function logout() { localStorage.clear(); window.location.href = "index.html"; }
+    function go(page) { window.location.href = page + ".html"; }
 
-async function fetchMyResults() {
-  try {
-    const res = await fetch('http://localhost:3000/results?limit=100', {
-      headers: { 'Authorization': 'Bearer ' + token }
-    });
-    const data = await res.json();
-    const tbody = document.getElementById('tableBody');
-    
-    if (!data.success || data.data.results.length === 0) {
-      tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#64748b;">Chưa có kết quả nào. Hãy làm bài kiểm tra trước!</td></tr>';
-      return;
+    function escapeHTML(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
     }
 
-    tbody.innerHTML = data.data.results.map(r => {
-      const isPass = r.score >= (r.total / 2); // Assume 50% is pass
-      const badgeClass = isPass ? 'score-pass' : 'score-fail';
-      const dateStr = r.submittedAt ? new Date(r.submittedAt).toLocaleString() : 'Chưa nộp';
-      
-      return `
+    async function fetchMyResults() {
+      try {
+        const res = await fetch('http://lms-gzty.onrender.com/results?limit=100', {
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        const data = await res.json();
+        const tbody = document.getElementById('tableBody');
+
+        if (!data.success || data.data.results.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color:#64748b;">Chưa có kết quả nào. Hãy làm bài kiểm tra trước!</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = data.data.results.map(r => {
+          const isPass = r.score >= (r.total / 2); // Assume 50% is pass
+          const badgeClass = isPass ? 'score-pass' : 'score-fail';
+          const dateStr = r.submittedAt ? new Date(r.submittedAt).toLocaleString() : 'Chưa nộp';
+
+          return `
       <tr class="result-row" onclick="viewDetails('${r._id}')">
         <td style="font-weight: 600; color: #1e3a8a;">${r.quizId?.title || 'Unknown Quiz'}</td>
         <td><span class="score-badge ${badgeClass}">${r.score} / ${r.total}</span></td>
@@ -193,116 +424,117 @@ async function fetchMyResults() {
         <td><button style="padding: 6px 12px; background: #eef2ff; color: var(--primary); border: none; border-radius: 8px; font-weight: 600; font-size: 13px; cursor: pointer;">Xem chi tiết ➡</button></td>
       </tr>
     `}).join('');
-  } catch(err) {
-    console.error(err);
-    document.getElementById('tableBody').innerHTML = '<tr><td colspan="4" style="text-align:center; color:#ef4444;">Lỗi khi tải kết quả.</td></tr>';
-  }
-}
-
-async function viewDetails(resultId) {
-  document.getElementById('detailModal').style.display = 'flex';
-  document.getElementById('modalBody').innerHTML = '<p style="text-align:center; color: var(--text-muted);">Đang tải chi tiết bài làm...</p>';
-  document.getElementById('modalTitle').innerText = 'Chi tiết bài thi';
-
-  try {
-    const res = await fetch('http://localhost:3000/results/' + resultId, {
-      headers: { 'Authorization': 'Bearer ' + token }
-    });
-    const data = await res.json();
-    if (!data.success) {
-      document.getElementById('modalBody').innerHTML = `<p style="text-align:center; color: red;">Lỗi từ máy chủ: ${data.message}</p>`;
-      return;
+      } catch (err) {
+        console.error(err);
+        document.getElementById('tableBody').innerHTML = '<tr><td colspan="4" style="text-align:center; color:#ef4444;">Lỗi khi tải kết quả.</td></tr>';
+      }
     }
 
-    const { score, total, answers, quizId } = data.data || {};
-    if (!quizId) {
-      document.getElementById('modalBody').innerHTML = '<p style="text-align:center; color: red;">Bài kiểm tra gốc đã bị xoá khỏi hệ thống nên không thể xem lại chi tiết câu hỏi.</p>';
-      return;
-    }
-    const questions = quizId.questions || [];
+    async function viewDetails(resultId) {
+      document.getElementById('detailModal').style.display = 'flex';
+      document.getElementById('modalBody').innerHTML = '<p style="text-align:center; color: var(--text-muted);">Đang tải chi tiết bài làm...</p>';
+      document.getElementById('modalTitle').innerText = 'Chi tiết bài thi';
 
-    document.getElementById('modalTitle').innerText = `Kết quả: ${score}/${total} - ${quizId.title}`;
+      try {
+        const res = await fetch('http://lms-gzty.onrender.com/results/' + resultId, {
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        const data = await res.json();
+        if (!data.success) {
+          document.getElementById('modalBody').innerHTML = `<p style="text-align:center; color: red;">Lỗi từ máy chủ: ${data.message}</p>`;
+          return;
+        }
 
-    if (questions.length === 0) {
-      document.getElementById('modalBody').innerHTML = '<p>Không tìm thấy dữ liệu câu hỏi.</p>';
-      return;
-    }
-    
-    // Validate we have what we need
-    const safeAnswers = answers || [];
+        const { score, total, answers, quizId } = data.data || {};
+        if (!quizId) {
+          document.getElementById('modalBody').innerHTML = '<p style="text-align:center; color: red;">Bài kiểm tra gốc đã bị xoá khỏi hệ thống nên không thể xem lại chi tiết câu hỏi.</p>';
+          return;
+        }
+        const questions = quizId.questions || [];
 
-    let html = '';
-    questions.forEach((q, idx) => {
-      // Find what the user answered
-      const studentAns = safeAnswers.find(a => a.questionId && q._id && a.questionId.toString() === q._id.toString());
-      const selected = studentAns ? studentAns.selected : null;
-      const isCorrect = studentAns ? studentAns.isCorrect : false;
+        document.getElementById('modalTitle').innerText = `Kết quả: ${score}/${total} - ${quizId.title}`;
 
-      // Card style based on correctness
-      const cardClass = isCorrect ? 'correct-q' : 'wrong-q';
-      let icon = isCorrect ? '✅' : '❌';
-      if(!selected) icon = '⚠️ (Bỏ trống)';
+        if (questions.length === 0) {
+          document.getElementById('modalBody').innerHTML = '<p>Không tìm thấy dữ liệu câu hỏi.</p>';
+          return;
+        }
 
-      const optsParams = [
-        { key: 'A', val: q.optionA },
-        { key: 'B', val: q.optionB },
-        { key: 'C', val: q.optionC },
-        { key: 'D', val: q.optionD }
-      ].filter(o => o.val);
+        // Validate we have what we need
+        const safeAnswers = answers || [];
 
-      html += `<div class="detail-card ${cardClass}">
+        let html = '';
+        questions.forEach((q, idx) => {
+          // Find what the user answered
+          const studentAns = safeAnswers.find(a => a.questionId && q._id && a.questionId.toString() === q._id.toString());
+          const selected = studentAns ? studentAns.selected : null;
+          const isCorrect = studentAns ? studentAns.isCorrect : false;
+
+          // Card style based on correctness
+          const cardClass = isCorrect ? 'correct-q' : 'wrong-q';
+          let icon = isCorrect ? '✅' : '❌';
+          if (!selected) icon = '⚠️ (Bỏ trống)';
+
+          const optsParams = [
+            { key: 'A', val: q.optionA },
+            { key: 'B', val: q.optionB },
+            { key: 'C', val: q.optionC },
+            { key: 'D', val: q.optionD }
+          ].filter(o => o.val);
+
+          html += `<div class="detail-card ${cardClass}">
                  <div class="q-title">${icon} Câu ${idx + 1}: ${escapeHTML(q.question)}</div>
                  <div class="q-options">
       `;
 
-      optsParams.forEach(opt => {
-         let optClass = 'opt-row';
-         let badges = '';
-         
-         const correctAns = q.correct ? q.correct.toUpperCase() : '';
-         const selectedAns = selected ? selected.toUpperCase() : '';
-         const currentOpt = opt.key.toUpperCase();
+          optsParams.forEach(opt => {
+            let optClass = 'opt-row';
+            let badges = '';
 
-         // If this option is the TRUE correct answer
-         if (correctAns && currentOpt === correctAns) {
-           optClass = 'opt-row opt-correct';
-           badges += `<span class="opt-selected-badge" style="background:#059669; color:white;">Đáp án đúng</span>`;
-         }
-         
-         // If user selected this option AND it is wrong
-         if (selectedAns && currentOpt === selectedAns && currentOpt !== correctAns) {
-           optClass = 'opt-row opt-wrong';
-           badges += `<span class="opt-selected-badge" style="background:#dc2626; color:white;">Bạn chọn</span>`;
-         }
+            const correctAns = q.correct ? q.correct.toUpperCase() : '';
+            const selectedAns = selected ? selected.toUpperCase() : '';
+            const currentOpt = opt.key.toUpperCase();
 
-         // If user selected this option AND it is correct
-         if (selectedAns && currentOpt === selectedAns && currentOpt === correctAns) {
-           badges += `<span class="opt-selected-badge" style="background:white; color:#059669;">Bạn chọn</span>`;
-         }
+            // If this option is the TRUE correct answer
+            if (correctAns && currentOpt === correctAns) {
+              optClass = 'opt-row opt-correct';
+              badges += `<span class="opt-selected-badge" style="background:#059669; color:white;">Đáp án đúng</span>`;
+            }
 
-         html += `<div class="${optClass}">
+            // If user selected this option AND it is wrong
+            if (selectedAns && currentOpt === selectedAns && currentOpt !== correctAns) {
+              optClass = 'opt-row opt-wrong';
+              badges += `<span class="opt-selected-badge" style="background:#dc2626; color:white;">Bạn chọn</span>`;
+            }
+
+            // If user selected this option AND it is correct
+            if (selectedAns && currentOpt === selectedAns && currentOpt === correctAns) {
+              badges += `<span class="opt-selected-badge" style="background:white; color:#059669;">Bạn chọn</span>`;
+            }
+
+            html += `<div class="${optClass}">
                     <span><strong>${opt.key}.</strong> ${escapeHTML(opt.val)}</span>
                     <div>${badges}</div>
                   </div>`;
-      });
+          });
 
-      html += `</div></div>`;
-    });
+          html += `</div></div>`;
+        });
 
-    document.getElementById('modalBody').innerHTML = html;
+        document.getElementById('modalBody').innerHTML = html;
 
-  } catch(err) {
-    console.error(err);
-    document.getElementById('modalBody').innerHTML = `<p style="text-align:center; color: red;">Lỗi: ${err.message || "Lỗi không xác định"}. Có thể dữ liệu câu hỏi bị lỗi hoặc hệ thống mất kết nối.</p>`;
-  }
-}
+      } catch (err) {
+        console.error(err);
+        document.getElementById('modalBody').innerHTML = `<p style="text-align:center; color: red;">Lỗi: ${err.message || "Lỗi không xác định"}. Có thể dữ liệu câu hỏi bị lỗi hoặc hệ thống mất kết nối.</p>`;
+      }
+    }
 
-function closeModal() {
-  document.getElementById('detailModal').style.display = 'none';
-}
+    function closeModal() {
+      document.getElementById('detailModal').style.display = 'none';
+    }
 
-fetchMyResults();
-</script>
+    fetchMyResults();
+  </script>
 
 </body>
+
 </html>

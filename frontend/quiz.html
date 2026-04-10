@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <title>AstraLMS - Làm Bài Kiểm Tra</title>
@@ -19,245 +20,424 @@
       --success: #10b981;
     }
 
-    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Outfit', sans-serif; }
-    body { display: flex; min-height: 100vh; background: var(--bg); color: var(--text-main); }
-    
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Outfit', sans-serif;
+    }
+
+    body {
+      display: flex;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--text-main);
+    }
+
     /* Sidebar matching user's image */
-    .sidebar { width: 260px; background: var(--sidebar-bg); padding: 30px 20px; display: flex; flex-direction: column; flex-shrink: 0; box-shadow: 2px 0 10px rgba(0,0,0,0.05); }
-    .sidebar .logo { font-weight: 700; font-size: 22px; margin-bottom: 40px; color: var(--text-sidebar); display: flex; align-items: center; justify-content: center; gap: 10px; }
-    .sidebar .logo span { font-size: 24px; }
-    .sidebar a { display: flex; align-items: center; gap: 14px; margin: 5px 0; padding: 12px 18px; color: rgba(255,255,255,0.9); text-decoration: none; cursor: pointer; border-radius: 10px; transition: all 0.2s ease; font-size: 15px; font-weight: 500; }
-    .sidebar a:hover { background: rgba(255,255,255,0.1); color: #fff; }
-    .sidebar a.active { background: rgba(255, 255, 255, 0.25); color: #fff; font-weight: 600; }
-    
+    .sidebar {
+      width: 260px;
+      background: var(--sidebar-bg);
+      padding: 30px 20px;
+      display: flex;
+      flex-direction: column;
+      flex-shrink: 0;
+      box-shadow: 2px 0 10px rgba(0, 0, 0, 0.05);
+    }
+
+    .sidebar .logo {
+      font-weight: 700;
+      font-size: 22px;
+      margin-bottom: 40px;
+      color: var(--text-sidebar);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+    }
+
+    .sidebar .logo span {
+      font-size: 24px;
+    }
+
+    .sidebar a {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      margin: 5px 0;
+      padding: 12px 18px;
+      color: rgba(255, 255, 255, 0.9);
+      text-decoration: none;
+      cursor: pointer;
+      border-radius: 10px;
+      transition: all 0.2s ease;
+      font-size: 15px;
+      font-weight: 500;
+    }
+
+    .sidebar a:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+    }
+
+    .sidebar a.active {
+      background: rgba(255, 255, 255, 0.25);
+      color: #fff;
+      font-weight: 600;
+    }
+
     /* Main Area */
-    .main { flex: 1; padding: 40px; overflow-y: auto; position: relative; }
-    
-    .timer-bar { 
-      position: sticky; top: 0; z-index: 100;
-      background: rgba(255, 255, 255, 0.95); backdrop-filter: blur(10px);
-      padding: 15px 30px; border-radius: 16px; box-shadow: 0 4px 20px rgba(0,0,0,0.06);
-      display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px;
+    .main {
+      flex: 1;
+      padding: 40px;
+      overflow-y: auto;
+      position: relative;
+    }
+
+    .timer-bar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      padding: 15px 30px;
+      border-radius: 16px;
+      box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
       border: 1px solid rgba(226, 232, 240, 0.8);
     }
-    .timer-text { font-size: 24px; font-weight: 700; color: var(--danger); display: flex; align-items: center; gap: 10px; }
-    .quiz-title { font-size: 20px; font-weight: 600; color: var(--text-main); }
-    
-    .quiz-container { display: flex; flex-direction: column; gap: 24px; max-width: 900px; margin: 0 auto; padding-bottom: 40px; }
-    
+
+    .timer-text {
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--danger);
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .quiz-title {
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--text-main);
+    }
+
+    .quiz-container {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      max-width: 900px;
+      margin: 0 auto;
+      padding-bottom: 40px;
+    }
+
     .q-card {
-      background: var(--surface); padding: 30px 40px; border-radius: 20px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.04); border: 1px solid #e2e8f0;
+      background: var(--surface);
+      padding: 30px 40px;
+      border-radius: 20px;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+      border: 1px solid #e2e8f0;
     }
-    .q-title { font-size: 18px; font-weight: 500; color: var(--text-main); margin-bottom: 20px; line-height: 1.6; }
-    .q-number { font-weight: 700; color: var(--primary); margin-right: 5px; }
 
-    .q-options { display: flex; flex-direction: column; gap: 12px; }
-    .q-option-label { cursor: pointer; display: block; }
+    .q-title {
+      font-size: 18px;
+      font-weight: 500;
+      color: var(--text-main);
+      margin-bottom: 20px;
+      line-height: 1.6;
+    }
+
+    .q-number {
+      font-weight: 700;
+      color: var(--primary);
+      margin-right: 5px;
+    }
+
+    .q-options {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .q-option-label {
+      cursor: pointer;
+      display: block;
+    }
+
     .q-option-box {
-      padding: 16px 20px; background: #f8fafc; border: 2px solid #e2e8f0; border-radius: 12px;
-      font-size: 16px; font-weight: 500; color: #334155; transition: all 0.2s;
-    }
-    .q-option-box:hover { background: #f1f5f9; border-color: #cbd5e1; }
-    
-    /* Radio checked state styling */
-    .q-option-label input:checked + .q-option-box {
-      background: #eef2ff; border-color: var(--primary); color: var(--accent); font-weight: 600;
+      padding: 16px 20px;
+      background: #f8fafc;
+      border: 2px solid #e2e8f0;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 500;
+      color: #334155;
+      transition: all 0.2s;
     }
 
-    .submit-area { text-align: center; margin-top: 20px; max-width: 900px; margin-left: auto; margin-right: auto; }
-    .btn-submit {
-      padding: 18px 40px; background: var(--primary); color: white; border: none; border-radius: 16px;
-      font-size: 18px; font-weight: 600; cursor: pointer; transition: 0.3s;
-      box-shadow: 0 4px 12px rgba(92, 158, 255, 0.4); width: 100%; max-width: 400px;
+    .q-option-box:hover {
+      background: #f1f5f9;
+      border-color: #cbd5e1;
     }
-    .btn-submit:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(92, 158, 255, 0.5); }
-    .btn-submit:disabled { opacity: 0.7; cursor: not-allowed; transform: none; }
+
+    /* Radio checked state styling */
+    .q-option-label input:checked+.q-option-box {
+      background: #eef2ff;
+      border-color: var(--primary);
+      color: var(--accent);
+      font-weight: 600;
+    }
+
+    .submit-area {
+      text-align: center;
+      margin-top: 20px;
+      max-width: 900px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    .btn-submit {
+      padding: 18px 40px;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 16px;
+      font-size: 18px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: 0.3s;
+      box-shadow: 0 4px 12px rgba(92, 158, 255, 0.4);
+      width: 100%;
+      max-width: 400px;
+    }
+
+    .btn-submit:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(92, 158, 255, 0.5);
+    }
+
+    .btn-submit:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: none;
+    }
 
     /* Result Screen overlay */
-    .result-screen { display: none; text-align: center; max-width: 600px; margin: 40px auto; background: white; padding: 50px; border-radius: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.08); }
-    .result-screen h2 { font-size: 32px; color: var(--text-main); margin-bottom: 15px; }
-    .score-text { font-size: 72px; font-weight: 800; color: var(--success); margin: 20px 0; }
+    .result-screen {
+      display: none;
+      text-align: center;
+      max-width: 600px;
+      margin: 40px auto;
+      background: white;
+      padding: 50px;
+      border-radius: 24px;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
+    }
+
+    .result-screen h2 {
+      font-size: 32px;
+      color: var(--text-main);
+      margin-bottom: 15px;
+    }
+
+    .score-text {
+      font-size: 72px;
+      font-weight: 800;
+      color: var(--success);
+      margin: 20px 0;
+    }
 
     /* Loading / Error */
-    #loading-msg { text-align: center; font-size: 18px; color: var(--text-muted); margin-top: 100px; }
+    #loading-msg {
+      text-align: center;
+      font-size: 18px;
+      color: var(--text-muted);
+      margin-top: 100px;
+    }
   </style>
 </head>
+
 <body>
 
-<div class="sidebar">
-  <div class="logo"><span>🎓</span> Student</div>
-  <a onclick="go('student-dashboard')">🏠 Dashboard</a>
-  <a onclick="go('vocab')">📚 Vocabulary</a>
-  <a onclick="go('lesson')">📖 Theory</a>
-  <a onclick="go('quizzes-student')" class="active">📝 Quizzes</a>
-  <a onclick="go('my-results')">📊 My Results</a>
-  <div style="flex-grow: 1;"></div>
-  <a onclick="logout()">🚪 Logout</a>
-</div>
-
-<div class="main">
-  
-  <div id="loading-msg">Đang tải bài kiểm tra...</div>
-
-  <!-- Quiz Active Area -->
-  <div id="quiz-active-area" style="display: none;">
-    <div class="timer-bar">
-      <div class="quiz-title">Bài Kiểm Tra Học Kỳ</div>
-      <div class="timer-text" id="timer-text">⏱ 00:00</div>
-    </div>
-    
-    <div class="quiz-container" id="questions-container">
-      <!-- Questions inject here -->
-    </div>
-    
-    <div class="submit-area">
-      <button class="btn-submit" id="btn-submit" onclick="submitQuiz()">Nộp bài ngay</button>
-    </div>
+  <div class="sidebar">
+    <div class="logo"><span>🎓</span> Student</div>
+    <a onclick="go('student-dashboard')">🏠 Dashboard</a>
+    <a onclick="go('vocab')">📚 Vocabulary</a>
+    <a onclick="go('lesson')">📖 Theory</a>
+    <a onclick="go('quizzes-student')" class="active">📝 Quizzes</a>
+    <a onclick="go('my-results')">📊 My Results</a>
+    <div style="flex-grow: 1;"></div>
+    <a onclick="logout()">🚪 Logout</a>
   </div>
 
-  <!-- Result Screen -->
-  <div class="result-screen" id="result-box">
-    <h2 id="result-title">Hoàn thành bài kiểm tra! 🎉</h2>
-    <div class="score-text" id="score-text">0 / 0</div>
-    <p style="color: var(--text-muted); margin-bottom: 30px; font-size: 16px;" id="result-msg">Kết quả của bạn đã được hệ thống lưu lại an toàn.</p>
-    <button class="btn-submit" onclick="window.location.href='my-results.html'" style="margin-bottom: 15px; width:100%;">Xem điểm số</button>
-    <button class="btn-submit" onclick="window.location.href='quizzes-student.html'" style="background: #f1f5f9; color: var(--text-main); box-shadow: none; width:100%;">Quay về danh sách</button>
+  <div class="main">
+
+    <div id="loading-msg">Đang tải bài kiểm tra...</div>
+
+    <!-- Quiz Active Area -->
+    <div id="quiz-active-area" style="display: none;">
+      <div class="timer-bar">
+        <div class="quiz-title">Bài Kiểm Tra Học Kỳ</div>
+        <div class="timer-text" id="timer-text">⏱ 00:00</div>
+      </div>
+
+      <div class="quiz-container" id="questions-container">
+        <!-- Questions inject here -->
+      </div>
+
+      <div class="submit-area">
+        <button class="btn-submit" id="btn-submit" onclick="submitQuiz()">Nộp bài ngay</button>
+      </div>
+    </div>
+
+    <!-- Result Screen -->
+    <div class="result-screen" id="result-box">
+      <h2 id="result-title">Hoàn thành bài kiểm tra! 🎉</h2>
+      <div class="score-text" id="score-text">0 / 0</div>
+      <p style="color: var(--text-muted); margin-bottom: 30px; font-size: 16px;" id="result-msg">Kết quả của bạn đã được
+        hệ thống lưu lại an toàn.</p>
+      <button class="btn-submit" onclick="window.location.href='my-results.html'"
+        style="margin-bottom: 15px; width:100%;">Xem điểm số</button>
+      <button class="btn-submit" onclick="window.location.href='quizzes-student.html'"
+        style="background: #f1f5f9; color: var(--text-main); box-shadow: none; width:100%;">Quay về danh sách</button>
+    </div>
+
   </div>
 
-</div>
+  <script>
+    const token = localStorage.getItem("token");
+    if (!token) window.location.href = "index.html";
+    const params = new URLSearchParams(window.location.search);
+    const quizId = params.get("id");
+    if (!quizId) window.location.href = "quizzes-student.html";
 
-<script>
-const token = localStorage.getItem("token");
-if (!token) window.location.href = "index.html";
-const params = new URLSearchParams(window.location.search);
-const quizId = params.get("id");
-if (!quizId) window.location.href = "quizzes-student.html";
+    function go(page) { window.location.href = page + ".html"; }
+    function logout() { localStorage.clear(); window.location.href = "index.html"; }
 
-function go(page) { window.location.href = page + ".html"; }
-function logout() { localStorage.clear(); window.location.href = "index.html"; }
+    let resultId = null;
+    let questions = [];
 
-let resultId = null;
-let questions = [];
+    let timeLeft = 60;
+    let timerInterval;
+    let cheatCount = 0;
+    let isQuizActive = false;
 
-let timeLeft = 60; 
-let timerInterval;
-let cheatCount = 0;
-let isQuizActive = false;
-
-// Anti-Cheat Mechanics
-document.addEventListener('contextmenu', e => e.preventDefault());
-document.addEventListener('copy', e => { 
-  e.preventDefault(); 
-  alert('⚠️ Cảnh báo: Học viên không được sao chép văn bản trong lúc làm bài!'); 
-});
-document.addEventListener('keydown', e => {
-  if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && e.key === 'I') || (e.ctrlKey && e.key === 'u')) {
-    e.preventDefault();
-  }
-});
-
-document.addEventListener('visibilitychange', () => {
-  if (document.hidden && isQuizActive && timeLeft > 0) {
-    cheatCount++;
-    alert(`⚠️ HỆ THỐNG CHỐNG GIAN LẬN:\nBạn vừa thoát khỏi ranh giới màn hình bài thi hoặc chuyển sang Tab khác.\nHành vi này đã được ghi nhận. Số lần vi phạm: ${cheatCount}`);
-    
-    if (cheatCount >= 3) {
-       alert('⛔ CẢNH BÁO: Vì bạn đã vi phạm rời màn hình 3 lần, hệ thống sẽ khoá và tự động nộp bài thi của bạn ngay bây giờ!');
-       submitQuiz();
-    }
-  }
-});
-
-async function startQuiz() {
-  try {
-    const res = await fetch('http://localhost:3000/results/quiz/' + quizId + '/start', {
-      method: 'POST',
-      headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' }
+    // Anti-Cheat Mechanics
+    document.addEventListener('contextmenu', e => e.preventDefault());
+    document.addEventListener('copy', e => {
+      e.preventDefault();
+      alert('⚠️ Cảnh báo: Học viên không được sao chép văn bản trong lúc làm bài!');
     });
-    const data = await res.json();
-      
-    if (!data.success) {
-      document.getElementById('loading-msg').innerText = data.message || "Không thể tải bài kiểm tra.";
-      return;
+    document.addEventListener('keydown', e => {
+      if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && e.key === 'I') || (e.ctrlKey && e.key === 'u')) {
+        e.preventDefault();
+      }
+    });
+
+    document.addEventListener('visibilitychange', () => {
+      if (document.hidden && isQuizActive && timeLeft > 0) {
+        cheatCount++;
+        alert(`⚠️ HỆ THỐNG CHỐNG GIAN LẬN:\nBạn vừa thoát khỏi ranh giới màn hình bài thi hoặc chuyển sang Tab khác.\nHành vi này đã được ghi nhận. Số lần vi phạm: ${cheatCount}`);
+
+        if (cheatCount >= 3) {
+          alert('⛔ CẢNH BÁO: Vì bạn đã vi phạm rời màn hình 3 lần, hệ thống sẽ khoá và tự động nộp bài thi của bạn ngay bây giờ!');
+          submitQuiz();
+        }
+      }
+    });
+
+    async function startQuiz() {
+      try {
+        const res = await fetch('http://lms-gzty.onrender.com/results/quiz/' + quizId + '/start', {
+          method: 'POST',
+          headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' }
+        });
+        const data = await res.json();
+
+        if (!data.success) {
+          document.getElementById('loading-msg').innerText = data.message || "Không thể tải bài kiểm tra.";
+          return;
+        }
+
+        resultId = data.data.resultId;
+        const quiz = data.data.quiz;
+        questions = quiz.questions || [];
+
+        if (questions.length === 0) {
+          document.getElementById('loading-msg').innerText = "Bài kiểm tra này chưa có câu hỏi nào.";
+          return;
+        }
+
+        // Prepare quiz view
+        document.getElementById('loading-msg').style.display = 'none';
+        document.getElementById('quiz-active-area').style.display = 'block';
+
+        // Hide sidebar for full focus mode during the exam
+        document.querySelector('.sidebar').style.display = 'none';
+
+        document.querySelector('.quiz-title').innerText = quiz.title || 'Làm bài kiểm tra';
+
+        timeLeft = quiz.timeLimit || (questions.length * 60); // Default 1 minute per question
+        isQuizActive = true;
+        startTimer();
+        renderQuestions();
+      } catch (err) {
+        console.error(err);
+        document.getElementById('loading-msg').innerText = "Lỗi kết nối mạng.";
+      }
     }
 
-    resultId = data.data.resultId;
-    const quiz = data.data.quiz;
-    questions = quiz.questions || [];
-      
-    if (questions.length === 0) {
-      document.getElementById('loading-msg').innerText = "Bài kiểm tra này chưa có câu hỏi nào.";
-      return;
+    function startTimer() {
+      timerInterval = setInterval(() => {
+        timeLeft--;
+        const m = Math.floor(timeLeft / 60);
+        const s = timeLeft % 60;
+
+        const formattedTimer = `⏱ ${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+        document.getElementById('timer-text').innerText = formattedTimer;
+
+        // Warning effect when time is under 1 minute
+        if (timeLeft <= 60 && timeLeft > 0) {
+          document.getElementById('timer-text').style.color = '#dc2626'; // Darker red
+          // pulse effect
+          if (timeLeft % 2 === 0) document.getElementById('timer-text').style.transform = 'scale(1.05)';
+          else document.getElementById('timer-text').style.transform = 'scale(1)';
+        }
+
+        if (timeLeft <= 0) {
+          clearInterval(timerInterval);
+          document.getElementById('timer-text').innerText = "Hết giờ!";
+          submitQuiz(); // Auto submit when time runs out
+        }
+      }, 1000);
     }
 
-    // Prepare quiz view
-    document.getElementById('loading-msg').style.display = 'none';
-    document.getElementById('quiz-active-area').style.display = 'block';
-    
-    // Hide sidebar for full focus mode during the exam
-    document.querySelector('.sidebar').style.display = 'none';
-
-    document.querySelector('.quiz-title').innerText = quiz.title || 'Làm bài kiểm tra';
-
-    timeLeft = quiz.timeLimit || (questions.length * 60); // Default 1 minute per question
-    isQuizActive = true;
-    startTimer();
-    renderQuestions();
-  } catch(err) {
-    console.error(err);
-    document.getElementById('loading-msg').innerText = "Lỗi kết nối mạng.";
-  }
-}
-
-function startTimer() {
-  timerInterval = setInterval(() => {
-    timeLeft--;
-    const m = Math.floor(timeLeft / 60);
-    const s = timeLeft % 60;
-    
-    const formattedTimer = `⏱ ${m.toString().padStart(2,'0')}:${s.toString().padStart(2,'0')}`;
-    document.getElementById('timer-text').innerText = formattedTimer;
-    
-    // Warning effect when time is under 1 minute
-    if (timeLeft <= 60 && timeLeft > 0) {
-      document.getElementById('timer-text').style.color = '#dc2626'; // Darker red
-      // pulse effect
-      if(timeLeft % 2 === 0) document.getElementById('timer-text').style.transform = 'scale(1.05)';
-      else document.getElementById('timer-text').style.transform = 'scale(1)';
+    function escapeHTML(str) {
+      if (!str) return '';
+      return String(str)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
     }
 
-    if (timeLeft <= 0) {
-      clearInterval(timerInterval);
-      document.getElementById('timer-text').innerText = "Hết giờ!";
-      submitQuiz(); // Auto submit when time runs out
-    }
-  }, 1000);
-}
+    function renderQuestions() {
+      const container = document.getElementById('questions-container');
+      container.innerHTML = questions.map((q, idx) => {
+        // Scramble options UI slightly
+        const optsParams = [
+          { key: 'A', val: q.optionA },
+          { key: 'B', val: q.optionB },
+          { key: 'C', val: q.optionC },
+          { key: 'D', val: q.optionD }
+        ].filter(o => o.val);
+        optsParams.sort(() => Math.random() - 0.5); // shuffle choices display
 
-function escapeHTML(str) {
-  if (!str) return '';
-  return String(str)
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&#039;");
-}
-
-function renderQuestions() {
-  const container = document.getElementById('questions-container');
-  container.innerHTML = questions.map((q, idx) => {
-    // Scramble options UI slightly
-    const optsParams = [
-      { key: 'A', val: q.optionA },
-      { key: 'B', val: q.optionB },
-      { key: 'C', val: q.optionC },
-      { key: 'D', val: q.optionD }
-    ].filter(o => o.val);
-    optsParams.sort(() => Math.random() - 0.5); // shuffle choices display
-    
-    return `
+        return `
       <div class="q-card">
         <h4 class="q-title"><span class="q-number">Câu ${idx + 1}:</span> ${escapeHTML(q.question)}</h4>
         <div class="q-options">
@@ -272,64 +452,65 @@ function renderQuestions() {
         </div>
       </div>
     `;
-  }).join('');
-}
-
-async function submitQuiz() {
-  // Confirm before submitting unless time is up
-  if (timeLeft > 0 && cheatCount < 3) {
-    if(!confirm("Bạn có chắc chắn muốn nộp bài? Hãy kiểm tra kỹ các câu trả lời!")) return;
-  }
-
-  isQuizActive = false;
-  clearInterval(timerInterval);
-  document.getElementById('btn-submit').innerText = "Đang nộp bài...";
-  document.getElementById('btn-submit').disabled = true;
-
-  // Gather client answers from radio buttons
-  let clientAnswers = [];
-  questions.forEach(q => {
-    const selectedRadio = document.querySelector(`input[name="${q._id}"]:checked`);
-    if(selectedRadio) {
-      clientAnswers.push({ questionId: q._id, selected: selectedRadio.value });
+      }).join('');
     }
-  });
 
-  document.getElementById('quiz-active-area').style.display = 'none';
-  document.getElementById('result-box').style.display = 'block';
-  document.getElementById('score-text').innerText = "...";
+    async function submitQuiz() {
+      // Confirm before submitting unless time is up
+      if (timeLeft > 0 && cheatCount < 3) {
+        if (!confirm("Bạn có chắc chắn muốn nộp bài? Hãy kiểm tra kỹ các câu trả lời!")) return;
+      }
 
-  try {
-    const res = await fetch(`http://localhost:3000/results/quiz/${quizId}/submit`, {
-      method: 'POST',
-      headers: { 
-        'Content-Type': 'application/json',
-        'Authorization': 'Bearer ' + token
-      },
-      body: JSON.stringify({
-        resultId: resultId,
-        clientAnswers: clientAnswers
-      })
-    });
-    
-    const data = await res.json();
-    if(data.success) {
-       document.getElementById('score-text').innerText = `${data.data.score} / ${data.data.total}`;
-       if (data.data.score === data.data.total) {
-          document.getElementById('result-title').innerText = "Điểm 10 tuyệt đối! 🏆";
-       }
-    } else {
-       document.getElementById('score-text').innerText = "Lỗi";
-       document.getElementById('result-msg').innerText = data.message;
+      isQuizActive = false;
+      clearInterval(timerInterval);
+      document.getElementById('btn-submit').innerText = "Đang nộp bài...";
+      document.getElementById('btn-submit').disabled = true;
+
+      // Gather client answers from radio buttons
+      let clientAnswers = [];
+      questions.forEach(q => {
+        const selectedRadio = document.querySelector(`input[name="${q._id}"]:checked`);
+        if (selectedRadio) {
+          clientAnswers.push({ questionId: q._id, selected: selectedRadio.value });
+        }
+      });
+
+      document.getElementById('quiz-active-area').style.display = 'none';
+      document.getElementById('result-box').style.display = 'block';
+      document.getElementById('score-text').innerText = "...";
+
+      try {
+        const res = await fetch(`http://localhost:3000/results/quiz/${quizId}/submit`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': 'Bearer ' + token
+          },
+          body: JSON.stringify({
+            resultId: resultId,
+            clientAnswers: clientAnswers
+          })
+        });
+
+        const data = await res.json();
+        if (data.success) {
+          document.getElementById('score-text').innerText = `${data.data.score} / ${data.data.total}`;
+          if (data.data.score === data.data.total) {
+            document.getElementById('result-title').innerText = "Điểm 10 tuyệt đối! 🏆";
+          }
+        } else {
+          document.getElementById('score-text').innerText = "Lỗi";
+          document.getElementById('result-msg').innerText = data.message;
+        }
+      } catch (err) {
+        console.error("Failed to save result", err);
+        document.getElementById('score-text').innerText = "Lỗi Mạng";
+      }
     }
-  } catch(err) {
-    console.error("Failed to save result", err);
-    document.getElementById('score-text').innerText = "Lỗi Mạng";
-  }
-}
 
-// Start
-startQuiz();
-</script>
+    // Start
+    startQuiz();
+  </script>
 </body>
+
 </html>
