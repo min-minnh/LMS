@@ -76,8 +76,10 @@ exports.startQuiz = async (req, res) => {
       startTime: new Date()
     });
     
-    // Shuffle questions before sending to client
-    const shuffledQuestions = [...quiz.questions].sort(() => Math.random() - 0.5);
+    // Shuffle questions only if quiz setting allows it
+    const shuffledQuestions = quiz.shuffleQuestions !== false
+      ? [...quiz.questions].sort(() => Math.random() - 0.5)
+      : [...quiz.questions];
 
     // Do not leak 'correct' answers down to the client when starting!
     const safeQuiz = {
@@ -86,6 +88,7 @@ exports.startQuiz = async (req, res) => {
       timeLimit: quiz.timeLimit,
       questions: shuffledQuestions.map(q => ({
         _id: q._id,
+        passage: q.passage || '',   // include passage for reading comprehension questions
         question: q.question,
         optionA: q.optionA,
         optionB: q.optionB,

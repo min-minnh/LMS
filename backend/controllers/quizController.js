@@ -5,8 +5,8 @@ const fs = require('fs');
 
 exports.create = async (req, res) => {
   try {
-    const { title, description, timeLimit, attemptLimit } = req.body;
-    const quiz = await Quiz.create({ title, description, timeLimit, attemptLimit: attemptLimit || 0 });
+    const { title, description, timeLimit, attemptLimit, shuffleQuestions } = req.body;
+    const quiz = await Quiz.create({ title, description, timeLimit, attemptLimit: attemptLimit || 0, shuffleQuestions: shuffleQuestions !== false });
     return sendSuccess(res, 'Quiz created', quiz, 201);
   } catch (err) {
     return sendError(res, err.message);
@@ -39,9 +39,10 @@ exports.getById = async (req, res) => {
 
 exports.update = async (req, res) => {
   try {
-    const { title, description, timeLimit, attemptLimit } = req.body;
+    const { title, description, timeLimit, attemptLimit, shuffleQuestions } = req.body;
     const updateFields = { title, description, timeLimit };
     if (attemptLimit !== undefined) updateFields.attemptLimit = attemptLimit;
+    if (shuffleQuestions !== undefined) updateFields.shuffleQuestions = shuffleQuestions;
     const quiz = await Quiz.findByIdAndUpdate(req.params.id, updateFields, { new: true });
     if (!quiz) return sendError(res, 'Quiz not found', 404);
     return sendSuccess(res, 'Quiz updated', quiz);
