@@ -5,8 +5,14 @@ const fs = require('fs');
 
 exports.create = async (req, res) => {
   try {
-    const { title, description, timeLimit, attemptLimit } = req.body;
-    const quiz = await Quiz.create({ title, description, timeLimit, attemptLimit: attemptLimit || 0 });
+    const { title, description, timeLimit, attemptLimit, shuffleQuestions } = req.body;
+    const quiz = await Quiz.create({ 
+      title, 
+      description, 
+      timeLimit, 
+      attemptLimit: attemptLimit || 0,
+      shuffleQuestions: shuffleQuestions !== false 
+    });
     return sendSuccess(res, 'Quiz created', quiz, 201);
   } catch (err) {
     return sendError(res, err.message);
@@ -39,9 +45,10 @@ exports.getById = async (req, res) => {
 
 exports.update = async (req, res) => {
   try {
-    const { title, description, timeLimit, attemptLimit } = req.body;
+    const { title, description, timeLimit, attemptLimit, shuffleQuestions } = req.body;
     const updateFields = { title, description, timeLimit };
     if (attemptLimit !== undefined) updateFields.attemptLimit = attemptLimit;
+    if (shuffleQuestions !== undefined) updateFields.shuffleQuestions = shuffleQuestions;
     const quiz = await Quiz.findByIdAndUpdate(req.params.id, updateFields, { new: true });
     if (!quiz) return sendError(res, 'Quiz not found', 404);
     return sendSuccess(res, 'Quiz updated', quiz);
@@ -129,22 +136,73 @@ exports.uploadCSV = async (req, res) => {
 
     // Support direct CSV text payload
     if (req.body.csvText) {
-      const lines = req.body.csvText.split('\n');
-      if (lines.length > 0) {
-        let headers = lines[0].split(',').map(h => h.trim());
-        for (let i = 1; i < lines.length; i++) {
-          const colStr = lines[i].trim();
-          if (!colStr) continue;
+      const parseCSV = (text) => {
+        const rows = [];
+        let currentRow = [];
+        let currentField = "";
+        let inQuotes = false;
 
-          const cols = colStr.split(',').map(c => c.trim());
+        for (let i = 0; i < text.length; i++) {
+          const char = text[i];
+          const nextChar = text[i + 1];
+
+          if (char === '"' && inQuotes && nextChar === '"') {
+            currentField += '"';
+            i++; 
+          } else if (char === '"') {
+            inQuotes = !inQuotes;
+          } else if (char === ',' && !inQuotes) {
+            currentRow.push(currentField.trim());
+            currentField = "";
+          } else if ((char === '\r' || char === '\n') && !inQuotes) {
+            if (char === '\r' && nextChar === '\n') i++; 
+            currentRow.push(currentField.trim());
+            if (currentRow.length > 1 || (currentRow.length === 1 && currentRow[0] !== "")) {
+              rows.push(currentRow);
+            }
+            currentRow = [];
+            currentField = "";
+          } else {
+            currentField += char;
+          }
+        }
+        if (currentField || currentRow.length > 0) {
+          currentRow.push(currentField.trim());
+          if (currentRow.length > 1 || (currentRow.length === 1 && currentRow[0] !== "")) {
+            rows.push(currentRow);
+          }
+        }
+        return rows;
+      };
+
+      const rows = parseCSV(req.body.csvText);
+      if (rows.length > 0) {
+        let headers = rows[0];
+        let startIdx = 1;
+
+        // Auto-detect header
+        const headerStr = headers.join(",").toLowerCase();
+        if (!headerStr.includes("question") && !headerStr.includes("correct") && !headerStr.includes("option")) {
+          headers = ["passage", "question", "optionA", "optionB", "optionC", "optionD", "correct"];
+          startIdx = 0;
+        }
+
+        for (let i = startIdx; i < rows.length; i++) {
+          const cols = rows[i];
+          if (cols.length < 2) continue;
+
           let obj = {};
           headers.forEach((h, idx) => {
-            if (h) obj[h] = cols[idx] || '';
+            if (h) {
+              const cleanHeader = h.trim().toLowerCase();
+              obj[cleanHeader] = cols[idx] || "";
+            }
           });
           data.push(obj);
         }
       }
-    } else {
+    }
+ else {
       const file = req.file;
       if (!file) return sendError(res, 'Please upload a CSV file or paste content', 400);
       data = await parseXLSX(file.path);
@@ -158,21 +216,21 @@ exports.uploadCSV = async (req, res) => {
       const row = data[i];
       const rowIndex = i + 2;
 
-      const passage = (row.passage || '').toString().trim();
-      const question = (row.question || '').toString().trim();
-      const optionA = (row.optionA || '').toString().trim();
-      const optionB = (row.optionB || '').toString().trim();
-      const optionC = (row.optionC || '').toString().trim();
-      const optionD = (row.optionD || '').toString().trim();
-      const correct = (row.correct || row.correctAnswer || '').toString().trim().toUpperCase();
+      const passage = (row.passage || "").toString().trim();
+      const question = (row.question || row.q || "").toString().trim();
+      const optionA = (row.optiona || row.option1 || row.a || "").toString().trim();
+      const optionB = (row.optionb || row.option2 || row.b || "").toString().trim();
+      const optionC = (row.optionc || row.option3 || row.c || "").toString().trim();
+      const optionD = (row.optiond || row.option4 || row.d || "").toString().trim();
+      const correct = (row.correct || row.correctanswer || row.ans || "").toString().trim().toUpperCase();
 
       if (!question || !optionA || !optionB || !optionC || !optionD || !correct) {
-        errorRows.push({ row: rowIndex, reason: 'Missing required question fields' });
+        errorRows.push({ row: rowIndex, reason: 'Missing required field (Check columns/headers)' });
         continue;
       }
 
       if (!validOptions.includes(correct)) {
-        errorRows.push({ row: rowIndex, reason: 'Correct answer must be A, B, C, or D' });
+        errorRows.push({ row: rowIndex, reason: `Invalid correct answer: '${correct}' (Must be A, B, C, or D)` });
         continue;
       }
 

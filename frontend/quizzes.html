@@ -284,7 +284,7 @@
           questions.</p>
         <input type="text" id="quizTitle" placeholder="Quiz Title (e.g., Final Exam Grade 10)">
         <textarea id="quizDescription" placeholder="Description or Instructions (optional)..." rows="2"></textarea>
-        <div style="display: flex; gap: 10px;">
+        <div style="display: flex; gap: 10px; margin-bottom: 20px;">
           <div style="flex:1;">
             <label style="font-size: 12px; color: #64748b;">Time Limit (Minutes)</label>
             <input type="number" id="timeLimitMinutes" placeholder="e.g. 30" min="1">
@@ -293,6 +293,11 @@
             <label style="font-size: 12px; color: #64748b;">Max Attempts (0 = unlimited)</label>
             <input type="number" id="attemptLimit" placeholder="e.g. 2" min="0">
           </div>
+        </div>
+
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 20px; font-size: 14px; color: #475569;">
+          <input type="checkbox" id="shuffleQuestions" checked style="width: auto; margin: 0;">
+          <label for="shuffleQuestions">🔀 Xáo trộn thứ tự câu hỏi khi làm bài</label>
         </div>
         <button id="createQuizBtn" onclick="addQuiz()">Create Quiz Folder</button>
       </div>
@@ -317,8 +322,10 @@
         <h3 style="font-size: 15px; margin-bottom: 10px;">📥 Import Questions via CSV Text</h3>
         <p style="font-size: 12px; color: #64748b; margin-bottom: 12px;">
           <strong>Format:</strong> passage, question, optionA, optionB, optionC, optionD, correct(A/B/C/D)<br>
-          <em>Note: 'passage' can be empty. Example: <code>,What is 1+1?,1,2,3,4,B</code></em>
+          <em>Note: Nếu nội dung có dấu phẩy (,), hãy bao quanh bằng dấu ngoặc kép (""). Ví dụ: <code>"Câu hỏi, có phẩy",...</code></em><br>
+          <em>Dòng tiêu đề (header) có thể có hoặc không.</em>
         </p>
+        <button class="back-btn" onclick="copyCsvTemplate()" style="padding: 5px 10px; font-size: 12px; margin-bottom: 10px;">📋 Copy CSV Template</button>
         <textarea id="csvContent" rows="6"
           style="width: 100%; border: 1px solid #cbd5e1; border-radius: 6px; padding: 12px; margin-bottom: 12px; font-family: monospace; font-size: 13px;"
           placeholder="passage,question,optionA,optionB,optionC,optionD,correct&#10;My passage,What is 1+1?,1,2,3,4,B"></textarea>
@@ -416,6 +423,7 @@
       const description = document.getElementById('quizDescription').value.trim();
       const mins = parseInt(document.getElementById('timeLimitMinutes').value);
       const attemptLimit = parseInt(document.getElementById('attemptLimit').value) || 0;
+      const shuffleQuestions = document.getElementById('shuffleQuestions').checked;
       const btn = document.getElementById('createQuizBtn');
 
       if (!title || isNaN(mins) || mins < 1) {
@@ -429,7 +437,7 @@
 
       const res = await apiFetch('/quizzes', {
         method: 'POST',
-        body: JSON.stringify({ title, description, timeLimit, attemptLimit })
+        body: JSON.stringify({ title, description, timeLimit, attemptLimit, shuffleQuestions })
       });
 
       btn.disabled = false;
@@ -538,12 +546,25 @@
       btn.innerText = "Import into this Quiz";
 
       if (res.success) {
-        showToast(`✅ Successfully imported ${res.data.successCount} questions!`);
+        let msg = `✅ Imported ${res.data.successCount} questions.`;
+        if (res.data.errorRows && res.data.errorRows.length > 0) {
+          msg += `\n⚠️ Errors: ${res.data.errorRows.length} rows skipped.`;
+          console.error("Import Errors:", res.data.errorRows);
+        }
+        showToast(msg, res.data.errorRows.length === 0);
         document.getElementById('csvContent').value = '';
         await loadQuestionsForQuiz();
       } else {
         showToast(res.message || "Failed to import", false);
       }
+    }
+
+    function copyCsvTemplate() {
+      const template = `passage,question,optionA,optionB,optionC,optionD,correct\n"Phần văn bản (nếu có)","Câu hỏi là gì?",Đáp án A,Đáp án B,Đáp án C,Đáp án D,A`;
+      const el = document.getElementById('csvContent');
+      el.value = template;
+      el.focus();
+      showToast("Template copied to box!");
     }
   </script>
 </body>
