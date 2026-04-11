@@ -37,11 +37,11 @@ exports.getById = async (req, res) => {
     const result = await Result.findById(req.params.id)
       .populate('userId', 'name email')
       .populate('quizId');
-      
+
     if (!result) return sendError(res, 'Result not found', 404);
 
     const resultUserId = result.userId ? (result.userId._id || result.userId).toString() : null;
-    
+
     if (req.user.role !== 'admin' && resultUserId !== req.user.id) {
       return sendError(res, 'Unauthorized to view this result', 403);
     }
@@ -75,11 +75,9 @@ exports.startQuiz = async (req, res) => {
       answers: [],
       startTime: new Date()
     });
-    
-    // Shuffle questions only if quiz setting allows it
-    const shuffledQuestions = quiz.shuffleQuestions !== false
-      ? [...quiz.questions].sort(() => Math.random() - 0.5)
-      : [...quiz.questions];
+
+    // Shuffle questions before sending to client
+    const shuffledQuestions = [...quiz.questions].sort(() => Math.random() - 0.5);
 
     // Do not leak 'correct' answers down to the client when starting!
     const safeQuiz = {
@@ -106,7 +104,7 @@ exports.startQuiz = async (req, res) => {
 exports.submitQuiz = async (req, res) => {
   try {
     const { quizId } = req.params;
-    const { resultId, clientAnswers } = req.body; 
+    const { resultId, clientAnswers } = req.body;
     // clientAnswers: [{ questionId, selected }]
 
     const quiz = await Quiz.findById(quizId);
@@ -130,7 +128,7 @@ exports.submitQuiz = async (req, res) => {
     quiz.questions.forEach(q => {
       const dbQid = q._id.toString();
       const ansObj = (clientAnswers || []).find(c => c.questionId === dbQid);
-      
+
       let isCorrect = false;
       let selected = ansObj ? ansObj.selected : null;
 
@@ -149,7 +147,7 @@ exports.submitQuiz = async (req, res) => {
     result.answers = finalAnswers;
     result.score = score;
     result.submittedAt = now;
-    
+
     await result.save();
 
     return sendSuccess(res, 'Quiz submitted', result);

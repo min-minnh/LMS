@@ -5,8 +5,8 @@ const fs = require('fs');
 
 exports.create = async (req, res) => {
   try {
-    const { title, description, timeLimit, attemptLimit, shuffleQuestions } = req.body;
-    const quiz = await Quiz.create({ title, description, timeLimit, attemptLimit: attemptLimit || 0, shuffleQuestions: shuffleQuestions !== false });
+    const { title, description, timeLimit, attemptLimit } = req.body;
+    const quiz = await Quiz.create({ title, description, timeLimit, attemptLimit: attemptLimit || 0 });
     return sendSuccess(res, 'Quiz created', quiz, 201);
   } catch (err) {
     return sendError(res, err.message);
@@ -39,10 +39,9 @@ exports.getById = async (req, res) => {
 
 exports.update = async (req, res) => {
   try {
-    const { title, description, timeLimit, attemptLimit, shuffleQuestions } = req.body;
+    const { title, description, timeLimit, attemptLimit } = req.body;
     const updateFields = { title, description, timeLimit };
     if (attemptLimit !== undefined) updateFields.attemptLimit = attemptLimit;
-    if (shuffleQuestions !== undefined) updateFields.shuffleQuestions = shuffleQuestions;
     const quiz = await Quiz.findByIdAndUpdate(req.params.id, updateFields, { new: true });
     if (!quiz) return sendError(res, 'Quiz not found', 404);
     return sendSuccess(res, 'Quiz updated', quiz);
@@ -78,11 +77,12 @@ exports.addQuestion = async (req, res) => {
 
 exports.updateQuestion = async (req, res) => {
   try {
-    const { passage, question, optionA, optionB, optionC, optionD, correct } = req.body;
+    const { question, optionA, optionB, optionC, optionD, correct } = req.body;
     const { id, qId } = req.params;
     const quiz = await Quiz.findOneAndUpdate(
       { _id: id, 'questions._id': qId },
-      { $set: { 
+      {
+        $set: {
           'questions.$.passage': passage || '',
           'questions.$.question': question,
           'questions.$.optionA': optionA,
@@ -90,12 +90,12 @@ exports.updateQuestion = async (req, res) => {
           'questions.$.optionC': optionC,
           'questions.$.optionD': optionD,
           'questions.$.correct': correct
-        } 
+        }
       },
       { new: true }
     );
     if (!quiz) return sendError(res, 'Quiz or Question not found', 404);
-    
+
     // trigger auto save hook to re-calc count if needed
     await quiz.save();
     return sendSuccess(res, 'Question updated', quiz);
@@ -126,7 +126,7 @@ exports.uploadCSV = async (req, res) => {
     if (!quiz) return sendError(res, 'Quiz not found', 404);
 
     let data = [];
-    
+
     // Support direct CSV text payload
     if (req.body.csvText) {
       const lines = req.body.csvText.split('\n');
@@ -135,7 +135,7 @@ exports.uploadCSV = async (req, res) => {
         for (let i = 1; i < lines.length; i++) {
           const colStr = lines[i].trim();
           if (!colStr) continue;
-          
+
           const cols = colStr.split(',').map(c => c.trim());
           let obj = {};
           headers.forEach((h, idx) => {
@@ -155,29 +155,29 @@ exports.uploadCSV = async (req, res) => {
     const validOptions = ['A', 'B', 'C', 'D'];
 
     for (let i = 0; i < data.length; i++) {
-        const row = data[i];
-        const rowIndex = i + 2; 
+      const row = data[i];
+      const rowIndex = i + 2;
 
-        const passage = (row.passage || '').toString().trim();
-        const question = (row.question || '').toString().trim();
-        const optionA = (row.optionA || '').toString().trim();
-        const optionB = (row.optionB || '').toString().trim();
-        const optionC = (row.optionC || '').toString().trim();
-        const optionD = (row.optionD || '').toString().trim();
-        const correct = (row.correct || row.correctAnswer || '').toString().trim().toUpperCase();
+      const passage = (row.passage || '').toString().trim();
+      const question = (row.question || '').toString().trim();
+      const optionA = (row.optionA || '').toString().trim();
+      const optionB = (row.optionB || '').toString().trim();
+      const optionC = (row.optionC || '').toString().trim();
+      const optionD = (row.optionD || '').toString().trim();
+      const correct = (row.correct || row.correctAnswer || '').toString().trim().toUpperCase();
 
-        if (!question || !optionA || !optionB || !optionC || !optionD || !correct) {
-          errorRows.push({ row: rowIndex, reason: 'Missing required question fields' });
-          continue;
-        }
+      if (!question || !optionA || !optionB || !optionC || !optionD || !correct) {
+        errorRows.push({ row: rowIndex, reason: 'Missing required question fields' });
+        continue;
+      }
 
-        if (!validOptions.includes(correct)) {
-          errorRows.push({ row: rowIndex, reason: 'Correct answer must be A, B, C, or D' });
-          continue;
-        }
+      if (!validOptions.includes(correct)) {
+        errorRows.push({ row: rowIndex, reason: 'Correct answer must be A, B, C, or D' });
+        continue;
+      }
 
-        quiz.questions.push({ passage, question, optionA, optionB, optionC, optionD, correct });
-        successCount++;
+      quiz.questions.push({ passage, question, optionA, optionB, optionC, optionD, correct });
+      successCount++;
     }
 
     await quiz.save();
