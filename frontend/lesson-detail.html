@@ -260,7 +260,7 @@
       if (!id) return window.history.back();
 
       try {
-        const res = await fetch('http://lms-gzty.onrender.com/lessons/' + id, {
+        const res = await fetch('https://lms-gzty.onrender.com/lessons/' + id, {
           headers: { 'Authorization': 'Bearer ' + token }
         });
         const data = await res.json();
@@ -278,7 +278,7 @@
         if (l.imageUrl) {
           const imgC = document.getElementById('image-container');
           imgC.style.display = 'block';
-          imgC.style.backgroundImage = `url('http://lms-gzty.onrender.com${l.imageUrl}')`;
+          imgC.style.backgroundImage = `url('https://lms-gzty.onrender.com${l.imageUrl}')`;
         }
 
         if (l.fileUrl) {

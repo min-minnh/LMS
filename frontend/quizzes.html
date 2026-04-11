@@ -103,7 +103,9 @@
       <button onclick="addQuiz()" style="margin-top:6px;">➕ Create Quiz Folder</button>
     </div>
 
-    <div class="topic-grid" id="quizGrid"></div>
+    <div class="topic-grid" id="quizGrid">
+      <div style="grid-column:1/-1; text-align:center; padding:50px; color:#94a3b8; font-size:15px;">⏳ Đang tải danh sách quiz...</div>
+    </div>
     <div id="quizPagination" class="pagination"></div>
   </div>
 
@@ -191,7 +193,47 @@
   let currentQuizId = null;
   let parsedRows = []; // holds preview table data
 
-  // ── Init ──────────────────────────────────────────────
+  // ── Quiz Folder CRUD ──────────────────────────────────
+  async function loadQuizzes(page = 1) {
+    const grid = document.getElementById('quizGrid');
+    grid.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:40px; color:#94a3b8;">⏳ Đang tải...</div>';
+
+    const res = await apiFetch(`/quizzes?page=${page}`);
+
+    if (!res || !res.success) {
+      grid.innerHTML = `
+        <div style="grid-column:1/-1; text-align:center; padding:50px;">
+          <div style="font-size:40px; margin-bottom:12px;">😴</div>
+          <div style="font-weight:600; color:#1e293b; margin-bottom:6px;">Không thể kết nối server</div>
+          <div style="color:#94a3b8; font-size:14px; margin-bottom:20px;">Server có thể đang khởi động (Render free tier). Thử lại sau 30 giây.</div>
+          <button onclick="loadQuizzes(${page})" style="background:#6366f1; color:white; border:none; border-radius:8px; padding:10px 20px; cursor:pointer; font-weight:600;">🔄 Thử lại</button>
+        </div>`;
+      return;
+    }
+
+    if (res.data.quizzes.length === 0) {
+      grid.innerHTML = '<div style="grid-column:1/-1; text-align:center; padding:50px; color:#94a3b8; font-size:15px;">📭 Chưa có quiz nào. Tạo quiz đầu tiên bên trên!</div>';
+      return;
+    }
+
+    grid.innerHTML = res.data.quizzes.map(q => `
+      <div class="topic-folder" onclick="openQuiz('${q._id}', '${q.title.replace(/'/g, "\\'")}')">
+        ${isAdmin() ? `<button class="delete-quiz-btn admin-only" onclick="event.stopPropagation(); deleteQuiz('${q._id}')">✕</button>` : ''}
+        <span class="icon">📝</span>
+        <h3>${q.title}</h3>
+        <small>⏱ ${Math.ceil(q.timeLimit / 60)} phút | ❓ ${q.questionCount || 0} Câu | 🔁 ${q.attemptLimit || '∞'} lượt</small>
+        <small>${q.shuffleQuestions !== false ? '🔀 Xáo câu' : '📋 Giữ thứ tự'}</small>
+        ${q.description ? `<p style="font-size:12px; margin-top:6px; color:#94a3b8;">${q.description}</p>` : ''}
+      </div>`).join('');
+
+    const pc = document.getElementById('quizPagination');
+    pc.innerHTML = res.data.totalPages > 1 ? `
+      <button ${page === 1 ? 'disabled' : ''} onclick="loadQuizzes(${page - 1})">Prev</button>
+      <span>Page ${page}/${res.data.totalPages}</span>
+      <button ${page === res.data.totalPages ? 'disabled' : ''} onclick="loadQuizzes(${page + 1})">Next</button>` : '';
+  }
+
+  // ── Init ─────────────────────────────────────────────
   function initView() {
     if (!isAdmin()) document.querySelectorAll('.admin-only').forEach(el => el.style.display = 'none');
     document.getElementById('quizzesView').style.display = 'block';
@@ -199,26 +241,6 @@
     loadQuizzes(1);
   }
 
-  // ── Quiz Folder CRUD ──────────────────────────────────
-  async function loadQuizzes(page = 1) {
-    const res = await apiFetch(`/quizzes?page=${page}`);
-    if (!res.success) return showToast(res.message, false);
-    const grid = document.getElementById('quizGrid');
-    if (res.data.quizzes.length === 0) { grid.innerHTML = '<p style="color:#64748b;">No quizzes yet.</p>'; return; }
-    grid.innerHTML = res.data.quizzes.map(q => `
-      <div class="topic-folder" onclick="openQuiz('${q._id}', '${q.title.replace(/'/g, "\\'")}')">
-        ${isAdmin() ? `<button class="delete-quiz-btn admin-only" onclick="event.stopPropagation(); deleteQuiz('${q._id}')">✕</button>` : ''}
-        <span class="icon">📝</span>
-        <h3>${q.title}</h3>
-        <small>⏱ ${Math.ceil(q.timeLimit / 60)} phút | ❓ ${q.questionCount || 0} Câu | 🔁 ${q.attemptLimit || '∞'} lượt | ${q.shuffleQuestions !== false ? '🔀 Xáo câu' : '📋 Giữ thứ tự'}</small>
-        ${q.description ? `<p style="font-size:12px; margin-top:5px; color:#94a3b8;">${q.description}</p>` : ''}
-      </div>`).join('');
-    const pc = document.getElementById('quizPagination');
-    pc.innerHTML = res.data.totalPages > 1 ? `
-      <button ${page === 1 ? 'disabled' : ''} onclick="loadQuizzes(${page - 1})">Prev</button>
-      <span>Page ${page}/${res.data.totalPages}</span>
-      <button ${page === res.data.totalPages ? 'disabled' : ''} onclick="loadQuizzes(${page + 1})">Next</button>` : '';
-  }
 
   async function addQuiz() {
     const title = document.getElementById('title').value.trim();
