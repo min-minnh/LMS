@@ -26,7 +26,7 @@ function isAdmin() {
   return user.role === 'admin';
 }
 
-// Request Wrapper with 15s timeout
+// Request Wrapper
 async function apiFetch(endpoint, options = {}) {
   const token = getToken();
   const defaultHeaders = {};
@@ -42,34 +42,12 @@ async function apiFetch(endpoint, options = {}) {
     headers: { ...defaultHeaders, ...(options.headers || {}) }
   };
 
-  // 15 second timeout
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 15000);
-  config.signal = controller.signal;
-
   try {
     const response = await fetch(`${BASE_URL}${endpoint}`, config);
-    clearTimeout(timer);
-
-    // Auto logout if token is rejected by server
-    if (response.status === 401) {
-      console.warn('[apiFetch] 401 Unauthorized — token expired/invalid. Redirecting to login...');
-      localStorage.clear();
-      window.location.href = 'index.html';
-      return { success: false, message: 'Phiên đăng nhập hết hạn. Vui lòng đăng nhập lại.', data: null };
-    }
-
     const data = await response.json();
-    console.log('[apiFetch]', endpoint, data.success ? 'OK' : 'FAIL', data.message || '');
     return data;
   } catch (err) {
-    clearTimeout(timer);
-    if (err.name === 'AbortError') {
-      console.warn('[apiFetch] TIMEOUT:', endpoint);
-      return { success: false, message: 'Server timeout (>15s). Server đang khởi động, thử lại sau!', data: null };
-    }
-    console.error('[apiFetch] ERROR:', endpoint, err.message);
-    return { success: false, message: 'Network error: ' + err.message, data: null };
+    return { success: false, message: 'Network error or server down', data: null };
   }
 }
 
@@ -99,13 +77,11 @@ function showToast(message, isSuccess = true) {
 
   container.appendChild(toast);
 
-  // animate in
   setTimeout(() => {
     toast.style.opacity = '1';
     toast.style.transform = 'translateY(0)';
   }, 10);
 
-  // remove after 3s
   setTimeout(() => {
     toast.style.opacity = '0';
     toast.style.transform = 'translateY(20px)';
@@ -129,7 +105,7 @@ function renderSkeleton(tableBodyId, colSpan, rows = 3) {
   tbody.innerHTML = html;
 }
 
-// Inject standard css for skeleton pulse
+// Inject standard css
 const style = document.createElement('style');
 style.innerHTML = `
   @keyframes pulse {
