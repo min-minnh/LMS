@@ -16,6 +16,7 @@ const quizSchema = new mongoose.Schema({
   timeLimit: { type: Number, required: true }, // in seconds
   attemptLimit: { type: Number, default: 0 }, // 0 = unlimited
   questionCount: { type: Number, default: 0 },
+  shuffleQuestions: { type: Boolean, default: false },
   questions: [questionSchema]
 }, { timestamps: true });
 

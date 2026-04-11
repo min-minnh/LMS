@@ -78,7 +78,7 @@ exports.startQuiz = async (req, res) => {
 
     // Shuffle questions before sending to client (conditional)
     let processedQuestions = [...quiz.questions];
-    if (quiz.shuffleQuestions !== false) {
+    if (quiz.shuffleQuestions === true) {
       processedQuestions.sort(() => Math.random() - 0.5);
     }
 
@@ -87,6 +87,7 @@ exports.startQuiz = async (req, res) => {
       _id: quiz._id,
       title: quiz.title,
       timeLimit: quiz.timeLimit,
+      shuffleQuestions: quiz.shuffleQuestions,
       questions: processedQuestions.map(q => ({
         _id: q._id,
         passage: q.passage || '',   // include passage for reading comprehension questions

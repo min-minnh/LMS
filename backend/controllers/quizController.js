@@ -11,7 +11,7 @@ exports.create = async (req, res) => {
       description, 
       timeLimit, 
       attemptLimit: attemptLimit || 0,
-      shuffleQuestions: shuffleQuestions !== false 
+      shuffleQuestions: !!shuffleQuestions 
     });
     return sendSuccess(res, 'Quiz created', quiz, 201);
   } catch (err) {

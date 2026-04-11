@@ -340,6 +340,7 @@
 
     let resultId = null;
     let questions = [];
+    let shuffleEnabled = false;
 
     let timeLeft = 60;
     let timerInterval;
@@ -386,6 +387,7 @@
         resultId = data.data.resultId;
         const quiz = data.data.quiz;
         questions = quiz.questions || [];
+        shuffleEnabled = !!quiz.shuffleQuestions;
 
         if (questions.length === 0) {
           document.getElementById('loading-msg').innerText = "Bài kiểm tra này chưa có câu hỏi nào.";
@@ -456,7 +458,10 @@
           { key: 'C', val: q.optionC },
           { key: 'D', val: q.optionD }
         ].filter(o => o.val);
-        optsParams.sort(() => Math.random() - 0.5); // shuffle choices display
+        
+        if (shuffleEnabled) {
+          optsParams.sort(() => Math.random() - 0.5); // shuffle choices display
+        }
 
         return `
       <div class="q-card">
