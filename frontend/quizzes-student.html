@@ -89,7 +89,7 @@ function go(page) { window.location.href = page + ".html"; }
 
 async function loadQuizzes() {
   try {
-    const res = await fetch('http://localhost:3000/quizzes?limit=100', {
+    const res = await fetch('https://lms-gzty.onrender.com/quizzes?limit=100', {
       headers: { 'Authorization': 'Bearer ' + token }
     });
     const data = await res.json();
@@ -104,7 +104,7 @@ async function loadQuizzes() {
       <div class="topic-card" onclick="window.location.href='quiz.html?id=${q._id}'">
         <span class="topic-icon">🏆</span>
         <div class="topic-title">${q.title}</div>
-        <div class="topic-meta">⏱ ${q.timeLimit}s | ❓ ${q.questionCount || 0} Questions</div>
+        <div class="topic-meta">⏱ ${Math.ceil(q.timeLimit/60)} phút | ❓ ${q.questionCount || 0} Questions</div>
         ${q.description ? `<p style="font-size:13px; margin-top:12px; color:var(--text-muted);">${q.description}</p>` : ''}
       </div>
     `).join('');

@@ -259,7 +259,7 @@ let waitingForNext = false;
 
 async function loadTopics() {
   try {
-    const res = await fetch('http://localhost:3000/topics?type=vocab&limit=100', {
+    const res = await fetch('https://lms-gzty.onrender.com/topics?type=vocab&limit=100', {
       headers: { 'Authorization': 'Bearer ' + token }
     });
     const data = await res.json();
@@ -294,7 +294,7 @@ async function openTopic(id, name) {
   switchMode('flashcards');
 
   try {
-    const res = await fetch('http://localhost:3000/vocabulary?topicId=' + id + '&limit=1000', {
+    const res = await fetch('https://lms-gzty.onrender.com/vocabulary?topicId=' + id + '&limit=1000', {
       headers: { 'Authorization': 'Bearer ' + token }
     });
     const data = await res.json();

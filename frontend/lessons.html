@@ -162,7 +162,7 @@
     tbody.innerHTML = res.data.lessons.map(l => `
       <tr>
         <td><strong>${l.title}</strong></td>
-        <td>${l.imageUrl ? `<img src="http://localhost:3000${l.imageUrl}" style="height:40px; border-radius:4px;">` : 'No Image'}</td>
+        <td>${l.imageUrl ? `<img src="https://lms-gzty.onrender.com${l.imageUrl}" style="height:40px; border-radius:4px;">` : 'No Image'}</td>
         <td>${new Date(l.createdAt).toLocaleDateString()}</td>
         <td><button class="del" onclick="deleteLesson('${l._id}')">Remove</button></td>
       </tr>

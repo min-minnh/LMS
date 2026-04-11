@@ -1,5 +1,5 @@
 // Shared Admin Utilities
-const BASE_URL = 'http://localhost:3000';
+const BASE_URL = 'https://lms-gzty.onrender.com';
 
 function getToken() {
   return localStorage.getItem('token');
@@ -36,7 +36,7 @@ async function apiFetch(endpoint, options = {}) {
   if (token) {
     defaultHeaders['Authorization'] = `Bearer ${token}`;
   }
-  
+
   const config = {
     ...options,
     headers: { ...defaultHeaders, ...(options.headers || {}) }
@@ -74,9 +74,9 @@ function showToast(message, isSuccess = true) {
     transform: translateY(20px);
     transition: all 0.3s ease;
   `;
-  
+
   container.appendChild(toast);
-  
+
   // animate in
   setTimeout(() => {
     toast.style.opacity = '1';
@@ -101,7 +101,7 @@ function renderEmptyState(tableBodyId, colSpan, message = "No data available") {
 function renderSkeleton(tableBodyId, colSpan, rows = 3) {
   const tbody = document.getElementById(tableBodyId);
   let html = '';
-  for(let i=0; i<rows; i++) {
+  for (let i = 0; i < rows; i++) {
     html += `<tr><td colspan="${colSpan}" style="padding:15px;"><div style="height:20px;background:#e2e8f0;border-radius:4px;animation:pulse 1.5s infinite;"></div></td></tr>`;
   }
   tbody.innerHTML = html;
@@ -132,6 +132,6 @@ function buildPagination(page, totalPages, fetchFn) {
   html += `<button ${page === 1 ? 'disabled' : ''} onclick="${fetchFn.name}(${page - 1})">Prev</button>`;
   html += `<span> Page ${page} of ${totalPages} </span>`;
   html += `<button ${page === totalPages ? 'disabled' : ''} onclick="${fetchFn.name}(${page + 1})">Next</button>`;
-  
+
   container.innerHTML = html;
 }

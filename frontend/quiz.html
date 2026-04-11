@@ -351,7 +351,7 @@
 
     async function startQuiz() {
       try {
-        const res = await fetch('http://lms-gzty.onrender.com/results/quiz/' + quizId + '/start', {
+        const res = await fetch('https://lms-gzty.onrender.com/results/quiz/' + quizId + '/start', {
           method: 'POST',
           headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' }
         });
@@ -480,7 +480,7 @@
       document.getElementById('score-text').innerText = "...";
 
       try {
-        const res = await fetch(`http://localhost:3000/results/quiz/${quizId}/submit`, {
+        const res = await fetch(`https://lms-gzty.onrender.com/results/quiz/${quizId}/submit`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
