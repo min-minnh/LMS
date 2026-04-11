@@ -76,13 +76,14 @@
     <!-- Upload into specific quiz -->
     <div class="card admin-only" style="background:#f8fafc; border: 1px dashed #cbd5e1; margin-bottom: 20px;">
       <h3 style="font-size: 14px; margin-bottom: 8px;">Upload Question Bank (Paste CSV/Excel Text)</h3>
-      <p style="font-size: 12px; color: #64748b; margin-bottom: 10px;">Format: question, optionA, optionB, optionC, optionD, correct(A/B/C/D)</p>
-      <textarea id="csvContent" rows="5" style="width: 100%; border: 1px solid #cbd5e1; border-radius: 4px; padding: 10px; margin-bottom: 10px; font-family: monospace;" placeholder="question,optionA,optionB,optionC,optionD,correct&#10;What is 1+1?,1,2,3,4,B"></textarea>
+      <p style="font-size: 12px; color: #64748b; margin-bottom: 10px;">Format: passage(optional), question, optionA, optionB, optionC, optionD, correct(A/B/C/D)<br>
+      <span style="color:#6366f1">📌 Không có passage thì để trống cột đầu, nhưng phải giữ đúng số cột.</span></p>
+      <textarea id="csvContent" rows="6" style="width: 100%; border: 1px solid #cbd5e1; border-radius: 4px; padding: 10px; margin-bottom: 10px; font-family: monospace;" placeholder="passage,question,optionA,optionB,optionC,optionD,correct&#10;Read: The cat sat on the mat.,What did the cat do?,Sat on the mat,Slept on the bed,Ran away,Ate food,A&#10;,What is 1+1?,1,2,3,4,B"></textarea>
       <button onclick="uploadCSV()" style="font-size: 13px;">Import into this Quiz</button>
     </div>
 
     <table id="dataTable" style="margin-top:20px; width:100%; text-align:left;">
-      <thead><tr><th>Question</th><th>A</th><th>B</th><th>C</th><th>D</th><th>Correct</th><th class="admin-only">Actions</th></tr></thead>
+      <thead><tr><th>Passage</th><th>Question</th><th>A</th><th>B</th><th>C</th><th>D</th><th>Correct</th><th class="admin-only">Actions</th></tr></thead>
       <tbody id="tableBody"></tbody>
     </table>
   </div>
@@ -187,6 +188,7 @@
 
     tbody.innerHTML = questions.map(q => `
       <tr>
+        <td style="max-width:200px; color:#64748b; font-size:13px; font-style:italic;">${q.passage ? `<span title="${q.passage}">${q.passage.length > 60 ? q.passage.substring(0,60)+'…' : q.passage}</span>` : '<span style="color:#cbd5e1;">—</span>'}</td>
         <td><strong>${q.question}</strong></td>
         <td>${q.optionA}</td><td>${q.optionB}</td><td>${q.optionC}</td><td>${q.optionD}</td>
         <td style="color:#10b981; font-weight:bold;">${q.correct}</td>

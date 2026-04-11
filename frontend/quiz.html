@@ -250,6 +250,27 @@
       margin: 20px 0;
     }
 
+    /* Passage box */
+    .passage-box {
+      background: #f0f4ff;
+      border-left: 4px solid var(--primary);
+      border-radius: 10px;
+      padding: 16px 20px;
+      margin-bottom: 20px;
+      font-size: 15px;
+      color: #334155;
+      line-height: 1.75;
+      white-space: pre-wrap;
+    }
+    .passage-label {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--primary);
+      margin-bottom: 8px;
+    }
+
     /* Loading / Error */
     #loading-msg {
       text-align: center;
@@ -439,6 +460,11 @@
 
         return `
       <div class="q-card">
+        ${q.passage ? `
+        <div class="passage-box">
+          <div class="passage-label">📖 Đoạn văn đọc hiểu</div>
+          ${escapeHTML(q.passage)}
+        </div>` : ''}
         <h4 class="q-title"><span class="q-number">Câu ${idx + 1}:</span> ${escapeHTML(q.question)}</h4>
         <div class="q-options">
           ${optsParams.map(opt => `

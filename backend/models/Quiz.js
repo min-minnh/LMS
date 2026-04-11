@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
 
 const questionSchema = new mongoose.Schema({
+  passage: { type: String, default: '' }, // optional reading passage
   question: { type: String, required: true },
   optionA: { type: String, required: true },
   optionB: { type: String, required: true },

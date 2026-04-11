@@ -63,11 +63,11 @@ exports.remove = async (req, res) => {
 // Questions Management
 exports.addQuestion = async (req, res) => {
   try {
-    const { question, optionA, optionB, optionC, optionD, correct } = req.body;
+    const { passage, question, optionA, optionB, optionC, optionD, correct } = req.body;
     const quiz = await Quiz.findById(req.params.id);
     if (!quiz) return sendError(res, 'Quiz not found', 404);
 
-    quiz.questions.push({ question, optionA, optionB, optionC, optionD, correct });
+    quiz.questions.push({ passage: passage || '', question, optionA, optionB, optionC, optionD, correct });
     await quiz.save();
     return sendSuccess(res, 'Question added', quiz, 201);
   } catch (err) {
@@ -77,11 +77,12 @@ exports.addQuestion = async (req, res) => {
 
 exports.updateQuestion = async (req, res) => {
   try {
-    const { question, optionA, optionB, optionC, optionD, correct } = req.body;
+    const { passage, question, optionA, optionB, optionC, optionD, correct } = req.body;
     const { id, qId } = req.params;
     const quiz = await Quiz.findOneAndUpdate(
       { _id: id, 'questions._id': qId },
       { $set: { 
+          'questions.$.passage': passage || '',
           'questions.$.question': question,
           'questions.$.optionA': optionA,
           'questions.$.optionB': optionB,
@@ -156,6 +157,7 @@ exports.uploadCSV = async (req, res) => {
         const row = data[i];
         const rowIndex = i + 2; 
 
+        const passage = (row.passage || '').toString().trim();
         const question = (row.question || '').toString().trim();
         const optionA = (row.optionA || '').toString().trim();
         const optionB = (row.optionB || '').toString().trim();
@@ -173,7 +175,7 @@ exports.uploadCSV = async (req, res) => {
           continue;
         }
 
-        quiz.questions.push({ question, optionA, optionB, optionC, optionD, correct });
+        quiz.questions.push({ passage, question, optionA, optionB, optionC, optionD, correct });
         successCount++;
     }
 

@@ -317,6 +317,26 @@
       background: rgba(0, 0, 0, 0.1);
       margin-left: 10px;
     }
+
+    .passage-review-box {
+      background: #f0f4ff;
+      border-left: 4px solid #5c9eff;
+      border-radius: 8px;
+      padding: 12px 16px;
+      margin-bottom: 16px;
+      font-size: 14px;
+      color: #334155;
+      line-height: 1.7;
+      white-space: pre-wrap;
+    }
+    .passage-review-label {
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #5c9eff;
+      margin-bottom: 6px;
+    }
   </style>
 </head>
 
@@ -472,6 +492,7 @@
           ].filter(o => o.val);
 
           html += `<div class="detail-card ${cardClass}">
+                     ${q.passage ? `<div class="passage-review-box"><div class="passage-review-label">📖 Đoạn văn</div>${escapeHTML(q.passage)}</div>` : ''}
                      <div class="q-title">${icon} Câu ${idx + 1}: ${escapeHTML(q.question)}</div>
                      <div class="q-options">`;
 
