@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin - Student Results</title>
+  <link rel="stylesheet" href="assets/css/design-system.css">
+  <style>
+    /* Specific overrides for Admin Results */
+    .pulsing-red {
+      color: var(--danger);
+      animation: pulse 1.5s infinite;
+      display: inline-block;
+      font-weight: 700;
+      font-size: 13px;
+    }
+    @keyframes pulse { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
+
+    /* Modal styling */
+    .modal-overlay {
+      display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(4px); z-index: 1000;
+      justify-content: center; align-items: center; padding: 40px;
+    }
+    .modal-content {
+      background: var(--bg-surface); border-radius: var(--radius-lg); width: 100%; max-width: 800px;
+      max-height: 90vh; overflow-y: auto; display: flex; flex-direction: column;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1); position: relative;
+    }
+    .modal-header {
+      padding: 32px 40px; border-bottom: 1px solid var(--border-color); position: sticky; top: 0;
+      background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); z-index: 10;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .modal-body { padding: 40px; display: flex; flex-direction: column; gap: 32px; }
+    
+    .detail-card { background: var(--bg-surface); border: 2px solid var(--border-color); border-radius: var(--radius-md); padding: 24px; }
+    .detail-card.correct-q { border-color: #a7f3d0; background: #ecfdf5; }
+    .detail-card.wrong-q { border-color: #fecaca; background: #fef2f2; }
+    .q-title { font-size: 1.0625rem; font-weight: 600; color: var(--text-main); margin-bottom: 16px; }
+    .q-options { display: flex; flex-direction: column; gap: 12px; }
+    .opt-row {
+      padding: 14px 20px; border-radius: var(--radius-sm); font-size: 0.9375rem; background: white; border: 1px solid var(--border-color);
+      display: flex; justify-content: space-between;
+    }
+    .opt-correct { background: #d1fae5; border-color: #10b981; color: #065f46; font-weight: 600; }
+    .opt-wrong { background: #fee2e2; border-color: #ef4444; color: #991b1b; font-weight: 600; }
+    .opt-selected-badge { font-size: 0.75rem; padding: 4px 10px; border-radius: var(--radius-full); background: rgba(0,0,0,0.1); margin-left: 12px;}
+
+    .topic-icon { font-size: 48px; margin-bottom: 16px; display: inline-block; color: var(--primary); }
+  </style>
+  <script src="admin-core.js"></script>
+</head>
+<body onload="checkAdmin(); initView()">
+
+<div class="app-container">
+  <!-- Admin Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">
+        <i class='bx bx-shield-quarter'></i>
+        <span>Admin Panel</span>
+      </div>
+    </div>
+    
+    <nav class="sidebar-nav">
+      <a href="dashboard.html" class="nav-item">
+        <i class='bx bxs-dashboard'></i> Dashboard
+      </a>
+      <a href="vocabulary.html" class="nav-item">
+        <i class='bx bx-book-bookmark'></i> Vocabulary
+      </a>
+      <a href="lessons.html" class="nav-item">
+        <i class='bx bx-library'></i> Lessons
+      </a>
+      <a href="users.html" class="nav-item">
+        <i class='bx bx-group'></i> Users List
+      </a>
+      <a href="quizzes.html" class="nav-item">
+        <i class='bx bx-edit'></i> Quizzes
+      </a>
+      <a href="results.html" class="nav-item active">
+        <i class='bx bx-bar-chart-alt-2'></i> Student Results
+      </a>
+    </nav>
+    
+    <div class="sidebar-footer">
+      <a href="#" onclick="localStorage.clear(); window.location.href='index.html'" class="nav-item text-danger">
+        <i class='bx bx-log-out'></i> Logout
+      </a>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <header class="topbar">
+      <div class="topbar-search">
+        <i class='bx bx-search'></i>
+        <input type="text" placeholder="Search...">
+      </div>
+      <div class="topbar-actions">
+        <div class="user-profile">
+          <div class="avatar" style="background: var(--warning-light); color: var(--warning);">A</div>
+          <span class="font-medium">Administrator</span>
+        </div>
+      </div>
+    </header>
+
+    <div class="content-area">
+      <!-- VIEW 1: QUIZZES ROOT -->
+      <div id="quizzesView" class="w-full">
+        <div class="page-header mb-6">
+          <h1 class="text-main" style="display: flex; align-items: center; gap: 8px;"><i class='bx bx-bar-chart-alt-2 text-primary'></i> Select Quiz to view Results</h1>
+        </div>
+
+        <div class="grid grid-cols-4 gap-6" id="quizGrid"></div>
+        <div id="quizPagination" class="pagination mt-6 flex items-center justify-center gap-4"></div>
+      </div>
+
+      <!-- VIEW 2: RESULTS For QUIZ -->
+      <div id="resultsDetailView" style="display: none; width: 100%;">
+        <div class="flex items-center mb-6" style="gap: 16px;">
+          <button class="btn btn-secondary" onclick="goBackToQuizzes()">
+            <i class='bx bx-arrow-back'></i> Back to Quizzes
+          </button>
+          <h2 class="text-primary m-0" id="currentQuizTitle" style="margin-bottom: 0;">Results for: ---</h2>
+        </div>
+        
+        <div class="mb-6 flex items-center" style="gap: 12px;">
+          <span class="text-sm font-bold text-main">Sort by:</span>
+          <button class="btn btn-secondary btn-sm sort-btn active" id="sort-date-desc" onclick="setSort('date-desc')"><i class='bx bx-calendar'></i> Newest</button>
+          <button class="btn btn-secondary btn-sm sort-btn" id="sort-date-asc" onclick="setSort('date-asc')"><i class='bx bx-calendar'></i> Oldest</button>
+          <button class="btn btn-secondary btn-sm sort-btn" id="sort-score-desc" onclick="setSort('score-desc')"><i class='bx bx-star'></i> Highest</button>
+          <button class="btn btn-secondary btn-sm sort-btn" id="sort-score-asc" onclick="setSort('score-asc')"><i class='bx bx-star'></i> Lowest</button>
+        </div>
+
+        <div class="card p-0 table-responsive">
+          <table id="dataTable">
+            <thead>
+              <tr>
+                <th>Student Name</th>
+                <th>Email</th>
+                <th>Score</th>
+                <th>Total</th>
+                <th>Date Submitted</th>
+                <th width="120">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+          </table>
+        </div>
+        <div id="pagination" class="pagination mt-6 flex items-center justify-center gap-4"></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Details Modal -->
+<div class="modal-overlay" id="detailModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <div class="font-bold text-xl text-primary" id="modalTitle">Chi tiết bài thi</div>
+      <button class="btn-icon" onclick="closeModal()"><i class='bx bx-x text-2xl'></i></button>
+    </div>
+    <div class="modal-body" id="modalBody">
+      <div class="flex justify-center"><i class='bx bx-loader-alt bx-spin text-3xl text-primary'></i></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  let currentQuizId = null;
+  let allResultsData = [];
+  let currentSort = 'date-desc';
+  let monitoringInterval = null;
+
+  function initView() {
+    if(monitoringInterval) clearInterval(monitoringInterval);
+    document.getElementById('quizzesView').style.display = 'block';
+    document.getElementById('resultsDetailView').style.display = 'none';
+    loadQuizzes(1);
+  }
+
+  async function loadQuizzes(page = 1) {
+    const res = await apiFetch(`/quizzes?page=${page}&limit=50`); 
+    if(!res.success) return showToast(res.message, false);
+    
+    const grid = document.getElementById('quizGrid');
+    if (res.data.quizzes.length === 0) {
+      grid.innerHTML = '<p class="text-muted col-span-full">No quizzes available.</p>';
+      return;
+    }
+
+    grid.innerHTML = res.data.quizzes.map(q => `
+      <div class="card text-center relative" style="cursor: pointer; transition: transform 0.2s;" onclick="openQuiz('${q._id}', '${q.title.replace(/'/g, "\\'")}')" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='translateY(0)'">
+        <i class='bx bx-trophy topic-icon'></i>
+        <h3 class="font-semibold text-main mb-2">${q.title}</h3>
+        <small class="text-muted">Click to view submissions & monitoring</small>
+      </div>
+    `).join('');
+  }
+
+  function openQuiz(id, title) {
+    currentQuizId = id;
+    document.getElementById('quizzesView').style.display = 'none';
+    document.getElementById('resultsDetailView').style.display = 'block';
+    document.getElementById('currentQuizTitle').innerText = title;
+    fetchResults();
+    
+    if(monitoringInterval) clearInterval(monitoringInterval);
+    monitoringInterval = setInterval(fetchResultsSilent, 5000);
+  }
+
+  function goBackToQuizzes() { currentQuizId = null; initView(); }
+
+  async function fetchResults() {
+    renderSkeleton('tableBody', 5);
+    const res = await apiFetch(`/results?quizId=${currentQuizId}&limit=1000`);
+    if(!res.success) return showToast(res.message, false);
+    
+    allResultsData = res.data.results || [];
+    applySortAndRender();
+  }
+  
+  async function fetchResultsSilent() {
+    if(!currentQuizId) return;
+    const res = await apiFetch(`/results?quizId=${currentQuizId}&limit=1000`);
+    if(res.success) {
+      allResultsData = res.data.results || [];
+      applySortAndRender();
+    }
+  }
+
+  function setSort(type) {
+    document.querySelectorAll('.sort-btn').forEach(btn => {
+      btn.classList.remove('btn-primary');
+      btn.classList.add('btn-secondary');
+    });
+    const activeBtn = document.getElementById('sort-' + type);
+    activeBtn.classList.remove('btn-secondary');
+    activeBtn.classList.add('btn-primary');
+    currentSort = type;
+    applySortAndRender();
+  }
+
+  function applySortAndRender() {
+    const tbody = document.getElementById('tableBody');
+    if (allResultsData.length === 0) {
+      renderEmptyState('tableBody', 5, "No submissions for this quiz yet.");
+      return;
+    }
+
+    let sorted = [...allResultsData];
+    if (currentSort === 'score-desc') sorted.sort((a,b) => b.score - a.score);
+    if (currentSort === 'score-asc') sorted.sort((a,b) => a.score - b.score);
+    if (currentSort === 'date-desc') sorted.sort((a,b) => new Date(b.submittedAt) - new Date(a.submittedAt));
+    if (currentSort === 'date-asc') sorted.sort((a,b) => new Date(a.submittedAt) - new Date(b.submittedAt));
+
+    tbody.innerHTML = sorted.map(r => {
+      const isDoing = r.submittedAt ? false : true;
+      const scoreClass = isDoing ? 'text-danger' : (r.score >= (r.total/2) ? 'text-success' : 'text-danger');
+      const scoreView = isDoing ? '<span class="pulsing-red"><i class="bx bx-radio-circle-marked bx-burst"></i> Đang Thi...</span>' : r.score;
+      const dateView = isDoing ? '<span class="text-warning font-semibold">System is monitoring...</span>' : new Date(r.submittedAt).toLocaleString();
+
+      return `
+      <tr style="${isDoing ? 'background: var(--danger-light);' : ''}">
+        <td><strong class="text-main">${r.userId?.name || 'Unknown'}</strong></td>
+        <td><small class="${isDoing ? 'text-danger font-bold' : 'text-muted'}">${r.userId?.email || 'N/A'}</small></td>
+        <td class="font-bold ${scoreClass}">${scoreView}</td>
+        <td>${r.total}</td>
+        <td class="text-sm">${dateView}</td>
+        <td>
+           ${isDoing ? '' : `<button class="btn btn-secondary btn-sm" onclick="viewDetails('${r._id}')">Chi tiết <i class='bx bx-right-arrow-alt'></i></button>`}
+        </td>
+      </tr>
+      `;
+    }).join('');
+  }
+
+  function escapeHTML(str) {
+    if (!str) return '';
+    return String(str).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+  }
+
+  function closeModal() { document.getElementById('detailModal').style.display = 'none'; }
+
+  async function viewDetails(resultId) {
+    document.getElementById('detailModal').style.display = 'flex';
+    document.getElementById('modalBody').innerHTML = '<div class="flex justify-center"><i class="bx bx-loader-alt bx-spin text-3xl text-primary"></i></div>';
+    document.getElementById('modalTitle').innerText = 'Chi tiết bài thi của học sinh';
+
+    try {
+      const res = await apiFetch(`/results/${resultId}`);
+      if (!res.success) {
+        document.getElementById('modalBody').innerHTML = `<p class="text-center text-danger"><i class='bx bx-error'></i> Lỗi từ máy chủ: ${res.message}</p>`;
+        return;
+      }
+
+      const { score, total, answers, quizId } = res.data || {};
+      if (!quizId) {
+        document.getElementById('modalBody').innerHTML = '<p class="text-center text-danger"><i class='bx bx-error'></i> Bài kiểm tra gốc đã bị xoá khỏi hệ thống.</p>';
+        return;
+      }
+      const questions = quizId.questions || [];
+      document.getElementById('modalTitle').innerText = `Kết quả: ${score}/${total} - ${quizId.title}`;
+
+      if (questions.length === 0) {
+        document.getElementById('modalBody').innerHTML = '<p class="text-center text-muted"><i class="bx bx-info-circle"></i> Không tìm thấy dữ liệu câu hỏi.</p>';
+        return;
+      }
+      const safeAnswers = answers || [];
+      let html = '';
+      questions.forEach((q, idx) => {
+        const studentAns = safeAnswers.find(a => a.questionId && q._id && a.questionId.toString() === q._id.toString());
+        const selected = studentAns ? studentAns.selected : null;
+        const isCorrect = studentAns ? studentAns.isCorrect : false;
+
+        const cardClass = isCorrect ? 'correct-q' : 'wrong-q';
+        let icon = isCorrect ? "<i class='bx bxs-check-circle text-success text-xl'></i>" : "<i class='bx bxs-x-circle text-danger text-xl'></i>";
+        if(!selected) icon = "<i class='bx bxs-info-circle text-warning text-xl'></i>";
+
+        const optsParams = [{ key: 'A', val: q.optionA }, { key: 'B', val: q.optionB }, { key: 'C', val: q.optionC }, { key: 'D', val: q.optionD }].filter(o => o.val);
+
+        html += `<div class="detail-card ${cardClass}"><div class="q-title flex items-center" style="gap:8px;">${icon} <span>Câu ${idx + 1}: ${escapeHTML(q.question)}</span></div><div class="q-options">`;
+        optsParams.forEach(opt => {
+           let optClass = 'opt-row';
+           let badges = '';
+           const correctAns = q.correct ? q.correct.toUpperCase() : '';
+           const selectedAns = selected ? selected.toUpperCase() : '';
+           const currentOpt = opt.key.toUpperCase();
+
+           if (correctAns && currentOpt === correctAns) {
+             optClass = 'opt-row opt-correct';
+             badges += `<span class="opt-selected-badge" style="background:#059669; color:white;">Đáp án đúng</span>`;
+           }
+           if (selectedAns && currentOpt === selectedAns && currentOpt !== correctAns) {
+             optClass = 'opt-row opt-wrong';
+             badges += `<span class="opt-selected-badge" style="background:#dc2626; color:white;">Học sinh chọn</span>`;
+           }
+           if (selectedAns && currentOpt === selectedAns && currentOpt === correctAns) {
+             badges += `<span class="opt-selected-badge" style="background:white; color:#059669;">Học sinh chọn</span>`;
+           }
+           html += `<div class="${optClass}"><span><strong style="margin-right:8px;">${opt.key}.</strong> ${escapeHTML(opt.val)}</span><div>${badges}</div></div>`;
+        });
+        html += `</div></div>`;
+      });
+      document.getElementById('modalBody').innerHTML = html;
+    } catch(err) {
+      document.getElementById('modalBody').innerHTML = `<p class="text-center text-danger"><i class='bx bx-error'></i> Lỗi: ${err.message}</p>`;
+    }
+  }
+</script>
+</body>
+</html>

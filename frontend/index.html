@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LMS - Login & Register</title>
+  <link rel="stylesheet" href="assets/css/design-system.css">
+  <style>
+    /* Specific overrides for Auth page */
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+    }
+    .auth-card {
+      width: 100%;
+      max-width: 420px;
+      padding: 40px;
+      text-align: center;
+      box-shadow: var(--shadow-lg);
+    }
+    .auth-logo {
+      width: 64px;
+      height: 64px;
+      background: var(--primary);
+      border-radius: var(--radius-lg);
+      margin: 0 auto 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 32px;
+    }
+    .auth-title {
+      font-size: 1.75rem;
+      color: var(--text-main);
+      margin-bottom: 8px;
+    }
+    .auth-subtitle {
+      color: var(--text-muted);
+      margin-bottom: 32px;
+      font-size: 0.875rem;
+    }
+    .auth-form {
+      text-align: left;
+    }
+    #register-fields {
+      display: none;
+    }
+    .toggle-link {
+      margin-top: 24px;
+      font-size: 0.875rem;
+      color: var(--text-muted);
+    }
+    .toggle-link span {
+      color: var(--primary);
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .toggle-link span:hover {
+      text-decoration: underline;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="card auth-card">
+    <div class="auth-logo"><i class='bx bxs-graduation'></i></div>
+    <h2 id="form-title" class="auth-title">Welcome Back</h2>
+    <p id="form-subtitle" class="auth-subtitle">Log in to continue your learning journey.</p>
+
+    <div class="auth-form">
+      <div id="register-fields">
+        <div class="form-group">
+          <label class="form-label">Full Name</label>
+          <input id="name" class="form-control" placeholder="John Doe">
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label id="email-label" class="form-label">Email or Username</label>
+        <input id="email" type="text" class="form-control" placeholder="minmin">
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Password</label>
+        <input id="password" type="password" class="form-control" placeholder="••••••••">
+      </div>
+
+      <button id="submit-btn" class="btn btn-primary w-full mt-4" style="padding: 12px; font-size: 1rem;" onclick="submitForm()">Log In</button>
+    </div>
+
+    <p class="toggle-link" id="toggle-desc">
+      New student? <span onclick="toggleMode()">Create an account</span>
+    </p>
+  </div>
+
+  <script>
+    let isLoginMode = true;
+
+    function toggleMode() {
+      isLoginMode = !isLoginMode;
+      const title = document.getElementById('form-title');
+      const subtitle = document.getElementById('form-subtitle');
+      const btn = document.getElementById('submit-btn');
+      const toggleDesc = document.getElementById('toggle-desc');
+      const regFields = document.getElementById('register-fields');
+      const emailLabel = document.getElementById('email-label');
+
+      if (isLoginMode) {
+        title.innerText = "Welcome Back";
+        subtitle.innerText = "Log in to continue your learning journey.";
+        btn.innerText = "Log In";
+        toggleDesc.innerHTML = `New student? <span onclick="toggleMode()">Create an account</span>`;
+        regFields.style.display = "none";
+        emailLabel.innerText = "Email or Username";
+        document.getElementById('email').placeholder = "minmin";
+      } else {
+        title.innerText = "Join Us";
+        subtitle.innerText = "Start learning today.";
+        btn.innerText = "Register";
+        toggleDesc.innerHTML = `Already have an account? <span onclick="toggleMode()">Log In</span>`;
+        regFields.style.display = "block";
+        emailLabel.innerText = "Email Address";
+        document.getElementById('email').placeholder = "john@example.com";
+      }
+    }
+
+    async function submitForm() {
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+
+      if (!email || !password) return alert("Please fill all fields!");
+
+      const url = isLoginMode ? 'https://lms-gzty.onrender.com/auth/login' : 'https://lms-gzty.onrender.com/auth/register';
+      const bodyData = { email, password };
+
+      if (!isLoginMode) {
+        const name = document.getElementById('name').value;
+        if (!name) return alert("Please fill your name!");
+        bodyData.name = name;
+      }
+
+      try {
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(bodyData)
+        });
+
+        const data = await res.json();
+
+        if (data.success && data.data && data.data.token) {
+          localStorage.setItem("token", data.data.token);
+          localStorage.setItem("user", JSON.stringify(data.data.user));
+
+          if (data.data.user.role === 'admin') {
+            window.location.href = "dashboard.html";
+          } else {
+            window.location.href = "student-dashboard.html";
+          }
+        } else if (data.success && !isLoginMode) {
+          alert("Registration successful! Please login.");
+          toggleMode();
+        } else {
+          alert(data.message || 'Login failed');
+        }
+      } catch (err) {
+        console.error(err);
+        alert("Error connecting to server.");
+      }
+    }
+  </script>
+</body>
+</html>

@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin - Vocabulary Management</title>
+  <link rel="stylesheet" href="assets/css/design-system.css">
+  <script src="admin-core.js"></script>
+</head>
+<body onload="checkAdmin(); initView()">
+
+<div class="app-container">
+  <!-- Admin Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">
+        <i class='bx bx-shield-quarter'></i>
+        <span>Admin Panel</span>
+      </div>
+    </div>
+    
+    <nav class="sidebar-nav">
+      <a href="dashboard.html" class="nav-item">
+        <i class='bx bxs-dashboard'></i> Dashboard
+      </a>
+      <a href="vocabulary.html" class="nav-item active">
+        <i class='bx bx-book-bookmark'></i> Vocabulary
+      </a>
+      <a href="lessons.html" class="nav-item">
+        <i class='bx bx-library'></i> Lessons
+      </a>
+      <a href="users.html" class="nav-item">
+        <i class='bx bx-group'></i> Users List
+      </a>
+      <a href="quizzes.html" class="nav-item">
+        <i class='bx bx-edit'></i> Quizzes
+      </a>
+      <a href="results.html" class="nav-item">
+        <i class='bx bx-bar-chart-alt-2'></i> Student Results
+      </a>
+    </nav>
+    
+    <div class="sidebar-footer">
+      <a href="#" onclick="localStorage.clear(); window.location.href='index.html'" class="nav-item text-danger">
+        <i class='bx bx-log-out'></i> Logout
+      </a>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <header class="topbar">
+      <div class="topbar-search">
+        <i class='bx bx-search'></i>
+        <input type="text" placeholder="Search...">
+      </div>
+      <div class="topbar-actions">
+        <div class="user-profile">
+          <div class="avatar" style="background: var(--warning-light); color: var(--warning);">A</div>
+          <span class="font-medium">Administrator</span>
+        </div>
+      </div>
+    </header>
+
+    <div class="content-area">
+      <!-- VIEW 1: TOPIC DIRECTORY -->
+      <div id="topicsView" class="w-full">
+        <div class="page-header mb-4">
+          <h1 class="text-main" style="display: flex; align-items: center; gap: 8px;"><i class='bx bx-folder'></i> Manage Topics</h1>
+        </div>
+
+        <div class="card mb-6" style="display: flex; gap: 16px; align-items: flex-start;">
+          <div style="flex: 1;">
+            <label class="form-label">New Topic Folder</label>
+            <input type="text" id="topicName" class="form-control" placeholder="Enter new topic folder name (e.g. Travel)...">
+          </div>
+          <button class="btn btn-primary" onclick="addTopic()" style="margin-top: 28px;">
+            <i class='bx bx-plus'></i> Create Folder
+          </button>
+        </div>
+
+        <div class="grid grid-cols-4 gap-6" id="topicGrid">
+          <!-- Generated Folders Here -->
+        </div>
+        <div id="topicPagination" class="pagination mt-4 flex items-center justify-center gap-4"></div>
+      </div>
+
+      <!-- VIEW 2: INSIDE A TOPIC (VOCABULARY LIST) -->
+      <div id="vocabView" style="display: none; width: 100%;">
+        
+        <div class="flex items-center mb-6" style="gap: 16px;">
+          <button class="btn btn-secondary" onclick="goBackToTopics()">
+            <i class='bx bx-arrow-back'></i> Back to Folders
+          </button>
+          <h2 class="text-primary m-0" id="currentTopicTitle" style="margin-bottom: 0;">Topic: ---</h2>
+        </div>
+
+        <div class="grid grid-cols-2 gap-6 mb-6">
+          <!-- Add Single Word -->
+          <div class="card">
+            <h3 class="font-bold mb-4">Add a Word</h3>
+            <div class="form-group">
+              <input type="text" id="word" class="form-control mb-2" placeholder="Word...">
+            </div>
+            <div class="form-group">
+              <input type="text" id="meaning" class="form-control mb-2" placeholder="Meaning...">
+            </div>
+            <div class="form-group">
+              <input type="text" id="example" class="form-control mb-4" placeholder="Example usage (optional)...">
+            </div>
+            <button class="btn btn-primary w-full" onclick="addVocab()">Add Word</button>
+          </div>
+
+          <!-- Quick Import CSV -->
+          <div class="card" style="border: 1px dashed var(--border-color); background: var(--bg-hover);">
+            <div class="flex items-center justify-between mb-2">
+              <h3 class="font-bold m-0" style="margin-bottom: 0;">Quick Import CSV/Excel</h3>
+              <i class='bx bx-import text-muted text-xl'></i>
+            </div>
+            <p class="text-xs text-muted mb-4">Format: word, meaning, example (Paste CSV raw text here)</p>
+            <textarea id="csvContent" rows="5" class="form-control mb-4" style="font-family: monospace; resize: vertical;" placeholder="word,meaning,example&#10;apple,quả táo,I eat an apple"></textarea>
+            <button class="btn btn-secondary w-full" onclick="uploadCSV()"><i class='bx bx-upload'></i> Import to Folder</button>
+          </div>
+        </div>
+
+        <div class="card p-0 table-responsive">
+          <table>
+            <thead>
+              <tr>
+                <th>Word</th>
+                <th>Meaning</th>
+                <th>Example</th>
+                <th width="100">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+          </table>
+        </div>
+        <div id="pagination" class="pagination mt-4 flex items-center justify-center gap-4"></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+  let currentTopicId = null;
+
+  async function initView() {
+    document.getElementById('topicsView').style.display = 'block';
+    document.getElementById('vocabView').style.display = 'none';
+    loadTopics();
+  }
+
+  /* ---- TOPIC LOGIC ---- */
+  async function loadTopics(page = 1) {
+    const res = await apiFetch(`/topics?type=vocab&page=${page}`);
+    if (!res.success) return showToast(res.message, false);
+
+    const grid = document.getElementById('topicGrid');
+    if (res.data.topics.length === 0) {
+      grid.innerHTML = '<p class="text-muted col-span-full">No folders created yet. Create one above!</p>';
+      return;
+    }
+
+    grid.innerHTML = res.data.topics.map(t => `
+    <div class="card text-center relative" style="cursor: pointer; transition: transform 0.2s;" onclick="openTopic('${t._id}', '${t.name.replace(/'/g, "\\'")}')" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='translateY(0)'">
+      <i class='bx bxs-folder text-primary' style="font-size: 48px; margin-bottom: 12px;"></i>
+      <h3 class="font-semibold text-main mb-4">${t.name}</h3>
+      <button class="btn btn-danger btn-sm text-xs w-full" onclick="event.stopPropagation(); deleteTopic('${t._id}')" style="padding: 6px;">Delete</button>
+    </div>
+  `).join('');
+
+    const pageContainer = document.getElementById('topicPagination');
+    if (res.data.totalPages > 1) {
+      pageContainer.innerHTML = `
+        <button class="btn btn-secondary" ${page === 1 ? 'disabled' : ''} onclick="loadTopics(${page - 1})">Prev</button>
+        <span class="text-sm font-medium">Page ${page} of ${res.data.totalPages}</span>
+        <button class="btn btn-secondary" ${page === res.data.totalPages ? 'disabled' : ''} onclick="loadTopics(${page + 1})">Next</button>
+     `;
+    } else {
+      pageContainer.innerHTML = '';
+    }
+  }
+
+  async function addTopic() {
+    const name = document.getElementById('topicName').value;
+    if (!name) return showToast("Folder name is required", false);
+
+    const res = await apiFetch('/topics', { method: 'POST', body: JSON.stringify({ name, type: 'vocab' }) });
+    if (res.success) {
+      showToast("Folder generated!");
+      document.getElementById('topicName').value = '';
+      loadTopics(1);
+    } else {
+      showToast(res.message, false);
+    }
+  }
+
+  async function deleteTopic(id) {
+    if (!confirm("Warning: Deleting this folder does not currently delete vocabularies globally but unlinks them. Proceed?")) return;
+    const res = await apiFetch(`/topics/${id}`, { method: 'DELETE' });
+    if (res.success) { showToast("Folder deleted"); loadTopics(); }
+  }
+
+
+  /* ---- VOCAB LOGIC (INSIDE TOPIC) ---- */
+  function openTopic(id, name) {
+    currentTopicId = id;
+    document.getElementById('topicsView').style.display = 'none';
+    document.getElementById('vocabView').style.display = 'block';
+    document.getElementById('currentTopicTitle').innerText = name;
+    loadVocabForTopic(1);
+  }
+
+  function goBackToTopics() {
+    currentTopicId = null;
+    initView();
+  }
+
+  async function loadVocabForTopic(page = 1) {
+    renderSkeleton('tableBody', 4);
+    const res = await apiFetch(`/vocabulary?topicId=${currentTopicId}&page=${page}`);
+    if (!res.success) return showToast(res.message, false);
+
+    const tbody = document.getElementById('tableBody');
+    if (res.data.vocab.length === 0) {
+      renderEmptyState('tableBody', 4, "No words inside this folder yet.");
+      document.getElementById('pagination').innerHTML = '';
+      return;
+    }
+
+    tbody.innerHTML = res.data.vocab.map(v => `
+    <tr>
+      <td><strong class="text-primary">${v.word}</strong></td>
+      <td>${v.meaning}</td>
+      <td class="text-muted text-sm">${v.example || '-'}</td>
+      <td>
+        <button class="btn btn-danger btn-sm text-xs" style="padding: 6px 10px;" onclick="deleteVocab('${v._id}')"><i class='bx bx-trash'></i></button>
+      </td>
+    </tr>
+  `).join('');
+    buildPagination(res.data.page, res.data.totalPages, loadVocabForTopic);
+  }
+
+  async function addVocab() {
+    const word = document.getElementById('word').value;
+    const meaning = document.getElementById('meaning').value;
+    const example = document.getElementById('example').value;
+
+    if (!word || !meaning) return showToast("Word and Meaning are required", false);
+
+    const res = await apiFetch('/vocabulary', {
+      method: 'POST',
+      body: JSON.stringify({ word, meaning, example, topicId: currentTopicId })
+    });
+
+    if (res.success) {
+      showToast("Word added successfully!");
+      document.getElementById('word').value = '';
+      document.getElementById('meaning').value = '';
+      document.getElementById('example').value = '';
+      loadVocabForTopic(1);
+    } else {
+      showToast(res.message, false);
+    }
+  }
+
+  async function deleteVocab(id) {
+    if (!confirm("Are you sure?")) return;
+    const res = await apiFetch(`/vocabulary/${id}`, { method: 'DELETE' });
+    if (res.success) { showToast("Word removed"); loadVocabForTopic(1); }
+  }
+
+
+  /* ---- GLOBAL UPLOAD ---- */
+  async function uploadCSV() {
+    const rawText = document.getElementById('csvContent').value;
+    if (!rawText.trim()) return showToast("Please paste CSV content first", false);
+
+    showToast("Importing...");
+    const res = await apiFetch('/vocabulary/upload-csv', {
+      method: 'POST',
+      body: JSON.stringify({ csvText: rawText, topicId: currentTopicId })
+    });
+
+    if (res.success) {
+      showToast(`Success: ${res.data.successCount} added`);
+      document.getElementById('csvContent').value = '';
+      loadVocabForTopic(1);
+    } else {
+      showToast(res.message, false);
+    }
+  }
+</script>
+</body>
+</html>

@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin - Topics Management</title>
+  <link rel="stylesheet" href="assets/css/design-system.css">
+  <script src="admin-core.js"></script>
+</head>
+<body onload="checkAdmin(); loadData(1)">
+
+<div class="app-container">
+  <!-- Admin Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">
+        <i class='bx bx-shield-quarter'></i>
+        <span>Admin Panel</span>
+      </div>
+    </div>
+    
+    <nav class="sidebar-nav">
+      <a href="dashboard.html" class="nav-item">
+        <i class='bx bxs-dashboard'></i> Dashboard
+      </a>
+      <a href="vocabulary.html" class="nav-item">
+        <i class='bx bx-book-bookmark'></i> Vocabulary
+      </a>
+      <a href="lessons.html" class="nav-item">
+        <i class='bx bx-library'></i> Lessons
+      </a>
+      <a href="users.html" class="nav-item">
+        <i class='bx bx-group'></i> Users List
+      </a>
+      <a href="quizzes.html" class="nav-item">
+        <i class='bx bx-edit'></i> Quizzes
+      </a>
+      <a href="results.html" class="nav-item">
+        <i class='bx bx-bar-chart-alt-2'></i> Student Results
+      </a>
+    </nav>
+    
+    <div class="sidebar-footer">
+      <a href="#" onclick="localStorage.clear(); window.location.href='index.html'" class="nav-item text-danger">
+        <i class='bx bx-log-out'></i> Logout
+      </a>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <header class="topbar">
+      <div class="topbar-search">
+        <i class='bx bx-search'></i>
+        <input type="text" placeholder="Search...">
+      </div>
+      <div class="topbar-actions">
+        <div class="user-profile">
+          <div class="avatar" style="background: var(--warning-light); color: var(--warning);">A</div>
+          <span class="font-medium">Administrator</span>
+        </div>
+      </div>
+    </header>
+
+    <div class="content-area">
+      <div class="page-header mb-6">
+        <h1 class="text-main" style="display: flex; align-items: center; gap: 8px;"><i class='bx bx-folder text-primary'></i> Topics Management</h1>
+      </div>
+      
+      <div class="card mb-6" style="display: flex; gap: 16px; align-items: flex-end;">
+        <div class="form-group m-0" style="flex: 1;">
+          <label class="form-label">Add New Topic</label>
+          <input type="text" id="topicName" class="form-control" placeholder="Enter topic name...">
+        </div>
+        <button class="btn btn-primary" onclick="addTopic()">
+          <i class='bx bx-save'></i> Save Topic
+        </button>
+      </div>
+
+      <div class="card p-0 table-responsive">
+        <table id="dataTable">
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th width="100">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+      <div id="pagination" class="pagination mt-6 flex items-center justify-center gap-4"></div>
+    </div>
+  </main>
+</div>
+
+<script>
+  let editingId = null;
+
+  async function loadData(page = 1) {
+    renderSkeleton('tableBody', 2);
+    const res = await apiFetch(`/topics?page=${page}`);
+    if(!res.success) return showToast(res.message, false);
+    
+    const tbody = document.getElementById('tableBody');
+    if (res.data.topics.length === 0) {
+      renderEmptyState('tableBody', 2, "No topics yet");
+      document.getElementById('pagination').innerHTML = '';
+      return;
+    }
+
+    tbody.innerHTML = res.data.topics.map(t => `
+      <tr>
+        <td><strong class="text-main">${t.name}</strong></td>
+        <td><button class="btn btn-danger btn-sm text-xs" style="padding: 6px 10px;" onclick="deleteTopic('${t._id}')"><i class='bx bx-trash'></i></button></td>
+      </tr>
+    `).join('');
+    
+    buildPagination(res.data.page, res.data.totalPages, loadData);
+  }
+
+  async function addTopic() {
+    const name = document.getElementById('topicName').value;
+    if (!name) return showToast("Name is required", false);
+    
+    const res = await apiFetch('/topics', {
+      method: 'POST',
+      body: JSON.stringify({ name })
+    });
+
+    if (res.success) {
+      showToast("Topic added!");
+      document.getElementById('topicName').value = '';
+      loadData(1);
+    } else {
+      showToast(res.message, false);
+    }
+  }
+
+  async function deleteTopic(id) {
+    if(!confirm("Are you sure?")) return;
+    const res = await apiFetch(`/topics/${id}`, { method: 'DELETE' });
+    if(res.success) { showToast("Topic deleted"); loadData(1); }
+    else { showToast(res.message, false); }
+  }
+</script>
+</body>
+</html>

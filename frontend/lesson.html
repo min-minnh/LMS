@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AstraLMS - Lessons</title>
+  <link rel="stylesheet" href="assets/css/design-system.css">
+  <style>
+    /* Specific overrides for Lesson page */
+    .topic-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+      display: inline-block;
+      color: var(--primary);
+    }
+    .empty-state-card {
+      background: var(--bg-surface);
+      padding: 40px;
+      border-radius: var(--radius-lg);
+      text-align: center;
+      color: var(--text-muted);
+      width: 100%;
+      border: 1px dashed var(--border-color);
+      grid-column: 1/-1;
+    }
+
+    /* Lessons Grid */
+    .lesson-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      overflow: hidden;
+      cursor: pointer;
+      transition: all var(--transition-normal);
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .lesson-card:hover {
+      transform: translateY(-4px);
+      box-shadow: var(--shadow-md);
+      border-color: var(--primary);
+    }
+
+    .lesson-img {
+      height: 180px;
+      background: var(--bg-hover);
+      width: 100%;
+      background-size: cover;
+      background-position: center;
+      border-bottom: 1px solid var(--border-color);
+    }
+
+    .lesson-info {
+      padding: 24px;
+      flex: 1;
+    }
+
+    .lesson-info h3 {
+      font-size: 1.125rem;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: var(--text-main);
+    }
+
+    .lesson-info p {
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      line-height: 1.5;
+      margin-bottom: 0;
+    }
+  </style>
+</head>
+<body>
+
+<div class="app-container">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">
+        <i class='bx bxs-graduation'></i>
+        <span>Student</span>
+      </div>
+    </div>
+    
+    <nav class="sidebar-nav">
+      <a href="#" onclick="go('student-dashboard')" class="nav-item">
+        <i class='bx bxs-dashboard'></i> Dashboard
+      </a>
+      <a href="#" onclick="go('vocab')" class="nav-item">
+        <i class='bx bx-book-bookmark'></i> Vocabulary
+      </a>
+      <a href="#" onclick="go('lesson')" class="nav-item active">
+        <i class='bx bx-library'></i> Theory
+      </a>
+      <a href="#" onclick="go('quizzes-student')" class="nav-item">
+        <i class='bx bx-edit'></i> Quizzes
+      </a>
+      <a href="#" onclick="go('my-results')" class="nav-item">
+        <i class='bx bx-bar-chart-alt-2'></i> My Results
+      </a>
+    </nav>
+    
+    <div class="sidebar-footer">
+      <a href="#" id="admin-link" onclick="go('dashboard')" class="nav-item" style="display: none; margin-bottom: 8px; color: var(--warning);">
+        <i class='bx bx-cog'></i> Admin Panel
+      </a>
+      <a href="#" onclick="logout()" class="nav-item text-danger">
+        <i class='bx bx-log-out'></i> Logout
+      </a>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <header class="topbar">
+      <div class="topbar-search">
+        <i class='bx bx-search'></i>
+        <input type="text" placeholder="Search lessons...">
+      </div>
+      <div class="topbar-actions">
+        <button class="btn-icon"><i class='bx bx-bell'></i></button>
+        <div class="user-profile">
+          <div class="avatar" id="user-avatar">S</div>
+          <span class="font-medium" id="user-name-top">Siêu Nhân</span>
+        </div>
+      </div>
+    </header>
+
+    <div class="content-area">
+      <!-- VIEW 1: TOPICS -->
+      <div id="topicsView" style="width: 100%;">
+        <div class="page-header" style="display: flex; flex-direction: column; align-items: flex-start; margin-bottom: 24px;">
+          <h1 class="text-main" style="display: flex; align-items: center; gap: 8px;"><i class='bx bx-book-open text-primary'></i> Theory Categories</h1>
+          <p class="text-muted">Select a category to view the available lessons and materials.</p>
+        </div>
+
+        <div class="grid grid-cols-4 gap-6" id="topicGrid">
+          <div class="empty-state-card">Loading folders...</div>
+        </div>
+      </div>
+
+      <!-- VIEW 2: INSIDE TOPIC -->
+      <div id="lessonsView" style="display: none; width: 100%;">
+        <div class="w-full flex items-center mb-6" style="gap: 16px;">
+          <button class="btn btn-secondary" onclick="backToTopics()">
+            <i class='bx bx-arrow-back'></i> Danh mục
+          </button>
+          <h2 class="text-primary m-0" id="topicTitle" style="margin-bottom: 0;">Folder Name</h2>
+        </div>
+
+        <div class="grid grid-cols-3 gap-6" id="lesson-container"></div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+  const token = localStorage.getItem("token");
+  const userStr = localStorage.getItem("user");
+  if (!token || !userStr) window.location.href = "index.html";
+
+  const user = JSON.parse(userStr);
+  if (user.role === 'admin') document.getElementById('admin-link').style.display = "flex";
+
+  const displayName = user.name || user.email.split('@')[0];
+  document.getElementById('user-name-top').innerText = displayName;
+  document.getElementById('user-avatar').innerText = displayName.charAt(0).toUpperCase();
+
+  function logout() { localStorage.clear(); window.location.href = "index.html"; }
+  function go(page) { window.location.href = page + ".html"; }
+
+  async function loadTopics() {
+    try {
+      const res = await fetch('https://lms-gzty.onrender.com/topics?type=lesson&limit=50', {
+        headers: { 'Authorization': 'Bearer ' + token }
+      });
+      const data = await res.json();
+      const grid = document.getElementById('topicGrid');
+
+      if (!data.success || data.data.topics.length === 0) {
+        grid.innerHTML = `<div class="empty-state-card"><i class='bx bx-book-open topic-icon' style="color: var(--text-light)"></i><br>No lesson folders available.</div>`;
+        return;
+      }
+
+      grid.innerHTML = data.data.topics.map(t => `
+        <div class="card text-center" style="cursor: pointer; transition: transform 0.2s;" onclick="openTopic('${t._id}', '${t.name.replace(/'/g, "\\'")}')" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='translateY(0)'">
+          <i class='bx bxs-book-open topic-icon'></i>
+          <h3 class="font-semibold text-main m-0">${t.name}</h3>
+        </div>
+      `).join('');
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  async function openTopic(id, name) {
+    document.getElementById('topicsView').style.display = 'none';
+    document.getElementById('lessonsView').style.display = 'block';
+    document.getElementById('topicTitle').innerText = name;
+
+    const container = document.getElementById('lesson-container');
+    container.innerHTML = '<div class="empty-state-card">Loading lessons...</div>';
+
+    try {
+      const res = await fetch('https://lms-gzty.onrender.com/lessons?topicId=' + id + '&limit=100', {
+        headers: { 'Authorization': 'Bearer ' + token }
+      });
+      const data = await res.json();
+      const lessons = data.data?.lessons || [];
+
+      if (lessons.length === 0) {
+        container.innerHTML = `<div class="empty-state-card"><i class='bx bx-file-blank' style="font-size: 40px; color: var(--text-light); margin-bottom: 16px; display: inline-block;"></i><br>No lessons found in this folder.</div>`;
+        return;
+      }
+
+      container.innerHTML = '';
+      lessons.forEach(l => {
+        const img = l.imageUrl ? 'https://lms-gzty.onrender.com' + l.imageUrl : 'https://images.unsplash.com/photo-1513258496099-48168024aec0?auto=format&fit=crop&w=600&q=80';
+        const card = document.createElement('div');
+        card.className = 'lesson-card';
+        card.onclick = () => window.location.href = `lesson-detail.html?id=${l._id}`;
+        card.innerHTML = `
+      <div class="lesson-img" style="background-image: url('${img}')"></div>
+      <div class="lesson-info">
+        <h3>${l.title}</h3>
+        <p>${l.content}</p>
+      </div>
+    `;
+        container.appendChild(card);
+      });
+    } catch (err) {
+      console.error(err);
+    }
+  }
+
+  function backToTopics() {
+    document.getElementById('topicsView').style.display = 'block';
+    document.getElementById('lessonsView').style.display = 'none';
+  }
+
+  loadTopics();
+</script>
+</body>
+</html>

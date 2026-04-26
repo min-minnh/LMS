@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AstraLMS - Lịch Sử Làm Bài</title>
+  <link rel="stylesheet" href="assets/css/design-system.css">
+  <style>
+    /* Specific overrides for My Results */
+    tr.result-row {
+      cursor: pointer;
+      transition: background var(--transition-fast);
+    }
+    tr.result-row:hover {
+      background: var(--bg-hover);
+    }
+
+    /* Modal styling */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(15, 23, 42, 0.4);
+      backdrop-filter: blur(4px);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+      padding: 40px;
+    }
+
+    .modal-content {
+      background: var(--bg-surface);
+      border-radius: var(--radius-lg);
+      width: 100%;
+      max-width: 800px;
+      max-height: 90vh;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+      position: relative;
+    }
+
+    .modal-header {
+      padding: 32px 40px;
+      border-bottom: 1px solid var(--border-color);
+      position: sticky;
+      top: 0;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      z-index: 10;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .modal-body {
+      padding: 40px;
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+    }
+
+    .detail-card {
+      background: var(--bg-surface);
+      border: 2px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 24px;
+    }
+    .detail-card.correct-q {
+      border-color: #A7F3D0;
+      background: #ECFDF5;
+    }
+    .detail-card.wrong-q {
+      border-color: #FECACA;
+      background: #FEF2F2;
+    }
+
+    .q-title {
+      font-size: 1.0625rem;
+      font-weight: 600;
+      color: var(--text-main);
+      margin-bottom: 16px;
+    }
+
+    .q-options {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .opt-row {
+      padding: 14px 20px;
+      border-radius: var(--radius-sm);
+      font-size: 0.9375rem;
+      background: white;
+      border: 1px solid var(--border-color);
+      display: flex;
+      justify-content: space-between;
+    }
+    .opt-correct {
+      background: #D1FAE5;
+      border-color: #10B981;
+      color: #065F46;
+      font-weight: 600;
+    }
+    .opt-wrong {
+      background: #FEE2E2;
+      border-color: #EF4444;
+      color: #991B1B;
+      font-weight: 600;
+    }
+    .opt-selected-badge {
+      font-size: 0.75rem;
+      padding: 4px 10px;
+      border-radius: var(--radius-full);
+      background: rgba(0, 0, 0, 0.1);
+      margin-left: 12px;
+    }
+
+    .passage-review-box {
+      background: var(--primary-light);
+      border-left: 4px solid var(--primary);
+      border-radius: var(--radius-sm);
+      padding: 16px 20px;
+      margin-bottom: 20px;
+      font-size: 0.9375rem;
+      color: var(--text-main);
+      line-height: 1.7;
+      white-space: pre-wrap;
+    }
+    .passage-review-label {
+      font-size: 0.625rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--primary);
+      margin-bottom: 8px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="app-container">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">
+        <i class='bx bxs-graduation'></i>
+        <span>Student</span>
+      </div>
+    </div>
+    
+    <nav class="sidebar-nav">
+      <a href="#" onclick="go('student-dashboard')" class="nav-item">
+        <i class='bx bxs-dashboard'></i> Dashboard
+      </a>
+      <a href="#" onclick="go('vocab')" class="nav-item">
+        <i class='bx bx-book-bookmark'></i> Vocabulary
+      </a>
+      <a href="#" onclick="go('lesson')" class="nav-item">
+        <i class='bx bx-library'></i> Theory
+      </a>
+      <a href="#" onclick="go('quizzes-student')" class="nav-item">
+        <i class='bx bx-edit'></i> Quizzes
+      </a>
+      <a href="#" onclick="go('my-results')" class="nav-item active">
+        <i class='bx bx-bar-chart-alt-2'></i> My Results
+      </a>
+    </nav>
+    
+    <div class="sidebar-footer">
+      <a href="#" id="admin-link" onclick="go('dashboard')" class="nav-item" style="display: none; margin-bottom: 8px; color: var(--warning);">
+        <i class='bx bx-cog'></i> Admin Panel
+      </a>
+      <a href="#" onclick="logout()" class="nav-item text-danger">
+        <i class='bx bx-log-out'></i> Logout
+      </a>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <header class="topbar">
+      <div class="topbar-search">
+        <i class='bx bx-search'></i>
+        <input type="text" placeholder="Search results...">
+      </div>
+      <div class="topbar-actions">
+        <button class="btn-icon"><i class='bx bx-bell'></i></button>
+        <div class="user-profile">
+          <div class="avatar" id="user-avatar">S</div>
+          <span class="font-medium" id="user-name-top">Siêu Nhân</span>
+        </div>
+      </div>
+    </header>
+
+    <div class="content-area">
+      <div class="page-header" style="display: flex; flex-direction: column; align-items: flex-start; margin-bottom: 24px;">
+        <h1 class="text-main" style="display: flex; align-items: center; gap: 8px;"><i class='bx bx-bar-chart-square text-primary'></i> Lịch Sử Làm Bài</h1>
+        <p class="text-muted">Xem lại điểm số bài thi và nhấp vào từng bài để xem chi tiết đáp án.</p>
+      </div>
+
+      <div class="card p-0 table-responsive" style="max-width: 1000px;">
+        <table id="dataTable">
+          <thead>
+            <tr>
+              <th>Tên bài kiểm tra</th>
+              <th>Điểm số</th>
+              <th>Thời gian nộp bài</th>
+              <th width="150">Thao tác</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody">
+            <tr>
+              <td colspan="4" style="text-align:center; color: var(--text-muted);">
+                <i class='bx bx-loader-alt bx-spin'></i> Đang tải dữ liệu...
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- Modal -->
+<div class="modal-overlay" id="detailModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <div class="font-bold text-xl text-primary" id="modalTitle">Chi tiết bài thi</div>
+      <button class="btn-icon" onclick="closeModal()"><i class='bx bx-x text-2xl'></i></button>
+    </div>
+    <div class="modal-body" id="modalBody">
+      <div class="flex justify-center"><i class='bx bx-loader-alt bx-spin text-3xl text-primary'></i></div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const BASE_URL = 'https://lms-gzty.onrender.com';
+
+  const token = localStorage.getItem("token");
+  const userStr = localStorage.getItem("user");
+  if (!token || !userStr) window.location.href = "index.html";
+
+  const user = JSON.parse(userStr);
+  if (user.role === 'admin') document.getElementById('admin-link').style.display = "flex";
+
+  const displayName = user.name || user.email.split('@')[0];
+  document.getElementById('user-name-top').innerText = displayName;
+  document.getElementById('user-avatar').innerText = displayName.charAt(0).toUpperCase();
+
+  function logout() { localStorage.clear(); window.location.href = "index.html"; }
+  function go(page) { window.location.href = page + ".html"; }
+
+  async function apiFetch(path) {
+    const res = await fetch(BASE_URL + path, {
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    return res.json();
+  }
+
+  function escapeHTML(str) {
+    if (!str) return '';
+    return String(str)
+      .replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+  }
+
+  async function fetchMyResults() {
+    try {
+      const data = await apiFetch('/results?limit=100');
+      const tbody = document.getElementById('tableBody');
+
+      if (!data.success || !data.data || !data.data.results || data.data.results.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center; color: var(--text-muted);"><i class="bx bx-info-circle"></i> Chưa có kết quả nào. Hãy làm bài kiểm tra trước!</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = data.data.results.map(r => {
+        const isPass = r.score >= (r.total / 2);
+        const badgeClass = isPass ? 'badge-success' : 'badge-danger';
+        const dateStr = r.submittedAt ? new Date(r.submittedAt).toLocaleString() : 'Chưa nộp';
+        return `
+          <tr class="result-row" onclick="viewDetails('${r._id}')">
+            <td><strong class="text-primary">${r.quizId?.title || 'Unknown Quiz'}</strong></td>
+            <td><span class="badge ${badgeClass}">${r.score} / ${r.total}</span></td>
+            <td class="text-muted text-sm">${dateStr}</td>
+            <td><button class="btn btn-secondary btn-sm" style="padding: 6px 12px; font-size: 13px;">Xem chi tiết <i class='bx bx-right-arrow-alt'></i></button></td>
+          </tr>`;
+      }).join('');
+    } catch (err) {
+      console.error(err);
+      document.getElementById('tableBody').innerHTML = '<tr><td colspan="4" style="text-align:center; color: var(--danger);"><i class="bx bx-error"></i> Lỗi khi tải kết quả. Vui lòng thử lại.</td></tr>';
+    }
+  }
+
+  async function viewDetails(resultId) {
+    document.getElementById('detailModal').style.display = 'flex';
+    document.getElementById('modalBody').innerHTML = '<div class="flex justify-center"><i class="bx bx-loader-alt bx-spin text-3xl text-primary"></i></div>';
+    document.getElementById('modalTitle').innerText = 'Chi tiết bài thi';
+
+    try {
+      const data = await apiFetch('/results/' + resultId);
+
+      if (!data.success) {
+        document.getElementById('modalBody').innerHTML = `<p style="text-align:center; color:var(--danger);"><i class='bx bx-error'></i> Lỗi từ máy chủ: ${data.message}</p>`;
+        return;
+      }
+
+      const { score, total, answers, quizId } = data.data || {};
+      if (!quizId) {
+        document.getElementById('modalBody').innerHTML = '<p style="text-align:center; color:var(--danger);"><i class='bx bx-error'></i> Bài kiểm tra gốc đã bị xoá khỏi hệ thống.</p>';
+        return;
+      }
+
+      const questions = quizId.questions || [];
+      document.getElementById('modalTitle').innerText = `Kết quả: ${score}/${total} - ${quizId.title}`;
+
+      if (questions.length === 0) {
+        document.getElementById('modalBody').innerHTML = '<p class="text-center text-muted"><i class="bx bx-info-circle"></i> Không tìm thấy dữ liệu câu hỏi.</p>';
+        return;
+      }
+
+      const safeAnswers = answers || [];
+      let html = '';
+
+      questions.forEach((q, idx) => {
+        const studentAns = safeAnswers.find(a => a.questionId && q._id && a.questionId.toString() === q._id.toString());
+        const selected = studentAns ? studentAns.selected : null;
+        const isCorrect = studentAns ? studentAns.isCorrect : false;
+
+        const cardClass = isCorrect ? 'correct-q' : 'wrong-q';
+        let icon = isCorrect ? "<i class='bx bxs-check-circle text-success text-xl'></i>" : "<i class='bx bxs-x-circle text-danger text-xl'></i>";
+        if (!selected) icon = "<i class='bx bxs-info-circle text-warning text-xl'></i>";
+
+        const optsParams = [
+          { key: 'A', val: q.optionA }, { key: 'B', val: q.optionB },
+          { key: 'C', val: q.optionC }, { key: 'D', val: q.optionD }
+        ].filter(o => o.val);
+
+        html += `<div class="detail-card ${cardClass}">
+                   ${q.passage ? `<div class="passage-review-box"><div class="passage-review-label"><i class='bx bx-book-open'></i> Đoạn văn</div>${escapeHTML(q.passage)}</div>` : ''}
+                   <div class="q-title flex items-center" style="gap:8px;">${icon} <span>Câu ${idx + 1}: ${escapeHTML(q.question)}</span></div>
+                   <div class="q-options">`;
+
+        optsParams.forEach(opt => {
+          let optClass = 'opt-row';
+          let badges = '';
+          const correctAns = q.correct ? q.correct.toUpperCase() : '';
+          const selectedAns = selected ? selected.toUpperCase() : '';
+          const currentOpt = opt.key.toUpperCase();
+
+          if (correctAns && currentOpt === correctAns) {
+            optClass = 'opt-row opt-correct';
+            badges += `<span class="opt-selected-badge" style="background:#059669; color:white;">Đáp án đúng</span>`;
+          }
+          if (selectedAns && currentOpt === selectedAns && currentOpt !== correctAns) {
+            optClass = 'opt-row opt-wrong';
+            badges += `<span class="opt-selected-badge" style="background:#dc2626; color:white;">Bạn chọn</span>`;
+          }
+          if (selectedAns && currentOpt === selectedAns && currentOpt === correctAns) {
+            badges += `<span class="opt-selected-badge" style="background:white; color:#059669;">Bạn chọn</span>`;
+          }
+
+          html += `<div class="${optClass}">
+                     <span><strong style="margin-right:8px;">${opt.key}.</strong> ${escapeHTML(opt.val)}</span>
+                     <div>${badges}</div>
+                   </div>`;
+        });
+
+        html += `</div></div>`;
+      });
+
+      document.getElementById('modalBody').innerHTML = html;
+
+    } catch (err) {
+      console.error(err);
+      document.getElementById('modalBody').innerHTML = `<p style="text-align:center; color:var(--danger);"><i class='bx bx-error'></i> Lỗi: ${err.message || "Lỗi không xác định"}.</p>`;
+    }
+  }
+
+  function closeModal() { document.getElementById('detailModal').style.display = 'none'; }
+
+  fetchMyResults();
+</script>
+</body>
+</html>

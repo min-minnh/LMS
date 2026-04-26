@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin Dashboard</title>
+  <link rel="stylesheet" href="assets/css/design-system.css">
+  <script src="admin-core.js"></script>
+</head>
+<body onload="checkAdmin(); loadStats()">
+
+<div class="app-container">
+  <!-- Admin Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">
+        <i class='bx bx-shield-quarter'></i>
+        <span>Admin Panel</span>
+      </div>
+    </div>
+    
+    <nav class="sidebar-nav">
+      <a href="dashboard.html" class="nav-item active">
+        <i class='bx bxs-dashboard'></i> Dashboard
+      </a>
+      <a href="vocabulary.html" class="nav-item">
+        <i class='bx bx-book-bookmark'></i> Vocabulary
+      </a>
+      <a href="lessons.html" class="nav-item">
+        <i class='bx bx-library'></i> Lessons
+      </a>
+      <a href="users.html" class="nav-item">
+        <i class='bx bx-group'></i> Users List
+      </a>
+      <a href="quizzes.html" class="nav-item">
+        <i class='bx bx-edit'></i> Quizzes
+      </a>
+      <a href="results.html" class="nav-item">
+        <i class='bx bx-bar-chart-alt-2'></i> Student Results
+      </a>
+    </nav>
+    
+    <div class="sidebar-footer">
+      <a href="#" onclick="localStorage.clear(); window.location.href='index.html'" class="nav-item text-danger">
+        <i class='bx bx-log-out'></i> Logout
+      </a>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <header class="topbar">
+      <div class="topbar-search">
+        <i class='bx bx-search'></i>
+        <input type="text" placeholder="Search...">
+      </div>
+      <div class="topbar-actions">
+        <button class="btn-icon"><i class='bx bx-bell'></i></button>
+        <div class="user-profile">
+          <div class="avatar" style="background: var(--warning-light); color: var(--warning);">A</div>
+          <span class="font-medium">Administrator</span>
+        </div>
+      </div>
+    </header>
+
+    <div class="content-area">
+      <div class="page-header mb-6">
+        <h1 class="text-main" style="display: flex; align-items: center; gap: 8px;"><i class='bx bxs-dashboard text-primary'></i> System Overview</h1>
+        <p class="text-muted">Welcome back, Admin. Here's what's happening with your platform today.</p>
+      </div>
+
+      <div class="grid grid-cols-4 gap-6">
+        <!-- Stat Cards -->
+        <div class="card" style="display: flex; align-items: center; gap: 20px;">
+          <div style="width: 56px; height: 56px; border-radius: 16px; background: var(--primary-light); color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 28px;">
+            <i class='bx bx-group'></i>
+          </div>
+          <div>
+            <h3 class="text-sm font-semibold text-muted mb-1 text-uppercase">Total Users</h3>
+            <div class="text-3xl font-bold text-main" id="stat-users">-</div>
+          </div>
+        </div>
+
+        <div class="card" style="display: flex; align-items: center; gap: 20px;">
+          <div style="width: 56px; height: 56px; border-radius: 16px; background: #e0e7ff; color: #4338ca; display: flex; align-items: center; justify-content: center; font-size: 28px;">
+            <i class='bx bx-book-bookmark'></i>
+          </div>
+          <div>
+            <h3 class="text-sm font-semibold text-muted mb-1 text-uppercase">Total Vocab</h3>
+            <div class="text-3xl font-bold text-main" id="stat-vocab">-</div>
+          </div>
+        </div>
+
+        <div class="card" style="display: flex; align-items: center; gap: 20px;">
+          <div style="width: 56px; height: 56px; border-radius: 16px; background: #dcfce7; color: #15803d; display: flex; align-items: center; justify-content: center; font-size: 28px;">
+            <i class='bx bx-library'></i>
+          </div>
+          <div>
+            <h3 class="text-sm font-semibold text-muted mb-1 text-uppercase">Total Lessons</h3>
+            <div class="text-3xl font-bold text-main" id="stat-lessons">-</div>
+          </div>
+        </div>
+
+        <div class="card" style="display: flex; align-items: center; gap: 20px;">
+          <div style="width: 56px; height: 56px; border-radius: 16px; background: #ffedd5; color: #c2410c; display: flex; align-items: center; justify-content: center; font-size: 28px;">
+            <i class='bx bx-edit'></i>
+          </div>
+          <div>
+            <h3 class="text-sm font-semibold text-muted mb-1 text-uppercase">Total Quizzes</h3>
+            <div class="text-3xl font-bold text-main" id="stat-quizzes">-</div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Quick Actions / Setup Guide (Visual placeholder for better dashboard layout) -->
+      <div class="grid grid-cols-2 gap-6 mt-6">
+        <div class="card" style="background: linear-gradient(135deg, var(--primary), var(--accent)); color: white;">
+          <h2 class="text-xl font-bold mb-2">Welcome to AstraLMS Admin</h2>
+          <p class="mb-4" style="color: rgba(255,255,255,0.8);">Manage your learning content, users, and track performance seamlessly from this dashboard.</p>
+          <div style="display: flex; gap: 12px;">
+            <button class="btn" style="background: white; color: var(--primary); font-weight: 600;" onclick="window.location.href='users.html'">Manage Users</button>
+            <button class="btn" style="background: rgba(255,255,255,0.2); color: white;" onclick="window.location.href='vocabulary.html'">Add Content</button>
+          </div>
+        </div>
+        
+        <div class="card">
+          <h3 class="font-bold mb-4 text-lg">System Status</h3>
+          <div style="display: flex; flex-direction: column; gap: 16px;">
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <div style="width: 10px; height: 10px; border-radius: 50%; background: var(--success);"></div>
+                <span class="font-medium text-main">API Database connection</span>
+              </div>
+              <span class="text-sm text-muted">Online</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <div style="width: 10px; height: 10px; border-radius: 50%; background: var(--success);"></div>
+                <span class="font-medium text-main">Authentication Service</span>
+              </div>
+              <span class="text-sm text-muted">Online</span>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+              <div style="display: flex; align-items: center; gap: 12px;">
+                <div style="width: 10px; height: 10px; border-radius: 50%; background: var(--warning);"></div>
+                <span class="font-medium text-main">File Storage Usage</span>
+              </div>
+              <span class="text-sm text-muted">64%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+    </div>
+  </main>
+</div>
+
+<script>
+  async function loadStats() {
+    const resUsers = await apiFetch('/users?limit=1');
+    if (resUsers.success) document.getElementById('stat-users').innerText = resUsers.data.total;
+    
+    const resVocab = await apiFetch('/vocabulary?limit=1');
+    if (resVocab.success) document.getElementById('stat-vocab').innerText = resVocab.data.total;
+
+    const resLessons = await apiFetch('/lessons?limit=1');
+    if (resLessons.success) document.getElementById('stat-lessons').innerText = resLessons.data.total;
+    
+    const resQuizz = await apiFetch('/quizzes?limit=1');
+    if (resQuizz.success) document.getElementById('stat-quizzes').innerText = resQuizz.data.total;
+  }
+</script>
+</body>
+</html>

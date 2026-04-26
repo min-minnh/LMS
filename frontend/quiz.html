@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AstraLMS - Làm Bài Kiểm Tra</title>
+  <link rel="stylesheet" href="assets/css/design-system.css">
+  <style>
+    /* Specific overrides for Quiz */
+    .timer-bar {
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: rgba(255, 255, 255, 0.95);
+      backdrop-filter: blur(10px);
+      padding: 16px 32px;
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 32px;
+      border: 1px solid var(--border-color);
+    }
+
+    .timer-text {
+      font-size: 1.5rem;
+      font-weight: 700;
+      color: var(--danger);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      transition: transform 0.2s;
+    }
+
+    .quiz-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: var(--text-main);
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .quiz-container {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
+      max-width: 900px;
+      margin: 0 auto;
+      padding-bottom: 40px;
+    }
+
+    .q-card {
+      background: var(--bg-surface);
+      padding: 32px 40px;
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm);
+      border: 1px solid var(--border-color);
+    }
+
+    .q-title {
+      font-size: 1.125rem;
+      font-weight: 600;
+      color: var(--text-main);
+      margin-bottom: 24px;
+      line-height: 1.6;
+    }
+
+    .q-number {
+      color: var(--primary);
+      margin-right: 8px;
+    }
+
+    .q-options {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .q-option-label {
+      cursor: pointer;
+      display: block;
+    }
+
+    .q-option-box {
+      padding: 16px 20px;
+      background: var(--bg-app);
+      border: 2px solid var(--border-color);
+      border-radius: var(--radius-md);
+      font-size: 1rem;
+      font-weight: 500;
+      color: var(--text-main);
+      transition: all var(--transition-fast);
+      display: flex;
+      align-items: center;
+    }
+
+    .q-option-box:hover {
+      background: var(--bg-hover);
+      border-color: #cbd5e1;
+    }
+
+    .q-option-label input:checked+.q-option-box {
+      background: var(--primary-light);
+      border-color: var(--primary);
+      color: var(--primary-hover);
+      font-weight: 600;
+    }
+
+    .submit-area {
+      text-align: center;
+      margin-top: 32px;
+      max-width: 900px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+
+    /* Result Screen overlay */
+    .result-screen {
+      display: none;
+      text-align: center;
+      max-width: 600px;
+      margin: 40px auto;
+      background: var(--bg-surface);
+      padding: 48px;
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg);
+    }
+
+    .result-screen h2 {
+      font-size: 2rem;
+      color: var(--text-main);
+      margin-bottom: 16px;
+    }
+
+    .score-text {
+      font-size: 4.5rem;
+      font-weight: 800;
+      color: var(--success);
+      margin: 24px 0;
+    }
+
+    /* Passage box */
+    .passage-box {
+      background: var(--primary-light);
+      border-left: 4px solid var(--primary);
+      border-radius: var(--radius-md);
+      padding: 20px 24px;
+      margin-bottom: 24px;
+      font-size: 1rem;
+      color: var(--text-main);
+      line-height: 1.75;
+      white-space: pre-wrap;
+    }
+    .passage-label {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--primary);
+      margin-bottom: 8px;
+    }
+
+    #loading-msg {
+      text-align: center;
+      font-size: 1.125rem;
+      color: var(--text-muted);
+      margin-top: 100px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 16px;
+    }
+    
+    .loading-spinner {
+      font-size: 48px;
+      color: var(--primary);
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin { 100% { transform: rotate(360deg); } }
+  </style>
+</head>
+<body>
+
+<div class="app-container">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">
+        <i class='bx bxs-graduation'></i>
+        <span>Student</span>
+      </div>
+    </div>
+    
+    <nav class="sidebar-nav">
+      <a href="#" onclick="go('student-dashboard')" class="nav-item">
+        <i class='bx bxs-dashboard'></i> Dashboard
+      </a>
+      <a href="#" onclick="go('vocab')" class="nav-item">
+        <i class='bx bx-book-bookmark'></i> Vocabulary
+      </a>
+      <a href="#" onclick="go('lesson')" class="nav-item">
+        <i class='bx bx-library'></i> Theory
+      </a>
+      <a href="#" onclick="go('quizzes-student')" class="nav-item active">
+        <i class='bx bx-edit'></i> Quizzes
+      </a>
+      <a href="#" onclick="go('my-results')" class="nav-item">
+        <i class='bx bx-bar-chart-alt-2'></i> My Results
+      </a>
+    </nav>
+    
+    <div class="sidebar-footer">
+      <a href="#" id="admin-link" onclick="go('dashboard')" class="nav-item" style="display: none; margin-bottom: 8px; color: var(--warning);">
+        <i class='bx bx-cog'></i> Admin Panel
+      </a>
+      <a href="#" onclick="logout()" class="nav-item text-danger">
+        <i class='bx bx-log-out'></i> Logout
+      </a>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <div class="content-area" style="padding-top: 40px;">
+
+      <div id="loading-msg">
+        <i class='bx bx-loader-alt loading-spinner'></i>
+        Đang tải bài kiểm tra...
+      </div>
+
+      <!-- Quiz Active Area -->
+      <div id="quiz-active-area" style="display: none;">
+        <div class="timer-bar">
+          <div class="quiz-title"><i class='bx bx-edit text-primary'></i> <span id="quiz-title-text">Bài Kiểm Tra Học Kỳ</span></div>
+          <div class="timer-text" id="timer-text"><i class='bx bx-timer'></i> 00:00</div>
+        </div>
+
+        <div class="quiz-container" id="questions-container">
+          <!-- Questions inject here -->
+        </div>
+
+        <div class="submit-area">
+          <button class="btn btn-primary" id="btn-submit" onclick="submitQuiz()" style="padding: 16px 40px; font-size: 18px; width: 100%; max-width: 400px; box-shadow: var(--shadow-md);">
+            <i class='bx bx-check-circle'></i> Nộp bài ngay
+          </button>
+        </div>
+      </div>
+
+      <!-- Result Screen -->
+      <div class="result-screen" id="result-box">
+        <div class="flex justify-center mb-4"><i class='bx bxs-party text-warning' style="font-size: 64px;"></i></div>
+        <h2 id="result-title">Hoàn thành bài kiểm tra!</h2>
+        <div class="score-text" id="score-text">0 / 0</div>
+        <p class="text-muted" style="margin-bottom: 32px; font-size: 16px;" id="result-msg">Kết quả của bạn đã được hệ thống lưu lại an toàn.</p>
+        
+        <button class="btn btn-primary w-full mb-4" onclick="window.location.href='my-results.html'" style="padding: 14px; font-size: 16px;">
+          <i class='bx bx-bar-chart-alt-2'></i> Xem điểm số
+        </button>
+        <button class="btn btn-secondary w-full" onclick="window.location.href='quizzes-student.html'" style="padding: 14px; font-size: 16px;">
+          <i class='bx bx-arrow-back'></i> Quay về danh sách
+        </button>
+      </div>
+
+    </div>
+  </main>
+</div>
+
+<script>
+  const token = localStorage.getItem("token");
+  if (!token) window.location.href = "index.html";
+  const params = new URLSearchParams(window.location.search);
+  const quizId = params.get("id");
+  if (!quizId) window.location.href = "quizzes-student.html";
+
+  const userStr = localStorage.getItem("user");
+  if (userStr) {
+    const user = JSON.parse(userStr);
+    if (user.role === 'admin') document.getElementById('admin-link').style.display = "flex";
+  }
+
+  function go(page) { window.location.href = page + ".html"; }
+  function logout() { localStorage.clear(); window.location.href = "index.html"; }
+
+  let resultId = null;
+  let questions = [];
+  let shuffleEnabled = false;
+
+  let timeLeft = 60;
+  let timerInterval;
+  let cheatCount = 0;
+  let isQuizActive = false;
+
+  // Anti-Cheat Mechanics
+  document.addEventListener('contextmenu', e => e.preventDefault());
+  document.addEventListener('copy', e => {
+    e.preventDefault();
+    alert('⚠️ Cảnh báo: Học viên không được sao chép văn bản trong lúc làm bài!');
+  });
+  document.addEventListener('keydown', e => {
+    if (e.key === 'F12' || (e.ctrlKey && e.shiftKey && e.key === 'I') || (e.ctrlKey && e.key === 'u')) {
+      e.preventDefault();
+    }
+  });
+
+  document.addEventListener('visibilitychange', () => {
+    if (document.hidden && isQuizActive && timeLeft > 0) {
+      cheatCount++;
+      alert(`⚠️ HỆ THỐNG CHỐNG GIAN LẬN:\nBạn vừa thoát khỏi ranh giới màn hình bài thi hoặc chuyển sang Tab khác.\nHành vi này đã được ghi nhận. Số lần vi phạm: ${cheatCount}`);
+
+      if (cheatCount >= 3) {
+        alert('⛔ CẢNH BÁO: Vì bạn đã vi phạm rời màn hình 3 lần, hệ thống sẽ khoá và tự động nộp bài thi của bạn ngay bây giờ!');
+        submitQuiz();
+      }
+    }
+  });
+
+  async function startQuiz() {
+    try {
+      const res = await fetch('https://lms-gzty.onrender.com/results/quiz/' + quizId + '/start', {
+        method: 'POST',
+        headers: { 'Authorization': 'Bearer ' + token, 'Content-Type': 'application/json' }
+      });
+      const data = await res.json();
+
+      if (!data.success) {
+        document.getElementById('loading-msg').innerHTML = `<i class='bx bx-error-circle text-danger' style="font-size:48px;"></i>${data.message || "Không thể tải bài kiểm tra."}`;
+        return;
+      }
+
+      resultId = data.data.resultId;
+      const quiz = data.data.quiz;
+      questions = quiz.questions || [];
+      shuffleEnabled = !!quiz.shuffleQuestions;
+
+      if (questions.length === 0) {
+        document.getElementById('loading-msg').innerHTML = `<i class='bx bx-info-circle text-warning' style="font-size:48px;"></i>Bài kiểm tra này chưa có câu hỏi nào.`;
+        return;
+      }
+
+      // Prepare quiz view
+      document.getElementById('loading-msg').style.display = 'none';
+      document.getElementById('quiz-active-area').style.display = 'block';
+
+      // Hide sidebar for full focus mode during the exam
+      document.querySelector('.sidebar').style.display = 'none';
+      document.querySelector('.main-content').style.marginLeft = '0';
+
+      document.getElementById('quiz-title-text').innerText = quiz.title || 'Làm bài kiểm tra';
+
+      timeLeft = quiz.timeLimit || (questions.length * 60);
+      isQuizActive = true;
+      startTimer();
+      renderQuestions();
+    } catch (err) {
+      console.error(err);
+      document.getElementById('loading-msg').innerHTML = `<i class='bx bx-wifi-off text-danger' style="font-size:48px;"></i>Lỗi kết nối mạng.`;
+    }
+  }
+
+  function startTimer() {
+    timerInterval = setInterval(() => {
+      timeLeft--;
+      const m = Math.floor(timeLeft / 60);
+      const s = timeLeft % 60;
+
+      const formattedTimer = `<i class='bx bx-timer'></i> ${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+      document.getElementById('timer-text').innerHTML = formattedTimer;
+
+      // Warning effect when time is under 1 minute
+      if (timeLeft <= 60 && timeLeft > 0) {
+        document.getElementById('timer-text').style.color = '#DC2626';
+        if (timeLeft % 2 === 0) document.getElementById('timer-text').style.transform = 'scale(1.05)';
+        else document.getElementById('timer-text').style.transform = 'scale(1)';
+      }
+
+      if (timeLeft <= 0) {
+        clearInterval(timerInterval);
+        document.getElementById('timer-text').innerHTML = "<i class='bx bx-time'></i> Hết giờ!";
+        submitQuiz(); 
+      }
+    }, 1000);
+  }
+
+  function escapeHTML(str) {
+    if (!str) return '';
+    return String(str)
+      .replace(/&/g, "&amp;")
+      .replace(/</g, "&lt;")
+      .replace(/>/g, "&gt;")
+      .replace(/"/g, "&quot;")
+      .replace(/'/g, "&#039;");
+  }
+
+  function renderQuestions() {
+    const container = document.getElementById('questions-container');
+    container.innerHTML = questions.map((q, idx) => {
+      const optsParams = [
+        { key: 'A', val: q.optionA },
+        { key: 'B', val: q.optionB },
+        { key: 'C', val: q.optionC },
+        { key: 'D', val: q.optionD }
+      ].filter(o => o.val);
+      
+      if (shuffleEnabled) {
+        optsParams.sort(() => Math.random() - 0.5);
+      }
+
+      return `
+    <div class="q-card">
+      ${q.passage ? `
+      <div class="passage-box">
+        <div class="passage-label"><i class='bx bx-book-open'></i> Đoạn văn đọc hiểu</div>
+        ${escapeHTML(q.passage)}
+      </div>` : ''}
+      <h4 class="q-title"><span class="q-number">Câu ${idx + 1}:</span> ${escapeHTML(q.question)}</h4>
+      <div class="q-options">
+        ${optsParams.map(opt => `
+          <label class="q-option-label">
+            <input type="radio" name="${q._id}" value="${opt.key}" style="display:none;" />
+            <div class="q-option-box">
+              <strong style="margin-right: 12px; color: var(--primary);">${opt.key}.</strong> ${escapeHTML(opt.val)}
+            </div>
+          </label>
+        `).join('')}
+      </div>
+    </div>
+  `;
+    }).join('');
+  }
+
+  async function submitQuiz() {
+    if (timeLeft > 0 && cheatCount < 3) {
+      if (!confirm("Bạn có chắc chắn muốn nộp bài? Hãy kiểm tra kỹ các câu trả lời!")) return;
+    }
+
+    isQuizActive = false;
+    clearInterval(timerInterval);
+    document.getElementById('btn-submit').innerHTML = "<i class='bx bx-loader-alt bx-spin'></i> Đang nộp bài...";
+    document.getElementById('btn-submit').disabled = true;
+
+    let clientAnswers = [];
+    questions.forEach(q => {
+      const selectedRadio = document.querySelector(`input[name="${q._id}"]:checked`);
+      if (selectedRadio) {
+        clientAnswers.push({ questionId: q._id, selected: selectedRadio.value });
+      }
+    });
+
+    document.getElementById('quiz-active-area').style.display = 'none';
+    document.querySelector('.main-content').style.marginLeft = '260px'; // Restore sidebar space
+    document.querySelector('.sidebar').style.display = 'flex'; // Show sidebar again
+    document.getElementById('result-box').style.display = 'block';
+    document.getElementById('score-text').innerHTML = "<i class='bx bx-loader-alt bx-spin'></i>";
+
+    try {
+      const res = await fetch(`https://lms-gzty.onrender.com/results/quiz/${quizId}/submit`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': 'Bearer ' + token
+        },
+        body: JSON.stringify({
+          resultId: resultId,
+          clientAnswers: clientAnswers
+        })
+      });
+
+      const data = await res.json();
+      if (data.success) {
+        document.getElementById('score-text').innerText = `${data.data.score} / ${data.data.total}`;
+        if (data.data.score === data.data.total) {
+          document.getElementById('result-title').innerText = "Điểm 10 tuyệt đối! 🏆";
+        }
+      } else {
+        document.getElementById('score-text').innerText = "Lỗi";
+        document.getElementById('result-msg').innerText = data.message;
+      }
+    } catch (err) {
+      console.error("Failed to save result", err);
+      document.getElementById('score-text').innerText = "Lỗi Mạng";
+    }
+  }
+
+  startQuiz();
+</script>
+</body>
+</html>

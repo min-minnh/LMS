@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AstraLMS - Bảng Điều Khiển Năng Lực</title>
+  <link rel="stylesheet" href="assets/css/design-system.css">
+  <style>
+    /* Specific overrides for Welcome Banner */
+    .welcome-banner {
+      background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+      border-radius: var(--radius-lg);
+      padding: 40px 48px;
+      color: white;
+      position: relative;
+      overflow: hidden;
+      box-shadow: var(--shadow-md);
+    }
+    .welcome-banner::after {
+      content: '🚀';
+      position: absolute;
+      right: 40px;
+      bottom: -20px;
+      font-size: 140px;
+      opacity: 0.15;
+    }
+    .welcome-banner h1 {
+      color: white;
+      font-size: 2.25rem;
+      font-weight: 800;
+      margin-bottom: 16px;
+      position: relative;
+      z-index: 10;
+    }
+    .welcome-banner p {
+      color: rgba(255, 255, 255, 0.9);
+      font-size: 1.125rem;
+      max-width: 600px;
+      position: relative;
+      z-index: 10;
+    }
+
+    .quote-box {
+      border-left: 4px solid var(--primary);
+    }
+
+    .action-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+      display: inline-block;
+    }
+  </style>
+</head>
+<body>
+
+<div class="app-container">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">
+        <i class='bx bxs-graduation'></i>
+        <span>Student</span>
+      </div>
+    </div>
+    
+    <nav class="sidebar-nav">
+      <a href="#" onclick="go('student-dashboard')" class="nav-item active">
+        <i class='bx bxs-dashboard'></i> Dashboard
+      </a>
+      <a href="#" onclick="go('vocab')" class="nav-item">
+        <i class='bx bx-book-bookmark'></i> Vocabulary
+      </a>
+      <a href="#" onclick="go('lesson')" class="nav-item">
+        <i class='bx bx-library'></i> Theory
+      </a>
+      <a href="#" onclick="go('quizzes-student')" class="nav-item">
+        <i class='bx bx-edit'></i> Quizzes
+      </a>
+      <a href="#" onclick="go('my-results')" class="nav-item">
+        <i class='bx bx-bar-chart-alt-2'></i> My Results
+      </a>
+    </nav>
+    
+    <div class="sidebar-footer">
+      <a href="#" id="admin-link" onclick="go('dashboard')" class="nav-item" style="display: none; margin-bottom: 8px; color: var(--warning);">
+        <i class='bx bx-cog'></i> Admin Panel
+      </a>
+      <a href="#" onclick="logout()" class="nav-item text-danger">
+        <i class='bx bx-log-out'></i> Logout
+      </a>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <header class="topbar">
+      <div class="topbar-search">
+        <i class='bx bx-search'></i>
+        <input type="text" placeholder="Search courses, vocabulary...">
+      </div>
+      <div class="topbar-actions">
+        <button class="btn-icon"><i class='bx bx-bell'></i></button>
+        <div class="user-profile">
+          <div class="avatar" id="user-avatar">S</div>
+          <span class="font-medium" id="user-name-top">Siêu Nhân</span>
+        </div>
+      </div>
+    </header>
+
+    <div class="content-area">
+      <!-- Banner -->
+      <div class="welcome-banner mb-4">
+        <h1 id="welcome-msg">Hi, Siêu Nhân! 👋</h1>
+        <p>Hành trình ngàn dặm bắt đầu từ một bước chân. Hãy tiếp tục khám phá kho tàng kiến thức và phá vỡ mọi giới hạn của bản thân ngày hôm nay nhé!</p>
+      </div>
+
+      <!-- Motivational Quote -->
+      <div class="card quote-box mb-4">
+        <h3 class="font-semibold text-main mb-2" id="quote-text" style="font-style: italic;">"Sự đầu tư vào tri thức luôn mang lại lợi nhuận cao nhất."</h3>
+        <p class="text-sm font-semibold text-primary uppercase" id="quote-author" style="margin-bottom: 0;">— Benjamin Franklin</p>
+      </div>
+
+      <!-- Action Grid -->
+      <div class="page-header mt-4 mb-4" style="margin-bottom: 16px;">
+        <h2 style="margin-bottom: 0;">Lựa Chọn Mục Tiêu Của Bạn 🎯</h2>
+      </div>
+      
+      <div class="grid grid-cols-3 gap-6">
+        <div class="card text-center" style="cursor: pointer; transition: transform 0.2s;" onclick="go('vocab')" onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'">
+          <span class="action-icon">📚</span>
+          <h3 class="font-bold mb-2">Từ Vựng (Vocabulary)</h3>
+          <p class="text-sm text-muted" style="margin-bottom: 0;">Mở rộng vốn từ vựng thông qua Flashcard và luyện tập gõ phím.</p>
+        </div>
+        
+        <div class="card text-center" style="cursor: pointer; transition: transform 0.2s;" onclick="go('lesson')" onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'">
+          <span class="action-icon">📖</span>
+          <h3 class="font-bold mb-2">Lý Thuyết (Theory)</h3>
+          <p class="text-sm text-muted" style="margin-bottom: 0;">Khám phá các bài học mới được soạn thảo cực kỳ chất lượng.</p>
+        </div>
+        
+        <div class="card text-center" style="cursor: pointer; transition: transform 0.2s;" onclick="go('quizzes-student')" onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'">
+          <span class="action-icon">📝</span>
+          <h3 class="font-bold mb-2">Bài Kiểm Tra (Quizzes)</h3>
+          <p class="text-sm text-muted" style="margin-bottom: 0;">Đánh giá nhanh xem bạn đã ghi nhớ bài được bao nhiêu %.</p>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+const token = localStorage.getItem("token");
+const userStr = localStorage.getItem("user");
+if (!token || !userStr) window.location.href = "index.html";
+
+const user = JSON.parse(userStr);
+if (user.role === 'admin') document.getElementById('admin-link').style.display = "flex";
+
+const displayName = user.name || user.email.split('@')[0];
+document.getElementById('welcome-msg').innerText = `Hi, ${displayName}! 👋`;
+document.getElementById('user-name-top').innerText = displayName;
+document.getElementById('user-avatar').innerText = displayName.charAt(0).toUpperCase();
+
+// Randomly change motivational quotes
+const quotes = [
+  { text: "Đừng nói bạn không có đủ thời gian. Bạn có số giờ mỗi ngày hoàn toàn bằng với Helen Keller, Pasteur, Michaelangelo, Mẹ Teresa, Leonardo da Vinci, Thomas Jefferson và Albert Einstein.", author: "H. Jackson Brown Jr." },
+  { text: "Thành công không phải là chìa khóa mở cánh cửa hạnh phúc. Hạnh phúc là chìa khóa dẫn tới thành công. Nếu bạn yêu điều bạn đang làm, bạn sẽ thành công.", author: "Albert Schweitzer" },
+  { text: "Giáo dục là vũ khí mạnh nhất mà người ta có thể sử dụng để thay đổi thế giới.", author: "Nelson Mandela" },
+  { text: "Học tập không bao giờ làm suy kiệt trí tuệ.", author: "Leonardo da Vinci" },
+  { text: "Tương lai thuộc về những ai tin vào vẻ đẹp trong những giấc mơ của họ.", author: "Eleanor Roosevelt" }
+];
+const q = quotes[Math.floor(Math.random() * quotes.length)];
+document.getElementById('quote-text').innerText = `"${q.text}"`;
+document.getElementById('quote-author').innerText = `— ${q.author}`;
+
+function logout() { localStorage.clear(); window.location.href = "index.html"; }
+function go(page) { window.location.href = page + ".html"; }
+</script>
+
+</body>
+</html>

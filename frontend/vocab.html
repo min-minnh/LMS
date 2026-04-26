@@ -1,0 +1,627 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AstraLMS - Vocabulary Topics</title>
+  <link rel="stylesheet" href="assets/css/design-system.css">
+  <style>
+    /* Specific overrides for Vocab page */
+    .topic-icon {
+      font-size: 40px;
+      margin-bottom: 16px;
+      display: inline-block;
+      color: var(--text-light);
+    }
+    .empty-state-card {
+      background: var(--bg-surface);
+      padding: 40px;
+      border-radius: var(--radius-lg);
+      text-align: center;
+      color: var(--text-muted);
+      width: 100%;
+      border: 1px dashed var(--border-color);
+    }
+
+    /* Mode Toggler */
+    .mode-toggle {
+      display: flex;
+      gap: 12px;
+      margin-bottom: 24px;
+      background: var(--bg-hover);
+      padding: 6px;
+      border-radius: var(--radius-md);
+      width: 100%;
+      max-width: 420px;
+      justify-content: center;
+    }
+    .mode-btn {
+      flex: 1;
+      padding: 10px 16px;
+      border-radius: var(--radius-sm);
+      border: none;
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+      background: transparent;
+      color: var(--text-muted);
+      transition: all var(--transition-fast);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+    }
+    .mode-btn.active {
+      background: var(--bg-surface);
+      color: var(--primary);
+      box-shadow: var(--shadow-sm);
+    }
+
+    /* --- Flashcard Mode --- */
+    .flashcard-container {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      animation: fadeIn 0.4s ease;
+    }
+    .card-wrap {
+      width: 460px;
+      height: 320px;
+      perspective: 1500px;
+      cursor: pointer;
+      margin-bottom: 24px;
+    }
+    .card-inner {
+      width: 100%;
+      height: 100%;
+      transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      transform-style: preserve-3d;
+      position: relative;
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-lg);
+    }
+    .card-inner.flip {
+      transform: rotateX(180deg);
+    }
+    .card-front, .card-back {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      border-radius: var(--radius-lg);
+      backface-visibility: hidden;
+      text-align: center;
+      padding: 40px;
+      border: 1px solid rgba(255,255,255,0.4);
+    }
+    .card-front {
+      background: var(--bg-surface);
+      color: var(--text-main);
+    }
+    .card-front .word {
+      font-size: 2.25rem;
+      font-weight: 700;
+      color: var(--primary-hover);
+    }
+    .card-back {
+      background: var(--primary);
+      color: white;
+      transform: rotateX(180deg);
+    }
+    .card-back .meaning {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+    .card-back .example {
+      font-size: 1rem;
+      font-weight: 400;
+      opacity: 0.9;
+      font-style: italic;
+      background: rgba(0,0,0,0.1);
+      padding: 12px 16px;
+      border-radius: var(--radius-md);
+    }
+
+    .card-progress {
+      text-align: center;
+      margin-top: 16px;
+      font-size: 0.875rem;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+
+    /* --- Typed Test Mode --- */
+    .test-container {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      padding: 40px;
+      border-radius: var(--radius-lg);
+      width: 100%;
+      max-width: 600px;
+      margin: 0 auto;
+      box-shadow: var(--shadow-md);
+      animation: fadeIn 0.4s ease;
+      position: relative;
+      overflow: hidden;
+    }
+    .test-progress {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 4px;
+      background: var(--primary);
+      transition: width 0.3s ease;
+    }
+    .test-status {
+      text-align: center;
+      color: var(--text-muted);
+      font-weight: 600;
+      margin-bottom: 24px;
+      font-size: 0.875rem;
+    }
+    .test-word {
+      font-size: 2.25rem;
+      font-weight: 700;
+      margin-bottom: 32px;
+      color: var(--primary-hover);
+      text-align: center;
+    }
+    .test-input {
+      width: 100%;
+      padding: 16px 20px;
+      font-size: 1.125rem;
+      border: 2px solid var(--border-color);
+      border-radius: var(--radius-md);
+      outline: none;
+      transition: all var(--transition-fast);
+      background: var(--bg-app);
+      color: var(--text-main);
+      font-weight: 500;
+    }
+    .test-input:focus {
+      border-color: var(--primary);
+      background: white;
+      box-shadow: 0 0 0 4px var(--primary-light);
+    }
+    .test-feedback {
+      text-align: center;
+      min-height: 24px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      margin-bottom: 24px;
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .test-feedback.show { opacity: 1; }
+    .test-feedback.correct { color: var(--success); }
+    .test-feedback.wrong { color: var(--danger); }
+    .test-feedback.info { color: var(--warning); }
+    
+    .test-completion { text-align: center; display: none; }
+    .completion-icon { font-size: 56px; margin-bottom: 16px; display: block; }
+
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+  </style>
+</head>
+<body>
+
+<div class="app-container">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">
+        <i class='bx bxs-graduation'></i>
+        <span>Student</span>
+      </div>
+    </div>
+    
+    <nav class="sidebar-nav">
+      <a href="#" onclick="go('student-dashboard')" class="nav-item">
+        <i class='bx bxs-dashboard'></i> Dashboard
+      </a>
+      <a href="#" onclick="go('vocab')" class="nav-item active">
+        <i class='bx bx-book-bookmark'></i> Vocabulary
+      </a>
+      <a href="#" onclick="go('lesson')" class="nav-item">
+        <i class='bx bx-library'></i> Theory
+      </a>
+      <a href="#" onclick="go('quizzes-student')" class="nav-item">
+        <i class='bx bx-edit'></i> Quizzes
+      </a>
+      <a href="#" onclick="go('my-results')" class="nav-item">
+        <i class='bx bx-bar-chart-alt-2'></i> My Results
+      </a>
+    </nav>
+    
+    <div class="sidebar-footer">
+      <a href="#" id="admin-link" onclick="go('dashboard')" class="nav-item" style="display: none; margin-bottom: 8px; color: var(--warning);">
+        <i class='bx bx-cog'></i> Admin Panel
+      </a>
+      <a href="#" onclick="logout()" class="nav-item text-danger">
+        <i class='bx bx-log-out'></i> Logout
+      </a>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <header class="topbar">
+      <div class="topbar-search">
+        <i class='bx bx-search'></i>
+        <input type="text" placeholder="Search vocabulary...">
+      </div>
+      <div class="topbar-actions">
+        <button class="btn-icon"><i class='bx bx-bell'></i></button>
+        <div class="user-profile">
+          <div class="avatar" id="user-avatar">S</div>
+          <span class="font-medium" id="user-name-top">Siêu Nhân</span>
+        </div>
+      </div>
+    </header>
+
+    <div class="content-area">
+      <!-- VIEW 1: TOPICS -->
+      <div id="topicsView" style="width: 100%;">
+        <div class="page-header" style="display: flex; flex-direction: column; align-items: flex-start; margin-bottom: 24px;">
+          <h1 class="text-main" style="display: flex; align-items: center; gap: 8px;"><i class='bx bx-book-open text-primary'></i> Vocabulary Topics</h1>
+          <p class="text-muted">Pick a topic and start mastering new words 🚀</p>
+        </div>
+        
+        <div class="grid grid-cols-4 gap-6" id="topicGrid">
+          <div class="empty-state-card" style="grid-column: 1/-1;">
+            Loading amazing topics...
+          </div>
+        </div>
+      </div>
+
+      <!-- VIEW 2: INSIDE TOPIC (LEARN/TEST) -->
+      <div id="learningView" style="display: none; width: 100%; flex-direction: column; align-items: center;">
+        
+        <div class="w-full flex items-center mb-4" style="gap: 16px;">
+          <button class="btn btn-secondary" onclick="backToTopics()">
+            <i class='bx bx-arrow-back'></i> Danh sách
+          </button>
+          <h2 class="text-primary m-0" id="topicTitle" style="margin-bottom: 0;">Topic Name</h2>
+        </div>
+
+        <div class="mode-toggle">
+          <button class="mode-btn active" id="btn-flashcards" onclick="switchMode('flashcards')">🧠 Học (Flashcard)</button>
+          <button class="mode-btn" id="btn-test" onclick="switchMode('test')">✍️ Kiểm tra</button>
+        </div>
+
+        <!-- FLASHCARDS MODE -->
+        <div class="flashcard-container" id="mode-flashcards">
+          <div id="empty-state" style="display: none;" class="empty-state-card">
+            <i class='bx bx-folder-open topic-icon'></i><br>
+            Thư mục này hiện chưa có từ vựng nào.
+          </div>
+          
+          <div class="card-wrap" id="flashcard-wrapper" onclick="flip()">
+            <div class="card-inner" id="card">
+              <div class="card-front"><div class="word" id="word">Loading...</div></div>
+              <div class="card-back">
+                 <div class="meaning" id="meaning">...</div>
+                 <div class="example" id="example"></div>
+              </div>
+            </div>
+          </div>
+          
+          <div class="flex items-center" id="flashcard-controls" style="gap: 16px;">
+            <button class="btn btn-secondary" onclick="prevCard()"><i class='bx bx-chevron-left'></i> Trước</button>
+            <button class="btn btn-primary" onclick="nextCard()">Tiếp theo <i class='bx bx-chevron-right'></i></button>
+          </div>
+          <div class="card-progress" id="card-progress">1 / 10</div>
+        </div>
+
+        <!-- TYPED TEST MODE -->
+        <div class="test-container" id="mode-test" style="display: none;">
+          <div id="test-active-area">
+            <div class="test-progress" id="test-progress-bar" style="width: 0%;"></div>
+            <div class="test-status" id="test-status">Tiến độ: 0 / 10</div>
+            
+            <div class="test-word" id="test-word">Apple</div>
+            
+            <div class="form-group mb-4">
+              <input type="text" id="test-input" class="test-input" placeholder="Nhập nghĩa tiếng Việt vào đây..." autocomplete="off">
+            </div>
+
+            <div class="flex justify-center mb-4" style="gap: 20px;">
+               <label class="text-sm text-muted flex items-center" style="gap: 6px; cursor: pointer;">
+                 <input type="checkbox" id="ignoreCase" checked> Không phân biệt hoa/thường
+               </label>
+               <label class="text-sm text-muted flex items-center" style="gap: 6px; cursor: pointer;">
+                 <input type="checkbox" id="ignoreAccents" checked> Không phân biệt dấu
+               </label>
+            </div>
+            
+            <div class="test-feedback" id="test-feedback"></div>
+            
+            <div class="flex items-center justify-center" id="test-actions" style="gap: 16px;">
+              <button class="btn btn-secondary" style="flex: 1;" onclick="skipTestWord()">Bỏ qua</button>
+              <button class="btn btn-primary" style="flex: 2;" onclick="submitTestAnswer()">Kiểm tra kết quả</button>
+            </div>
+          </div>
+
+          <div class="test-completion" id="test-completion">
+            <span class="completion-icon">🏆</span>
+            <h2 class="text-main mb-2">Hoàn thành Bài Kiểm Tra!</h2>
+            <p class="text-muted mb-4" id="test-final-score">Bạn đã trả lời đúng 8/10 từ.</p>
+            <button class="btn btn-primary w-full" onclick="startTestMode()">Làm lại bài test</button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+const token = localStorage.getItem("token");
+const userStr = localStorage.getItem("user");
+if (!token || !userStr) window.location.href = "index.html";
+
+const user = JSON.parse(userStr);
+if (user.role === 'admin') document.getElementById('admin-link').style.display = "flex";
+
+const displayName = user.name || user.email.split('@')[0];
+document.getElementById('user-name-top').innerText = displayName;
+document.getElementById('user-avatar').innerText = displayName.charAt(0).toUpperCase();
+
+function go(page) { window.location.href = page + ".html"; }
+function logout() { localStorage.clear(); window.location.href = "index.html"; }
+
+// --- Data States ---
+let currentWords = [];
+let cardIndex = 0;
+let testQueue = [];
+let testCurrentWord = null;
+let testScore = 0;
+let testTotal = 0;
+let waitingForNext = false;
+
+async function loadTopics() {
+  try {
+    const res = await fetch('https://lms-gzty.onrender.com/topics?type=vocab&limit=100', {
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    const data = await res.json();
+    const grid = document.getElementById('topicGrid');
+    
+    if (!data.success || data.data.topics.length === 0) {
+      grid.innerHTML = `
+        <div class="empty-state-card" style="grid-column: 1/-1;">
+          <i class='bx bx-folder-open topic-icon'></i><br>
+          No vocabulary topics available yet.
+        </div>`;
+      return;
+    }
+
+    grid.innerHTML = data.data.topics.map(t => `
+      <div class="card text-center" style="cursor: pointer; transition: transform 0.2s;" onclick="openTopic('${t._id}', '${t.name.replace(/'/g, "\\'")}')" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='translateY(0)'">
+        <i class='bx bx-folder topic-icon'></i>
+        <div class="font-semibold text-main">${t.name}</div>
+      </div>
+    `).join('');
+  } catch(err) {
+    console.error(err);
+  }
+}
+
+async function openTopic(id, name) {
+  document.getElementById('topicsView').style.display = 'none';
+  document.getElementById('learningView').style.display = 'flex';
+  document.getElementById('topicTitle').innerText = name;
+  
+  switchMode('flashcards');
+
+  try {
+    const res = await fetch('https://lms-gzty.onrender.com/vocabulary?topicId=' + id + '&limit=1000', {
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    const data = await res.json();
+    if (data.success) {
+      currentWords = data.data.vocab || [];
+      cardIndex = 0;
+      updateFlashcardUI();
+    }
+  } catch(err) {
+    console.error(err);
+  }
+}
+
+function backToTopics() {
+  document.getElementById('topicsView').style.display = 'block';
+  document.getElementById('learningView').style.display = 'none';
+}
+
+function switchMode(mode) {
+  document.getElementById('btn-flashcards').classList.remove('active');
+  document.getElementById('btn-test').classList.remove('active');
+  document.getElementById('btn-' + mode).classList.add('active');
+
+  if (mode === 'flashcards') {
+    document.getElementById('mode-flashcards').style.display = 'flex';
+    document.getElementById('mode-test').style.display = 'none';
+    updateFlashcardUI();
+  } else {
+    document.getElementById('mode-flashcards').style.display = 'none';
+    document.getElementById('mode-test').style.display = 'block';
+    startTestMode();
+  }
+}
+
+function updateFlashcardUI() {
+  const cardWrap = document.getElementById('flashcard-wrapper');
+  const controls = document.getElementById('flashcard-controls');
+  const empty = document.getElementById('empty-state');
+  const progress = document.getElementById('card-progress');
+  
+  document.getElementById('card').classList.remove('flip');
+
+  if (currentWords.length === 0) {
+    cardWrap.style.display = 'none';
+    controls.style.display = 'none';
+    progress.style.display = 'none';
+    empty.style.display = 'block';
+    return;
+  }
+  
+  cardWrap.style.display = 'block';
+  controls.style.display = 'flex';
+  progress.style.display = 'block';
+  empty.style.display = 'none';
+
+  const w = currentWords[cardIndex];
+  document.getElementById('word').innerText = w.word;
+  document.getElementById('meaning').innerText = w.meaning;
+  document.getElementById('example').innerText = w.example ? `"${w.example}"` : '';
+  progress.innerText = `${cardIndex + 1} / ${currentWords.length}`;
+}
+
+function flip() { document.getElementById('card').classList.toggle('flip'); }
+
+function nextCard() {
+  if (currentWords.length === 0) return;
+  cardIndex = (cardIndex + 1) % currentWords.length;
+  document.getElementById('card').classList.remove('flip');
+  setTimeout(updateFlashcardUI, 150);
+}
+
+function prevCard() {
+  if (currentWords.length === 0) return;
+  cardIndex = (cardIndex - 1 + currentWords.length) % currentWords.length;
+  document.getElementById('card').classList.remove('flip');
+  setTimeout(updateFlashcardUI, 150);
+}
+
+window.addEventListener('keydown', (e) => {
+  if(document.getElementById('learningView').style.display !== 'none' && document.getElementById('mode-flashcards').style.display !== 'none') {
+    if(e.key === 'ArrowRight') nextCard();
+    if(e.key === 'ArrowLeft') prevCard();
+    if((e.key === ' ' || e.key === 'ArrowUp' || e.key === 'ArrowDown') && e.target.tagName !== 'INPUT') { e.preventDefault(); flip(); }
+  }
+});
+
+function startTestMode() {
+  document.getElementById('test-active-area').style.display = 'block';
+  document.getElementById('test-completion').style.display = 'none';
+
+  if (currentWords.length === 0) {
+    document.getElementById('test-active-area').style.display = 'none';
+    document.getElementById('test-completion').style.display = 'block';
+    document.getElementById('test-completion').innerHTML = '<p class="text-muted">Không có từ vựng nào trong thư mục này để kiểm tra.</p>';
+    return;
+  }
+
+  testQueue = [...currentWords].sort(() => 0.5 - Math.random());
+  testTotal = testQueue.length;
+  testScore = 0;
+  waitingForNext = false;
+  
+  loadNextTestWord();
+}
+
+function loadNextTestWord() {
+  waitingForNext = false;
+  const input = document.getElementById('test-input');
+  const feedback = document.getElementById('test-feedback');
+  
+  if (testQueue.length === 0) {
+    document.getElementById('test-active-area').style.display = 'none';
+    document.getElementById('test-completion').style.display = 'block';
+    document.getElementById('test-final-score').innerText = `Bạn đã trả lời đúng ${testScore} / ${testTotal} từ.`;
+    document.getElementById('test-progress-bar').style.width = '100%';
+    return;
+  }
+  
+  testCurrentWord = testQueue.shift();
+  const currentQNum = testTotal - testQueue.length;
+  
+  document.getElementById('test-status').innerText = `Tiến độ: ${currentQNum} / ${testTotal}`;
+  document.getElementById('test-progress-bar').style.width = `${((currentQNum-1)/testTotal)*100}%`;
+  document.getElementById('test-word').innerText = testCurrentWord.word;
+  
+  input.value = '';
+  input.disabled = false;
+  input.focus();
+  
+  feedback.className = 'test-feedback';
+  feedback.innerText = '';
+}
+
+function submitTestAnswer() {
+  if (!testCurrentWord || waitingForNext) return;
+  
+  const input = document.getElementById('test-input');
+  let userAnswer = input.value.trim();
+  let correctAnswer = testCurrentWord.meaning.trim();
+  const feedback = document.getElementById('test-feedback');
+  
+  const ignoreCase = document.getElementById('ignoreCase').checked;
+  const ignoreAccents = document.getElementById('ignoreAccents').checked;
+
+  if (ignoreCase) {
+    userAnswer = userAnswer.toLowerCase();
+    correctAnswer = correctAnswer.toLowerCase();
+  }
+
+  if (ignoreAccents) {
+    const removeAccents = (str) => {
+      return str.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/đ/g, 'd').replace(/Đ/g, 'D');
+    };
+    userAnswer = removeAccents(userAnswer);
+    correctAnswer = removeAccents(correctAnswer);
+  }
+
+  if (!userAnswer) {
+    feedback.innerText = "Vui lòng nhập nghĩa của từ.";
+    feedback.className = 'test-feedback show info';
+    return;
+  }
+  
+  waitingForNext = true;
+  input.disabled = true;
+
+  const validAnswers = correctAnswer.split(/[,;]/).map(s => s.trim());
+
+  if (validAnswers.includes(userAnswer)) {
+     testScore++;
+     feedback.innerText = 'Chính xác! 🎉';
+     feedback.className = 'test-feedback show correct';
+     document.getElementById('test-progress-bar').style.width = `${((testTotal - testQueue.length)/testTotal)*100}%`;
+     setTimeout(loadNextTestWord, 1000);
+  } else {
+     feedback.innerHTML = `Sai rồi. Nghĩa đúng là: <strong>${testCurrentWord.meaning}</strong>`;
+     feedback.className = 'test-feedback show wrong';
+     setTimeout(loadNextTestWord, 2000);
+  }
+}
+
+function skipTestWord() {
+  if (!testCurrentWord || waitingForNext) return;
+  waitingForNext = true;
+  
+  const input = document.getElementById('test-input');
+  input.disabled = true;
+  
+  const feedback = document.getElementById('test-feedback');
+  feedback.innerHTML = `Bỏ qua. Nghĩa đúng: <strong>${testCurrentWord.meaning}</strong>`;
+  feedback.className = 'test-feedback show info';
+  
+  setTimeout(loadNextTestWord, 2000);
+}
+
+document.getElementById('test-input').addEventListener('keypress', function (e) {
+  if (e.key === 'Enter') submitTestAnswer();
+});
+
+loadTopics();
+</script>
+</body>
+</html>

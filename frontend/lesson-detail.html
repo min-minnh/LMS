@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AstraLMS - Lesson Detail</title>
+  <link rel="stylesheet" href="assets/css/design-system.css">
+  <style>
+    /* Specific overrides for Lesson Detail page */
+    .container {
+      width: 100%;
+      max-width: 900px;
+      margin: 0 auto;
+    }
+
+    .lesson-content {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 40px;
+      box-shadow: var(--shadow-md);
+    }
+
+    .lesson-info h1 {
+      font-size: 2.25rem;
+      font-weight: 700;
+      color: var(--primary-hover);
+      margin-bottom: 12px;
+    }
+
+    .lesson-meta {
+      color: var(--text-muted);
+      font-size: 0.875rem;
+      margin-bottom: 32px;
+      display: flex;
+      gap: 16px;
+    }
+
+    .lesson-image {
+      width: 100%;
+      height: 350px;
+      background-color: var(--bg-hover);
+      background-size: cover;
+      background-position: center;
+      border-radius: var(--radius-md);
+      margin-bottom: 32px;
+    }
+
+    .lesson-text {
+      font-size: 1.0625rem;
+      line-height: 1.8;
+      color: var(--text-main);
+      white-space: pre-wrap;
+      font-weight: 400;
+    }
+
+    .attachment-card {
+      margin-top: 40px;
+      padding: 24px;
+      border-radius: var(--radius-md);
+      border: 1px solid var(--border-color);
+      background: var(--bg-app);
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+  </style>
+</head>
+<body>
+
+<div class="app-container">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">
+        <i class='bx bxs-graduation'></i>
+        <span>Student</span>
+      </div>
+    </div>
+    
+    <nav class="sidebar-nav">
+      <a href="#" onclick="go('student-dashboard')" class="nav-item">
+        <i class='bx bxs-dashboard'></i> Dashboard
+      </a>
+      <a href="#" onclick="go('vocab')" class="nav-item">
+        <i class='bx bx-book-bookmark'></i> Vocabulary
+      </a>
+      <a href="#" onclick="go('lesson')" class="nav-item active">
+        <i class='bx bx-library'></i> Theory
+      </a>
+      <a href="#" onclick="go('quizzes-student')" class="nav-item">
+        <i class='bx bx-edit'></i> Quizzes
+      </a>
+      <a href="#" onclick="go('my-results')" class="nav-item">
+        <i class='bx bx-bar-chart-alt-2'></i> My Results
+      </a>
+    </nav>
+    
+    <div class="sidebar-footer">
+      <a href="#" id="admin-link" onclick="go('dashboard')" class="nav-item" style="display: none; margin-bottom: 8px; color: var(--warning);">
+        <i class='bx bx-cog'></i> Admin Panel
+      </a>
+      <a href="#" onclick="logout()" class="nav-item text-danger">
+        <i class='bx bx-log-out'></i> Logout
+      </a>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <header class="topbar">
+      <div class="topbar-search">
+        <i class='bx bx-search'></i>
+        <input type="text" placeholder="Search lessons...">
+      </div>
+      <div class="topbar-actions">
+        <button class="btn-icon"><i class='bx bx-bell'></i></button>
+        <div class="user-profile">
+          <div class="avatar" id="user-avatar">S</div>
+          <span class="font-medium" id="user-name-top">Siêu Nhân</span>
+        </div>
+      </div>
+    </header>
+
+    <div class="content-area">
+      <div class="container">
+        <button class="btn btn-secondary mb-4" onclick="window.history.back()">
+          <i class='bx bx-arrow-back'></i> Trở về danh sách
+        </button>
+
+        <div class="lesson-content">
+          <div id="image-container" class="lesson-image" style="display: none;"></div>
+
+          <div class="lesson-info">
+            <h1 id="title">Loading...</h1>
+            <div class="lesson-meta">
+              <span id="date"></span>
+            </div>
+          </div>
+
+          <div class="lesson-text" id="content">Đang tải nội dung bài học...</div>
+
+          <div id="attachment-container" class="attachment-card" style="display:none;">
+            <div class="flex items-center" style="gap: 16px;">
+              <i class='bx bxs-file-pdf text-primary' style="font-size: 32px;"></i>
+              <div>
+                <div class="font-semibold text-main text-lg">Tài Liệu Đính Kèm</div>
+                <div class="text-sm text-muted">Tải xuống để xem ngoại tuyến</div>
+              </div>
+            </div>
+            <a id="download-link" class="btn btn-primary" target="_blank" download>
+              <i class='bx bx-download'></i> Tải xuống
+            </a>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+  const token = localStorage.getItem("token");
+  const userStr = localStorage.getItem("user");
+  if (!token || !userStr) window.location.href = "index.html";
+
+  const user = JSON.parse(userStr);
+  if (user.role === 'admin') document.getElementById('admin-link').style.display = "flex";
+
+  const displayName = user.name || user.email.split('@')[0];
+  document.getElementById('user-name-top').innerText = displayName;
+  document.getElementById('user-avatar').innerText = displayName.charAt(0).toUpperCase();
+
+  function logout() { localStorage.clear(); window.location.href = "index.html"; }
+  function go(page) { window.location.href = page + ".html"; }
+
+  async function fetchLessonDetail() {
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get("id");
+    if (!id) return window.history.back();
+
+    try {
+      const res = await fetch('https://lms-gzty.onrender.com/lessons/' + id, {
+        headers: { 'Authorization': 'Bearer ' + token }
+      });
+      const data = await res.json();
+      if (!data.success) {
+        document.getElementById('title').innerText = "Không tìm thấy bài học";
+        document.getElementById('content').innerText = "";
+        return;
+      }
+
+      const l = data.data;
+      document.getElementById('title').innerText = l.title;
+      document.getElementById('date').innerText = "Đăng vào ngày " + new Date(l.createdAt).toLocaleDateString();
+      document.getElementById('content').innerText = l.content;
+
+      if (l.imageUrl) {
+        const imgC = document.getElementById('image-container');
+        imgC.style.display = 'block';
+        imgC.style.backgroundImage = `url('https://lms-gzty.onrender.com${l.imageUrl}')`;
+      }
+
+      if (l.fileUrl) {
+        const attC = document.getElementById('attachment-container');
+        attC.style.display = 'flex';
+        document.getElementById('download-link').href = 'https://lms-gzty.onrender.com' + l.fileUrl;
+      }
+
+    } catch (err) {
+      console.error(err);
+      document.getElementById('title').innerText = "Lỗi tải nội dung";
+      document.getElementById('content').innerText = "";
+    }
+  }
+
+  fetchLessonDetail();
+</script>
+</body>
+</html>

@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AstraLMS - Quizzes List</title>
+  <link rel="stylesheet" href="assets/css/design-system.css">
+  <style>
+    /* Specific overrides for Quizzes List */
+    .empty-state-card {
+      background: var(--bg-surface);
+      padding: 50px;
+      border-radius: var(--radius-lg);
+      text-align: center;
+      color: var(--text-muted);
+      width: 100%;
+      border: 1px dashed var(--border-color);
+      grid-column: 1/-1;
+    }
+    
+    .topic-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+      display: inline-block;
+      color: var(--primary);
+    }
+  </style>
+</head>
+<body>
+
+<div class="app-container">
+  <!-- Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">
+        <i class='bx bxs-graduation'></i>
+        <span>Student</span>
+      </div>
+    </div>
+    
+    <nav class="sidebar-nav">
+      <a href="#" onclick="go('student-dashboard')" class="nav-item">
+        <i class='bx bxs-dashboard'></i> Dashboard
+      </a>
+      <a href="#" onclick="go('vocab')" class="nav-item">
+        <i class='bx bx-book-bookmark'></i> Vocabulary
+      </a>
+      <a href="#" onclick="go('lesson')" class="nav-item">
+        <i class='bx bx-library'></i> Theory
+      </a>
+      <a href="#" onclick="go('quizzes-student')" class="nav-item active">
+        <i class='bx bx-edit'></i> Quizzes
+      </a>
+      <a href="#" onclick="go('my-results')" class="nav-item">
+        <i class='bx bx-bar-chart-alt-2'></i> My Results
+      </a>
+    </nav>
+    
+    <div class="sidebar-footer">
+      <a href="#" id="admin-link" onclick="go('dashboard')" class="nav-item" style="display: none; margin-bottom: 8px; color: var(--warning);">
+        <i class='bx bx-cog'></i> Admin Panel
+      </a>
+      <a href="#" onclick="logout()" class="nav-item text-danger">
+        <i class='bx bx-log-out'></i> Logout
+      </a>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <header class="topbar">
+      <div class="topbar-search">
+        <i class='bx bx-search'></i>
+        <input type="text" placeholder="Search quizzes...">
+      </div>
+      <div class="topbar-actions">
+        <button class="btn-icon"><i class='bx bx-bell'></i></button>
+        <div class="user-profile">
+          <div class="avatar" id="user-avatar">S</div>
+          <span class="font-medium" id="user-name-top">Siêu Nhân</span>
+        </div>
+      </div>
+    </header>
+
+    <div class="content-area">
+      <div class="page-header" style="display: flex; flex-direction: column; align-items: flex-start; margin-bottom: 24px;">
+        <h1 class="text-main" style="display: flex; align-items: center; gap: 8px;"><i class='bx bx-edit text-primary'></i> All Quizzes</h1>
+        <p class="text-muted">Select a quiz to test your knowledge.</p>
+      </div>
+
+      <div class="grid grid-cols-3 gap-6" id="quizGrid">
+        <div class="empty-state-card">Loading quizzes...</div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+const token = localStorage.getItem("token");
+const userStr = localStorage.getItem("user");
+if (!token || !userStr) window.location.href = "index.html";
+
+const user = JSON.parse(userStr);
+if (user.role === 'admin') document.getElementById('admin-link').style.display = "flex";
+
+const displayName = user.name || user.email.split('@')[0];
+document.getElementById('user-name-top').innerText = displayName;
+document.getElementById('user-avatar').innerText = displayName.charAt(0).toUpperCase();
+
+function logout() { localStorage.clear(); window.location.href = "index.html"; }
+function go(page) { window.location.href = page + ".html"; }
+
+async function loadQuizzes() {
+  try {
+    const res = await fetch('https://lms-gzty.onrender.com/quizzes?limit=100', {
+      headers: { 'Authorization': 'Bearer ' + token }
+    });
+    const data = await res.json();
+    const grid = document.getElementById('quizGrid');
+    
+    if (!data.success || data.data.quizzes.length === 0) {
+      grid.innerHTML = `<div class="empty-state-card"><i class='bx bx-trophy topic-icon' style="color: var(--text-light)"></i><br>No quizzes available at the moment.</div>`;
+      return;
+    }
+
+    grid.innerHTML = data.data.quizzes.map(q => `
+      <div class="card text-center" style="cursor: pointer; transition: transform 0.2s; display: flex; flex-direction: column; align-items: center;" onclick="window.location.href='quiz.html?id=${q._id}'" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='translateY(0)'">
+        <i class='bx bx-trophy topic-icon'></i>
+        <h3 class="font-semibold text-main mb-2">${q.title}</h3>
+        <div class="badge badge-primary mb-2">⏱ ${Math.ceil(q.timeLimit/60)} phút | ❓ ${q.questionCount || 0} Questions</div>
+        ${q.description ? `<p class="text-sm text-muted mt-2" style="margin-bottom: 0;">${q.description}</p>` : ''}
+      </div>
+    `).join('');
+  } catch(err) {
+    console.error(err);
+  }
+}
+
+loadQuizzes();
+</script>
+</body>
+</html>

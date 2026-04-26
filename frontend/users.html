@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin - Users List</title>
+  <link rel="stylesheet" href="assets/css/design-system.css">
+  <script src="admin-core.js"></script>
+</head>
+<body onload="checkAdmin(); fetchUsers(1)">
+
+<div class="app-container">
+  <!-- Admin Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">
+        <i class='bx bx-shield-quarter'></i>
+        <span>Admin Panel</span>
+      </div>
+    </div>
+    
+    <nav class="sidebar-nav">
+      <a href="dashboard.html" class="nav-item">
+        <i class='bx bxs-dashboard'></i> Dashboard
+      </a>
+      <a href="vocabulary.html" class="nav-item">
+        <i class='bx bx-book-bookmark'></i> Vocabulary
+      </a>
+      <a href="lessons.html" class="nav-item">
+        <i class='bx bx-library'></i> Lessons
+      </a>
+      <a href="users.html" class="nav-item active">
+        <i class='bx bx-group'></i> Users List
+      </a>
+      <a href="quizzes.html" class="nav-item">
+        <i class='bx bx-edit'></i> Quizzes
+      </a>
+      <a href="results.html" class="nav-item">
+        <i class='bx bx-bar-chart-alt-2'></i> Student Results
+      </a>
+    </nav>
+    
+    <div class="sidebar-footer">
+      <a href="#" onclick="localStorage.clear(); window.location.href='index.html'" class="nav-item text-danger">
+        <i class='bx bx-log-out'></i> Logout
+      </a>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <header class="topbar">
+      <div class="topbar-search">
+        <i class='bx bx-search'></i>
+        <input type="text" placeholder="Search...">
+      </div>
+      <div class="topbar-actions">
+        <div class="user-profile">
+          <div class="avatar" style="background: var(--warning-light); color: var(--warning);">A</div>
+          <span class="font-medium">Administrator</span>
+        </div>
+      </div>
+    </header>
+
+    <div class="content-area">
+      <div class="page-header mb-6">
+        <h1 class="text-main" style="display: flex; align-items: center; gap: 8px;"><i class='bx bx-group text-primary'></i> Users Management</h1>
+      </div>
+      
+      <div class="card mb-6" style="background: var(--bg-hover); border: 1px dashed var(--border-color);">
+        <h3 class="text-lg font-bold mb-4">Create New User</h3>
+        <div style="display:flex; gap:16px; flex-wrap:wrap; align-items: flex-end;">
+          <div class="form-group m-0" style="flex:1; min-width: 150px;">
+            <label class="form-label">Name</label>
+            <input type="text" id="newName" class="form-control" placeholder="John Doe">
+          </div>
+          <div class="form-group m-0" style="flex:1; min-width: 150px;">
+            <label class="form-label">Email</label>
+            <input type="email" id="newEmail" class="form-control" placeholder="john@example.com">
+          </div>
+          <div class="form-group m-0" style="flex:1; min-width: 150px;">
+            <label class="form-label">Password</label>
+            <input type="password" id="newPassword" class="form-control" placeholder="••••••••">
+          </div>
+          <div class="form-group m-0" style="flex:0.5; min-width: 100px;">
+            <label class="form-label">Role</label>
+            <select id="newRole" class="form-control">
+              <option value="student">Student</option>
+              <option value="admin">Admin</option>
+            </select>
+          </div>
+          <button class="btn btn-primary" onclick="addUser()">
+            <i class='bx bx-user-plus'></i> Create User
+          </button>
+        </div>
+      </div>
+
+      <div class="card p-0 table-responsive">
+        <div class="p-6 border-b" style="border-color: var(--border-color);">
+          <h3 class="font-bold text-lg m-0">Student & Admin Accounts</h3>
+        </div>
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>Email</th>
+              <th>Role</th>
+              <th>Joined</th>
+              <th width="100">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="tableBody"></tbody>
+        </table>
+      </div>
+      <div id="pagination" class="pagination mt-6 flex items-center justify-center gap-4"></div>
+    </div>
+  </main>
+</div>
+
+<script>
+  async function fetchUsers(page = 1) {
+    if (typeof renderSkeleton === 'function') renderSkeleton('tableBody', 5);
+    const res = await apiFetch(`/users?page=${page}`);
+    if (!res.success) return showToast(res.message, false);
+
+    const tbody = document.getElementById('tableBody');
+    if (!res.data.users || res.data.users.length === 0) {
+      if (typeof renderEmptyState === 'function') renderEmptyState('tableBody', 5, "No users found.");
+      document.getElementById('pagination').innerHTML = '';
+      return;
+    }
+
+    tbody.innerHTML = res.data.users.map(u => `
+      <tr>
+        <td><strong class="text-primary">${u.name || '-'}</strong></td>
+        <td>${u.email}</td>
+        <td>
+          <select class="form-control" onchange="updateRole('${u._id}', this.value)" style="padding: 4px 8px; border-radius: 6px; font-size: 13px; text-transform: capitalize; font-weight: 600; cursor: pointer; width: auto; display: inline-block; background: ${u.role === 'admin' ? 'var(--danger-light)' : 'var(--primary-light)'}; color: ${u.role === 'admin' ? 'var(--danger)' : 'var(--primary)'}">
+             <option value="student" ${u.role === 'student' ? 'selected' : ''}>Student</option>
+             <option value="admin" ${u.role === 'admin' ? 'selected' : ''}>Admin</option>
+          </select>
+        </td>
+        <td class="text-muted">${new Date(u.createdAt).toLocaleDateString()}</td>
+        <td>
+          <button class="btn btn-danger btn-sm text-xs" style="padding: 6px 10px;" onclick="deleteUser('${u._id}')"><i class='bx bx-trash'></i></button>
+        </td>
+      </tr>
+    `).join('');
+
+    if (typeof buildPagination === 'function') buildPagination(res.data.page, res.data.totalPages, fetchUsers);
+  }
+
+  async function addUser() {
+    const name = document.getElementById('newName').value;
+    const email = document.getElementById('newEmail').value;
+    const password = document.getElementById('newPassword').value;
+    const role = document.getElementById('newRole').value;
+
+    if (!email || !password) return showToast("Email and password required", false);
+
+    const res = await apiFetch('/users', {
+      method: 'POST',
+      body: JSON.stringify({ name, email, password, role })
+    });
+    if (res.success) {
+      showToast("User created successfully!");
+      document.getElementById('newName').value = '';
+      document.getElementById('newEmail').value = '';
+      document.getElementById('newPassword').value = '';
+      fetchUsers(1);
+    } else { showToast(res.message, false); }
+  }
+
+  async function updateRole(id, role) {
+    const res = await apiFetch(`/users/${id}/role`, {
+      method: 'PUT',
+      body: JSON.stringify({ role })
+    });
+    if (res.success) {
+      showToast("Role updated!");
+    } else {
+      showToast(res.message, false);
+      fetchUsers(1); // revert on UI
+    }
+  }
+
+  async function deleteUser(id) {
+    if (!confirm("Are you sure you want to delete this user and all their results?")) return;
+    const res = await apiFetch(`/users/${id}`, { method: 'DELETE' });
+    if (res.success) {
+      showToast("User deleted successfully!");
+      fetchUsers(1);
+    } else {
+      showToast(res.message, false);
+    }
+  }
+</script>
+</body>
+</html>

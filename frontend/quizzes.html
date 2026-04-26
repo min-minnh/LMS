@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Admin - Quizzes</title>
+  <link rel="stylesheet" href="assets/css/design-system.css">
+  <style>
+    /* Specific overrides for Admin Quizzes */
+    .topic-icon {
+      font-size: 48px;
+      margin-bottom: 16px;
+      display: inline-block;
+      color: var(--primary);
+    }
+    .admin-only {
+      display: none;
+    }
+    body.admin-mode .admin-only {
+      display: block;
+    }
+    body.admin-mode table .admin-only {
+      display: table-cell;
+    }
+    
+    .delete-quiz-btn {
+      position: absolute;
+      top: 12px;
+      right: 12px;
+      padding: 6px 12px;
+      font-size: 0.75rem;
+    }
+  </style>
+  <script src="admin-core.js"></script>
+</head>
+<body onload="checkAdmin(); initView()">
+
+<div class="app-container">
+  <!-- Admin Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">
+        <i class='bx bx-shield-quarter'></i>
+        <span>Admin Panel</span>
+      </div>
+    </div>
+    
+    <nav class="sidebar-nav">
+      <a href="dashboard.html" class="nav-item">
+        <i class='bx bxs-dashboard'></i> Dashboard
+      </a>
+      <a href="vocabulary.html" class="nav-item">
+        <i class='bx bx-book-bookmark'></i> Vocabulary
+      </a>
+      <a href="lessons.html" class="nav-item">
+        <i class='bx bx-library'></i> Lessons
+      </a>
+      <a href="users.html" class="nav-item">
+        <i class='bx bx-group'></i> Users List
+      </a>
+      <a href="quizzes.html" class="nav-item active">
+        <i class='bx bx-edit'></i> Quizzes
+      </a>
+      <a href="results.html" class="nav-item">
+        <i class='bx bx-bar-chart-alt-2'></i> Student Results
+      </a>
+    </nav>
+    
+    <div class="sidebar-footer">
+      <a href="#" onclick="localStorage.clear(); window.location.href='index.html'" class="nav-item text-danger">
+        <i class='bx bx-log-out'></i> Logout
+      </a>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <header class="topbar">
+      <div class="topbar-search">
+        <i class='bx bx-search'></i>
+        <input type="text" placeholder="Search...">
+      </div>
+      <div class="topbar-actions">
+        <div class="user-profile">
+          <div class="avatar" style="background: var(--warning-light); color: var(--warning);">A</div>
+          <span class="font-medium">Administrator</span>
+        </div>
+      </div>
+    </header>
+
+    <div class="content-area">
+      <!-- VIEW 1: QUIZZES DIRECTORY -->
+      <div id="quizzesView" class="w-full">
+        <div class="page-header mb-6">
+          <h1 class="text-main" style="display: flex; align-items: center; gap: 8px;"><i class='bx bx-edit text-primary'></i> Manage Quizzes</h1>
+        </div>
+
+        <div class="card mb-6 admin-only">
+          <h3 class="font-bold mb-2">Create a New Quiz Folder</h3>
+          <p class="text-sm text-muted mb-4">This sets up the container for your quiz questions.</p>
+          
+          <div class="form-group">
+            <input type="text" id="quizTitle" class="form-control" placeholder="Quiz Title (e.g., Final Exam Grade 10)">
+          </div>
+          <div class="form-group">
+            <textarea id="quizDescription" class="form-control" placeholder="Description or Instructions (optional)..." rows="2"></textarea>
+          </div>
+          
+          <div class="grid grid-cols-2 gap-6 mb-4">
+            <div class="form-group m-0">
+              <label class="form-label">Time Limit (Minutes)</label>
+              <input type="number" id="timeLimitMinutes" class="form-control" placeholder="e.g. 30" min="1">
+            </div>
+            <div class="form-group m-0">
+              <label class="form-label">Max Attempts (0 = unlimited)</label>
+              <input type="number" id="attemptLimit" class="form-control" placeholder="e.g. 2" min="0">
+            </div>
+          </div>
+
+          <div class="flex items-center gap-2 mb-4">
+            <input type="checkbox" id="shuffleQuestions" style="width: auto; margin: 0; cursor: pointer;">
+            <label for="shuffleQuestions" class="text-sm text-main" style="cursor: pointer;"><i class='bx bx-shuffle text-primary'></i> Xáo trộn thứ tự câu hỏi khi làm bài</label>
+          </div>
+          <button id="createQuizBtn" class="btn btn-primary" onclick="addQuiz()">
+            <i class='bx bx-plus'></i> Create Quiz Folder
+          </button>
+        </div>
+
+        <div id="quizLoader" style="display: none; text-align: center; padding: 40px;">
+          <i class='bx bx-loader-alt bx-spin text-3xl text-primary'></i>
+          <p class="text-muted mt-2">Loading quizzes...</p>
+        </div>
+
+        <!-- Generated Quizzes Here -->
+        <div class="grid grid-cols-4 gap-6" id="quizGrid"></div>
+        <div id="quizPagination" class="pagination mt-6 flex items-center justify-center gap-4"></div>
+      </div>
+
+      <!-- VIEW 2: INSIDE A QUIZ (QUESTIONS LIST) -->
+      <div id="quizDetailView" style="display: none; width: 100%;">
+        <div class="flex items-center mb-6" style="gap: 16px;">
+          <button class="btn btn-secondary" onclick="goBackToQuizzes()">
+            <i class='bx bx-arrow-back'></i> Back to Quizzes
+          </button>
+          <h2 class="text-primary m-0" id="currentQuizTitle" style="margin-bottom: 0;">Quiz: ---</h2>
+        </div>
+
+        <!-- Upload into specific quiz -->
+        <div class="card admin-only mb-6" style="background: var(--bg-hover); border: 1px dashed var(--border-color);">
+          <div class="flex items-center justify-between mb-2">
+            <h3 class="font-bold m-0" style="margin-bottom: 0;">Import Questions via CSV Text</h3>
+            <i class='bx bx-import text-muted text-xl'></i>
+          </div>
+          <p class="text-xs text-muted mb-4">
+            <strong>Format:</strong> passage, question, optionA, optionB, optionC, optionD, correct(A/B/C/D)<br>
+            <em>Note: Nếu nội dung có dấu phẩy (,), hãy bao quanh bằng dấu ngoặc kép (""). Ví dụ: <code>"Câu hỏi, có phẩy",...</code></em><br>
+            <em>Dòng tiêu đề (header) có thể có hoặc không.</em>
+          </p>
+          <button class="btn btn-secondary btn-sm mb-4" onclick="copyCsvTemplate()"><i class='bx bx-copy'></i> Copy CSV Template</button>
+          <textarea id="csvContent" rows="6" class="form-control mb-4" style="font-family: monospace; resize: vertical;" placeholder='passage,question,optionA,optionB,optionC,optionD,correct&#10;"Đoạn văn",What is 1+1?,1,2,3,4,B'></textarea>
+          <button id="importBtn" class="btn btn-primary" onclick="uploadCSV()"><i class='bx bx-upload'></i> Import into this Quiz</button>
+        </div>
+
+        <div id="questionLoader" style="display: none; text-align: center; padding: 20px;">
+          <i class='bx bx-loader-alt bx-spin text-2xl text-primary'></i>
+          <p class="text-muted mt-2">Fetching questions...</p>
+        </div>
+
+        <div class="card p-0 table-responsive">
+          <table id="dataTable">
+            <thead>
+              <tr>
+                <th style="width: 150px;">Passage</th>
+                <th>Question</th>
+                <th style="width: 100px;">A</th>
+                <th style="width: 100px;">B</th>
+                <th style="width: 100px;">C</th>
+                <th style="width: 100px;">D</th>
+                <th style="width: 60px;">Ans</th>
+                <th class="admin-only" style="width: 80px;">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="tableBody"></tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+  let currentQuizId = null;
+
+  async function initView() {
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    if (user.role === 'admin') {
+      document.body.classList.add('admin-mode');
+    }
+
+    document.getElementById('quizzesView').style.display = 'block';
+    document.getElementById('quizDetailView').style.display = 'none';
+    await loadQuizzes(1);
+  }
+
+  async function loadQuizzes(page = 1) {
+    const grid = document.getElementById('quizGrid');
+    const loader = document.getElementById('quizLoader');
+
+    grid.innerHTML = '';
+    loader.style.display = 'block';
+
+    const res = await apiFetch(`/quizzes?page=${page}`);
+    loader.style.display = 'none';
+
+    if (!res.success) return showToast(res.message, false);
+
+    const { quizzes, totalPages } = res.data;
+
+    if (!quizzes || quizzes.length === 0) {
+      grid.innerHTML = '<div style="grid-column: 1/-1; text-align: center; padding: 40px; color: var(--text-muted);">No quizzes found. Create one above!</div>';
+      return;
+    }
+
+    grid.innerHTML = quizzes.map(q => `
+      <div class="card text-center relative" style="cursor: pointer; transition: transform 0.2s; display: flex; flex-direction: column; align-items: center;" onclick="openQuiz('${q._id}', '${q.title.replace(/'/g, "\\'")}')" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='translateY(0)'">
+        <button class="btn btn-danger btn-sm delete-quiz-btn admin-only" onclick="event.stopPropagation(); deleteQuiz('${q._id}')"><i class='bx bx-trash'></i> Delete</button>
+        <i class='bx bx-trophy topic-icon'></i>
+        <h3 class="font-semibold text-main mb-2">${q.title}</h3>
+        <div class="badge badge-primary mb-2">⏱ ${Math.ceil((q.timeLimit || 0) / 60)} minutes</div>
+        <div class="text-xs text-muted mb-2 font-medium">❓ ${q.questionCount || 0} Questions | 🔁 Attempts: ${q.attemptLimit || '∞'}</div>
+        ${q.description ? `<p class="text-xs text-muted mt-1 italic" style="margin-bottom: 0;">${q.description}</p>` : ''}
+      </div>
+    `).join('');
+
+    renderPagination('quizPagination', page, totalPages, loadQuizzes);
+  }
+
+  function renderPagination(containerId, currentPage, totalPages, fetchFn) {
+    const container = document.getElementById(containerId);
+    if (totalPages <= 1) {
+      container.innerHTML = '';
+      return;
+    }
+
+    container.innerHTML = `
+      <button class="btn btn-secondary" ${currentPage === 1 ? 'disabled' : ''} onclick="${fetchFn.name}(${currentPage - 1})">Prev</button>
+      <span class="text-sm font-medium">Page ${currentPage} of ${totalPages}</span>
+      <button class="btn btn-secondary" ${currentPage === totalPages ? 'disabled' : ''} onclick="${fetchFn.name}(${currentPage + 1})">Next</button>
+    `;
+  }
+
+  async function addQuiz() {
+    const title = document.getElementById('quizTitle').value.trim();
+    const description = document.getElementById('quizDescription').value.trim();
+    const mins = parseInt(document.getElementById('timeLimitMinutes').value);
+    const attemptLimit = parseInt(document.getElementById('attemptLimit').value) || 0;
+    const shuffleQuestions = document.getElementById('shuffleQuestions').checked;
+    const btn = document.getElementById('createQuizBtn');
+
+    if (!title || isNaN(mins) || mins < 1) {
+      return showToast("Please enter a Title and a valid Time Limit (minimum 1 minute).", false);
+    }
+
+    btn.disabled = true;
+    btn.innerHTML = "<i class='bx bx-loader-alt bx-spin'></i> Creating...";
+
+    const timeLimit = mins * 60; // convert to seconds for backend
+
+    const res = await apiFetch('/quizzes', {
+      method: 'POST',
+      body: JSON.stringify({ title, description, timeLimit, attemptLimit, shuffleQuestions })
+    });
+
+    btn.disabled = false;
+    btn.innerHTML = "<i class='bx bx-plus'></i> Create Quiz Folder";
+
+    if (res.success) {
+      showToast("✅ Quiz folder created successfully!");
+      document.getElementById('quizTitle').value = '';
+      document.getElementById('quizDescription').value = '';
+      document.getElementById('timeLimitMinutes').value = '';
+      document.getElementById('attemptLimit').value = '';
+      await loadQuizzes(1);
+    } else {
+      showToast(res.message || "Failed to create quiz", false);
+    }
+  }
+
+  async function deleteQuiz(id) {
+    if (!confirm("⚠️ Are you sure? This will delete the QUIZ and ALL its questions!")) return;
+    const res = await apiFetch(`/quizzes/${id}`, { method: 'DELETE' });
+    if (res.success) {
+      showToast("🗑 Quiz deleted successfully.");
+      await loadQuizzes(1);
+    } else {
+      showToast(res.message, false);
+    }
+  }
+
+  async function openQuiz(id, title) {
+    currentQuizId = id;
+    document.getElementById('quizzesView').style.display = 'none';
+    document.getElementById('quizDetailView').style.display = 'block';
+    document.getElementById('currentQuizTitle').innerText = title;
+    await loadQuestionsForQuiz();
+  }
+
+  function goBackToQuizzes() {
+    currentQuizId = null;
+    document.getElementById('quizzesView').style.display = 'block';
+    document.getElementById('quizDetailView').style.display = 'none';
+    loadQuizzes(1);
+  }
+
+  async function loadQuestionsForQuiz() {
+    const tbody = document.getElementById('tableBody');
+    const loader = document.getElementById('questionLoader');
+
+    tbody.innerHTML = '';
+    loader.style.display = 'block';
+
+    const res = await apiFetch(`/quizzes/${currentQuizId}`);
+    loader.style.display = 'none';
+
+    if (!res.success) return showToast(res.message, false);
+
+    const questions = res.data.questions || [];
+    if (questions.length === 0) {
+      tbody.innerHTML = '<tr><td colspan="8" style="text-align:center; padding:40px; color:var(--text-muted);">No questions in this quiz. Type or paste CSV content above to import.</td></tr>';
+      return;
+    }
+
+    tbody.innerHTML = questions.map(q => `
+      <tr>
+        <td class="text-xs text-muted italic" style="max-width: 150px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;" title="${q.passage || ''}">
+          ${q.passage || '-'}
+        </td>
+        <td><strong class="text-main">${q.question}</strong></td>
+        <td>${q.optionA}</td>
+        <td>${q.optionB}</td>
+        <td>${q.optionC}</td>
+        <td>${q.optionD}</td>
+        <td class="text-success font-bold text-center">${q.correct}</td>
+        <td class="admin-only">
+          <button class="btn btn-danger btn-sm text-xs" style="padding: 6px 10px;" onclick="deleteQuestion('${q._id}')"><i class='bx bx-trash'></i></button>
+        </td>
+      </tr>
+    `).join('');
+  }
+
+  async function deleteQuestion(qId) {
+    if (!confirm("Remove this question?")) return;
+    const res = await apiFetch(`/quizzes/${currentQuizId}/questions/${qId}`, { method: 'DELETE' });
+    if (res.success) {
+      showToast("Question removed.");
+      await loadQuestionsForQuiz();
+    } else {
+      showToast(res.message, false);
+    }
+  }
+
+  async function uploadCSV() {
+    const rawText = document.getElementById('csvContent').value.trim();
+    const btn = document.getElementById('importBtn');
+
+    if (!rawText) return showToast("Please paste CSV content first.", false);
+
+    btn.disabled = true;
+    btn.innerHTML = "<i class='bx bx-loader-alt bx-spin'></i> Importing...";
+
+    const res = await apiFetch(`/quizzes/${currentQuizId}/upload-csv`, {
+      method: 'POST',
+      body: JSON.stringify({ csvText: rawText })
+    });
+
+    btn.disabled = false;
+    btn.innerHTML = "<i class='bx bx-upload'></i> Import into this Quiz";
+
+    if (res.success) {
+      let msg = `✅ Imported ${res.data.successCount} questions.`;
+      if (res.data.errorRows && res.data.errorRows.length > 0) {
+        msg += `\n⚠️ Errors: ${res.data.errorRows.length} rows skipped.`;
+        console.error("Import Errors:", res.data.errorRows);
+      }
+      showToast(msg, res.data.errorRows.length === 0);
+      document.getElementById('csvContent').value = '';
+      await loadQuestionsForQuiz();
+    } else {
+      showToast(res.message || "Failed to import", false);
+    }
+  }
+
+  function copyCsvTemplate() {
+    const template = `passage,question,optionA,optionB,optionC,optionD,correct\n"Phần văn bản (nếu có)","Câu hỏi là gì?",Đáp án A,Đáp án B,Đáp án C,Đáp án D,A`;
+    const el = document.getElementById('csvContent');
+    el.value = template;
+    el.focus();
+    showToast("Template copied to box!");
+  }
+</script>
+</body>
+</html>
