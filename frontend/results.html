@@ -298,7 +298,7 @@
 
       const { score, total, answers, quizId } = res.data || {};
       if (!quizId) {
-        document.getElementById('modalBody').innerHTML = '<p class="text-center text-danger"><i class='bx bx-error'></i> Bài kiểm tra gốc đã bị xoá khỏi hệ thống.</p>';
+        document.getElementById('modalBody').innerHTML = '<p class="text-center text-danger"><i class="bx bx-error"></i> Bài kiểm tra gốc đã bị xoá khỏi hệ thống.</p>';
         return;
       }
       const questions = quizId.questions || [];
