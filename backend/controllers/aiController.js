@@ -50,7 +50,7 @@ exports.generateQuizFromFiles = async (req, res) => {
 
     if (genAI) {
       const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
-      const prompt = \`
+      const prompt = `
       Bạn là một chuyên gia xử lý dữ liệu và phân tích đề thi trắc nghiệm (đặc biệt là đề tiếng Anh phức tạp). Dưới đây là nội dung đề bài và nội dung đáp án (nếu có).
       Nhiệm vụ của bạn là bóc tách toàn bộ nội dung thành các câu hỏi trắc nghiệm (có 4 đáp án A, B, C, D) theo định dạng JSON chuẩn.
 
@@ -59,7 +59,7 @@ exports.generateQuizFromFiles = async (req, res) => {
       2. Đoạn văn đọc hiểu (Passage): Nếu đề bài có các đoạn văn đọc chung cho nhiều câu hỏi (ví dụ: "Read the following passage..."), hãy đưa toàn bộ nội dung đoạn văn đó vào trường "passage" của TẤT CẢ các câu hỏi liên quan.
       3. Đáp án: Có thể là một từ, một câu, hoặc các chuỗi sắp xếp (ví dụ: b-e-a-d-c). Hãy trích xuất chính xác text của đáp án A, B, C, D.
       4. Đáp án đúng (correct): Nếu có thông tin đáp án, hãy đối chiếu để tìm đáp án đúng (A, B, C hoặc D). Nếu không, hãy tự giải quyết và đưa ra đáp án đúng nhất. CHỈ trả về MỘT chữ cái in hoa (A, B, C, hoặc D).
-      5. Bắt buộc escape đúng các ký tự ngoặc kép (\") trong chuỗi JSON để không làm hỏng cấu trúc.
+      5. Bắt buộc escape đúng các ký tự ngoặc kép (") trong chuỗi JSON để không làm hỏng cấu trúc.
 
       Trả về kết quả CHỈ LÀ MỘT MẢNG JSON với các object có cấu trúc sau:
       [
@@ -75,13 +75,13 @@ exports.generateQuizFromFiles = async (req, res) => {
       ]
       
       Đề bài:
-      \${docText}
+      ${docText}
       
       Đáp án (Nếu có):
-      \${ansText}
+      ${ansText}
       
       LƯU Ý TỐI QUAN TRỌNG: CHỈ TRẢ VỀ CHUỖI JSON HỢP LỆ (BẮT ĐẦU BẰNG [ VÀ KẾT THÚC BẰNG ]). KHÔNG ĐƯỢC BỌC TRONG \`\`\`json, KHÔNG ĐƯỢC GIẢI THÍCH HOẶC VIẾT THÊM BẤT KỲ CHỮ NÀO KHÁC.
-      \`;
+      `;
 
       try {
         const result = await model.generateContent(prompt);
