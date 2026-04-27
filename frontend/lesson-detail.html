@@ -145,12 +145,21 @@
               <i class='bx bxs-file-pdf text-primary' style="font-size: 32px;"></i>
               <div>
                 <div class="font-semibold text-main text-lg">Tài Liệu Đính Kèm</div>
-                <div class="text-sm text-muted">Tải xuống để xem ngoại tuyến</div>
+                <div class="text-sm text-muted">Xem trực tiếp hoặc tải xuống</div>
               </div>
             </div>
-            <a id="download-link" class="btn btn-primary" target="_blank" download>
-              <i class='bx bx-download'></i> Tải xuống
-            </a>
+            <div style="display: flex; gap: 12px;">
+              <a id="view-link" class="btn btn-secondary" onclick="togglePreview()" style="cursor: pointer;">
+                <i class='bx bx-show'></i> Xem trực tiếp
+              </a>
+              <a id="download-link" class="btn btn-primary" target="_blank" download>
+                <i class='bx bx-download'></i> Tải xuống
+              </a>
+            </div>
+          </div>
+          
+          <div id="preview-container" style="display:none; margin-top: 24px; width: 100%; height: 700px; border: 1px solid var(--border-color); border-radius: var(--radius-md); overflow: hidden; background: #fff;">
+            <iframe id="preview-frame" style="width: 100%; height: 100%; border: none;"></iframe>
           </div>
         </div>
 
@@ -204,13 +213,24 @@
       if (l.fileUrl) {
         const attC = document.getElementById('attachment-container');
         attC.style.display = 'flex';
-        document.getElementById('download-link').href = 'https://lms-gzty.onrender.com' + l.fileUrl;
+        const fileFullUrl = 'https://lms-gzty.onrender.com' + l.fileUrl;
+        document.getElementById('download-link').href = fileFullUrl;
+        document.getElementById('preview-frame').src = fileFullUrl;
       }
 
     } catch (err) {
       console.error(err);
       document.getElementById('title').innerText = "Lỗi tải nội dung";
       document.getElementById('content').innerText = "";
+    }
+  }
+
+  function togglePreview() {
+    const pc = document.getElementById('preview-container');
+    if (pc.style.display === 'none' || !pc.style.display) {
+      pc.style.display = 'block';
+    } else {
+      pc.style.display = 'none';
     }
   }
 

@@ -5,6 +5,25 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Admin - Lessons Management</title>
   <link rel="stylesheet" href="assets/css/design-system.css">
+  <style>
+    /* Modal styling */
+    .modal-overlay {
+      display: none; position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+      background: rgba(15, 23, 42, 0.4); backdrop-filter: blur(4px); z-index: 1000;
+      justify-content: center; align-items: center; padding: 40px;
+    }
+    .modal-content {
+      background: var(--bg-surface); border-radius: var(--radius-lg); width: 100%; max-width: 900px;
+      max-height: 90vh; overflow-y: auto; display: flex; flex-direction: column;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.1); position: relative;
+    }
+    .modal-header {
+      padding: 32px 40px; border-bottom: 1px solid var(--border-color); position: sticky; top: 0;
+      background: rgba(255,255,255,0.95); backdrop-filter: blur(10px); z-index: 10;
+      display: flex; justify-content: space-between; align-items: center;
+    }
+    .modal-body { padding: 40px; display: flex; flex-direction: column; gap: 24px; }
+  </style>
   <script src="admin-core.js"></script>
 </head>
 <body onload="checkAdmin(); initView()">
@@ -126,7 +145,7 @@
                 <th>Title</th>
                 <th>Image</th>
                 <th>Date</th>
-                <th width="100">Actions</th>
+                <th width="160">Actions</th>
               </tr>
             </thead>
             <tbody id="tableBody"></tbody>
@@ -138,8 +157,28 @@
   </main>
 </div>
 
+<!-- Preview Modal -->
+<div class="modal-overlay" id="previewModal">
+  <div class="modal-content">
+    <div class="modal-header">
+      <div class="font-bold text-xl text-primary" id="previewTitle">Lesson Title</div>
+      <button class="btn-icon" onclick="closePreview()"><i class='bx bx-x text-2xl'></i></button>
+    </div>
+    <div class="modal-body">
+      <div id="previewImage" style="width: 100%; height: 350px; background-size: cover; background-position: center; border-radius: var(--radius-md); display: none;"></div>
+      <div id="previewContent" style="white-space: pre-wrap; line-height: 1.8; color: var(--text-main); font-size: 1.0625rem;"></div>
+      
+      <div id="previewAttachment" style="display: none; flex-direction: column; gap: 16px; border-top: 1px solid var(--border-color); padding-top: 24px;">
+        <div class="font-bold text-main" style="display: flex; align-items: center; gap: 8px;"><i class='bx bx-paperclip text-primary text-xl'></i> Tài Liệu Đính Kèm:</div>
+        <iframe id="previewIframe" style="width: 100%; height: 600px; border: 1px solid var(--border-color); border-radius: var(--radius-md);"></iframe>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
   let currentTopicId = null;
+  let allCurrentLessons = [];
 
   function initView() {
     document.getElementById('topicsView').style.display = 'block';
@@ -210,13 +249,16 @@
       return;
     }
 
-    tbody.innerHTML = res.data.lessons.map(l => `
+    allCurrentLessons = res.data.lessons;
+
+    tbody.innerHTML = allCurrentLessons.map(l => `
       <tr>
         <td><strong class="text-primary">${l.title}</strong></td>
         <td>${l.imageUrl ? `<img src="https://lms-gzty.onrender.com${l.imageUrl}" style="height:40px; border-radius:4px; object-fit: cover;">` : '<span class="text-muted">No Image</span>'}</td>
         <td class="text-muted text-sm">${new Date(l.createdAt).toLocaleDateString()}</td>
-        <td>
-          <button class="btn btn-danger btn-sm text-xs" style="padding: 6px 10px;" onclick="deleteLesson('${l._id}')"><i class='bx bx-trash'></i></button>
+        <td style="display: flex; gap: 8px;">
+          <button class="btn btn-secondary btn-sm text-xs" style="padding: 6px 10px;" onclick="previewLesson('${l._id}')"><i class='bx bx-show'></i> View</button>
+          <button class="btn btn-danger btn-sm text-xs" style="padding: 6px 10px;" onclick="deleteLesson('${l._id}')"><i class='bx bx-trash'></i> Delete</button>
         </td>
       </tr>
     `).join('');
@@ -254,6 +296,39 @@
     if(!confirm("Are you sure?")) return;
     const res = await apiFetch(`/lessons/${id}`, { method: 'DELETE' });
     if(res.success) { showToast("Deleted"); loadLessonsForTopic(1); }
+  }
+
+  function previewLesson(id) {
+    const l = allCurrentLessons.find(x => x._id === id);
+    if (!l) return;
+    
+    document.getElementById('previewTitle').innerText = l.title;
+    document.getElementById('previewContent').innerText = l.content;
+    
+    const imgC = document.getElementById('previewImage');
+    if (l.imageUrl) {
+      imgC.style.display = 'block';
+      imgC.style.backgroundImage = `url('https://lms-gzty.onrender.com${l.imageUrl}')`;
+    } else {
+      imgC.style.display = 'none';
+    }
+    
+    const attC = document.getElementById('previewAttachment');
+    const iframe = document.getElementById('previewIframe');
+    if (l.fileUrl) {
+      attC.style.display = 'flex';
+      iframe.src = 'https://lms-gzty.onrender.com' + l.fileUrl;
+    } else {
+      attC.style.display = 'none';
+      iframe.src = '';
+    }
+    
+    document.getElementById('previewModal').style.display = 'flex';
+  }
+  
+  function closePreview() {
+    document.getElementById('previewModal').style.display = 'none';
+    document.getElementById('previewIframe').src = '';
   }
 </script>
 </body>
