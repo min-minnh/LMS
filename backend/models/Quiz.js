@@ -17,6 +17,13 @@ const quizSchema = new mongoose.Schema({
   attemptLimit: { type: Number, default: 0 }, // 0 = unlimited
   questionCount: { type: Number, default: 0 },
   shuffleQuestions: { type: Boolean, default: false },
+  
+  status: { type: String, enum: ['Draft', 'Pending Review', 'Published', 'Archived'], default: 'Published' },
+  audioFile1: { type: String },
+  audioFile2: { type: String },
+  aiGenerated: { type: Boolean, default: false },
+  originalFiles: [{ type: String }],
+  
   questions: [questionSchema]
 }, { timestamps: true });
 

@@ -319,7 +319,24 @@
       }
 
       const questions = quizId.questions || [];
-      document.getElementById('modalTitle').innerText = `Kết quả: ${score}/${total} - ${quizId.title}`;
+      
+      const percentage = total > 0 ? Math.round((score / total) * 100) : 0;
+      const conicBg = `conic-gradient(var(--success) ${percentage}%, var(--danger) 0)`;
+
+      document.getElementById('modalTitle').innerHTML = \`
+        <div style="display: flex; align-items: center; gap: 24px;">
+          <div style="width: 80px; height: 80px; border-radius: 50%; background: \${conicBg}; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
+            <div style="width: 64px; height: 64px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-direction: column;">
+              <span style="font-size: 20px; font-weight: 800; color: var(--text-main); line-height: 1;">\${score}</span>
+              <span style="font-size: 11px; color: var(--text-muted); font-weight: 600;">/ \${total}</span>
+            </div>
+          </div>
+          <div>
+            <div style="font-size: 13px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;">Báo cáo phân tích</div>
+            <div style="font-size: 22px; color: var(--primary); line-height: 1.2;">\${escapeHTML(quizId.title)}</div>
+          </div>
+        </div>
+      \`;
 
       if (questions.length === 0) {
         document.getElementById('modalBody').innerHTML = '<p class="text-center text-muted"><i class="bx bx-info-circle"></i> Không tìm thấy dữ liệu câu hỏi.</p>';

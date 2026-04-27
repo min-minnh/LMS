@@ -45,10 +45,11 @@ exports.getById = async (req, res) => {
 
 exports.update = async (req, res) => {
   try {
-    const { title, description, timeLimit, attemptLimit, shuffleQuestions } = req.body;
+    const { title, description, timeLimit, attemptLimit, shuffleQuestions, status } = req.body;
     const updateFields = { title, description, timeLimit };
     if (attemptLimit !== undefined) updateFields.attemptLimit = attemptLimit;
     if (shuffleQuestions !== undefined) updateFields.shuffleQuestions = shuffleQuestions;
+    if (status) updateFields.status = status;
     const quiz = await Quiz.findByIdAndUpdate(req.params.id, updateFields, { new: true });
     if (!quiz) return sendError(res, 'Quiz not found', 404);
     return sendSuccess(res, 'Quiz updated', quiz);

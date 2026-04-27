@@ -121,9 +121,14 @@
             <input type="checkbox" id="shuffleQuestions" style="width: auto; margin: 0; cursor: pointer;">
             <label for="shuffleQuestions" class="text-sm text-main" style="cursor: pointer;"><i class='bx bx-shuffle text-primary'></i> Xáo trộn thứ tự câu hỏi khi làm bài</label>
           </div>
-          <button id="createQuizBtn" class="btn btn-primary" onclick="addQuiz()">
-            <i class='bx bx-plus'></i> Create Quiz Folder
-          </button>
+          <div style="display: flex; gap: 12px;">
+            <button id="createQuizBtn" class="btn btn-primary" onclick="addQuiz()">
+              <i class='bx bx-plus'></i> Create Quiz Folder
+            </button>
+            <button class="btn" style="background: linear-gradient(135deg, #A855F7, #6366F1); color: white;" onclick="window.location.href='admin-quiz-ai.html'">
+              <i class='bx bx-bot'></i> Tạo Quiz tự động bằng AI
+            </button>
+          </div>
         </div>
 
         <div id="quizLoader" style="display: none; text-align: center; padding: 40px;">
@@ -222,11 +227,15 @@
     }
 
     grid.innerHTML = quizzes.map(q => `
-      <div class="card text-center relative" style="cursor: pointer; transition: transform 0.2s; display: flex; flex-direction: column; align-items: center;" onclick="openQuiz('${q._id}', '${q.title.replace(/'/g, "\\'")}')" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='translateY(0)'">
+      <div class="card text-center relative" style="cursor: pointer; transition: transform 0.2s; display: flex; flex-direction: column; align-items: center;" onclick="${q.status === 'Pending Review' ? `window.location.href='admin-quiz-review.html?id=${q._id}'` : `openQuiz('${q._id}', '${q.title.replace(/'/g, "\\\\'")}')`}" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='translateY(0)'">
         <button class="btn btn-danger btn-sm delete-quiz-btn admin-only" onclick="event.stopPropagation(); deleteQuiz('${q._id}')"><i class='bx bx-trash'></i> Delete</button>
         <i class='bx bx-trophy topic-icon'></i>
         <h3 class="font-semibold text-main mb-2">${q.title}</h3>
-        <div class="badge badge-primary mb-2">⏱ ${Math.ceil((q.timeLimit || 0) / 60)} minutes</div>
+        <div style="display: flex; gap: 6px; flex-wrap: wrap; justify-content: center; margin-bottom: 8px;">
+          <div class="badge badge-primary">⏱ ${Math.ceil((q.timeLimit || 0) / 60)} min</div>
+          <div class="badge ${q.status === 'Published' ? 'badge-success' : q.status === 'Pending Review' ? 'badge-warning' : 'badge-secondary'}">${q.status || 'Published'}</div>
+          ${q.aiGenerated ? '<div class="badge" style="background: linear-gradient(135deg, #A855F7, #6366F1); color: white;"><i class=\\\'bx bx-bot\\\'></i> AI</div>' : ''}
+        </div>
         <div class="text-xs text-muted mb-2 font-medium">❓ ${q.questionCount || 0} Questions | 🔁 Attempts: ${q.attemptLimit || '∞'}</div>
         ${q.description ? `<p class="text-xs text-muted mt-1 italic" style="margin-bottom: 0;">${q.description}</p>` : ''}
       </div>

@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tạo Quiz tự động bằng AI</title>
+  <link rel="stylesheet" href="assets/css/design-system.css">
+  <script src="admin-core.js"></script>
+  <style>
+    .upload-zone {
+      border: 2px dashed var(--border-color);
+      border-radius: var(--radius-lg);
+      padding: 40px;
+      text-align: center;
+      background: var(--bg-hover);
+      transition: all var(--transition-fast);
+      cursor: pointer;
+    }
+    .upload-zone:hover, .upload-zone.dragover {
+      border-color: var(--primary);
+      background: var(--primary-light);
+    }
+    .file-input { display: none; }
+    .selected-file {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      background: white;
+      padding: 12px 16px;
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-sm);
+      margin-top: 16px;
+      border: 1px solid var(--primary-light);
+    }
+    .selected-file i { font-size: 24px; color: var(--primary); }
+    .loader-overlay {
+      position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(255,255,255,0.9);
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 1000;
+    }
+    .pulse-bot {
+      font-size: 64px;
+      background: linear-gradient(135deg, var(--primary), var(--secondary));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      animation: float 2s ease-in-out infinite;
+    }
+  </style>
+</head>
+<body onload="checkAdmin()">
+
+<div class="app-container">
+  <!-- Same Sidebar -->
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo">
+        <i class='bx bx-shield-quarter'></i>
+        <span>Admin Panel</span>
+      </div>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="dashboard.html" class="nav-item"><i class='bx bxs-dashboard'></i> Dashboard</a>
+      <a href="vocabulary.html" class="nav-item"><i class='bx bx-book-bookmark'></i> Vocabulary</a>
+      <a href="lessons.html" class="nav-item"><i class='bx bx-library'></i> Lessons</a>
+      <a href="users.html" class="nav-item"><i class='bx bx-group'></i> Users List</a>
+      <a href="quizzes.html" class="nav-item active"><i class='bx bx-edit'></i> Quizzes</a>
+      <a href="results.html" class="nav-item"><i class='bx bx-bar-chart-alt-2'></i> Student Results</a>
+    </nav>
+  </aside>
+
+  <main class="main-content">
+    <header class="topbar">
+      <h2 class="m-0 text-primary flex items-center gap-2"><i class='bx bx-bot'></i> AI Quiz Builder</h2>
+    </header>
+
+    <div class="content-area" style="max-width: 800px; margin: 0 auto;">
+      <button class="btn btn-secondary mb-6" onclick="window.location.href='quizzes.html'">
+        <i class='bx bx-arrow-back'></i> Quay lại
+      </button>
+
+      <div class="card mb-6">
+        <h2 class="mb-2">Thông tin bài thi</h2>
+        <div class="form-group">
+          <label class="form-label">Tên bài thi</label>
+          <input type="text" id="quizTitle" class="form-control" placeholder="Ví dụ: Đề thi thử đại học môn Anh">
+        </div>
+        <div class="grid grid-cols-2 gap-4">
+          <div class="form-group">
+            <label class="form-label">Thời gian (phút)</label>
+            <input type="number" id="quizTime" class="form-control" value="60">
+          </div>
+          <div class="form-group">
+            <label class="form-label">Số lần làm (0 = Không giới hạn)</label>
+            <input type="number" id="quizAttempts" class="form-control" value="0">
+          </div>
+        </div>
+      </div>
+
+      <div class="card mb-6">
+        <h2 class="mb-4">Tải lên tài liệu gốc</h2>
+        
+        <!-- Document -->
+        <div class="mb-6">
+          <label class="form-label">1. File Đề Bài (DOCX, PDF) <span class="text-danger">*</span></label>
+          <div class="upload-zone" onclick="document.getElementById('docFile').click()">
+            <i class='bx bxs-file-doc text-4xl text-primary mb-2'></i>
+            <p class="font-medium">Kéo thả hoặc Nhấp để tải lên Đề bài</p>
+          </div>
+          <input type="file" id="docFile" class="file-input" accept=".docx,.pdf" onchange="showFile('docFile', 'docDisplay')">
+          <div id="docDisplay"></div>
+        </div>
+
+        <!-- Answer Key -->
+        <div class="mb-6">
+          <label class="form-label">2. File Đáp Án (Tùy chọn)</label>
+          <div class="upload-zone" onclick="document.getElementById('ansFile').click()">
+            <i class='bx bx-check-shield text-4xl text-success mb-2'></i>
+            <p class="font-medium">Tải lên file Đáp án để AI dò chính xác hơn</p>
+          </div>
+          <input type="file" id="ansFile" class="file-input" accept=".docx,.pdf,.txt" onchange="showFile('ansFile', 'ansDisplay')">
+          <div id="ansDisplay"></div>
+        </div>
+
+        <!-- Audio -->
+        <div class="mb-4">
+          <label class="form-label">3. File Nghe Audio (Tùy chọn)</label>
+          <div class="grid grid-cols-2 gap-4">
+            <div class="upload-zone" style="padding: 20px;" onclick="document.getElementById('audio1').click()">
+              <i class='bx bx-headphone text-2xl mb-1'></i><br>Audio Part 1
+            </div>
+            <div class="upload-zone" style="padding: 20px;" onclick="document.getElementById('audio2').click()">
+              <i class='bx bx-headphone text-2xl mb-1'></i><br>Audio Part 2
+            </div>
+          </div>
+          <input type="file" id="audio1" class="file-input" accept="audio/*" onchange="showFile('audio1', 'audio1Display')">
+          <input type="file" id="audio2" class="file-input" accept="audio/*" onchange="showFile('audio2', 'audio2Display')">
+          <div id="audio1Display"></div>
+          <div id="audio2Display"></div>
+        </div>
+      </div>
+
+      <button class="btn btn-primary w-full" style="padding: 16px; font-size: 1.1rem;" onclick="generateAIQuiz()">
+        <i class='bx bx-magic-wand'></i> Bắt đầu Sinh Đề Bằng AI
+      </button>
+    </div>
+  </main>
+</div>
+
+<!-- Loader -->
+<div class="loader-overlay" id="loader">
+  <i class='bx bx-bot pulse-bot mb-4'></i>
+  <h2 class="text-primary font-bold">AI đang phân tích tài liệu...</h2>
+  <p class="text-muted">Quá trình này có thể mất từ 15 - 30 giây. Vui lòng không đóng trang.</p>
+</div>
+
+<script>
+  function showFile(inputId, displayId) {
+    const file = document.getElementById(inputId).files[0];
+    const display = document.getElementById(displayId);
+    if(file) {
+      display.innerHTML = `
+        <div class="selected-file">
+          <i class='bx bxs-file'></i>
+          <div style="flex: 1;">
+            <div class="font-bold text-sm">${file.name}</div>
+            <div class="text-xs text-muted">${(file.size / 1024).toFixed(1)} KB</div>
+          </div>
+          <i class='bx bx-x text-danger cursor-pointer' onclick="removeFile('${inputId}', '${displayId}')"></i>
+        </div>
+      `;
+    }
+  }
+
+  function removeFile(inputId, displayId) {
+    document.getElementById(inputId).value = '';
+    document.getElementById(displayId).innerHTML = '';
+  }
+
+  async function generateAIQuiz() {
+    const title = document.getElementById('quizTitle').value.trim();
+    const timeLimit = document.getElementById('quizTime').value;
+    const attemptLimit = document.getElementById('quizAttempts').value;
+    const docFile = document.getElementById('docFile').files[0];
+    const ansFile = document.getElementById('ansFile').files[0];
+    const audio1 = document.getElementById('audio1').files[0];
+    const audio2 = document.getElementById('audio2').files[0];
+
+    if(!docFile) {
+      return showToast("⚠️ Vui lòng tải lên file Đề bài!", false);
+    }
+
+    const formData = new FormData();
+    formData.append('title', title || 'Bài thi AI');
+    formData.append('timeLimit', timeLimit * 60);
+    formData.append('attemptLimit', attemptLimit || 0);
+    formData.append('document', docFile);
+    if(ansFile) formData.append('answerKey', ansFile);
+    if(audio1) formData.append('audio1', audio1);
+    if(audio2) formData.append('audio2', audio2);
+
+    document.getElementById('loader').style.display = 'flex';
+
+    try {
+      const token = localStorage.getItem('token');
+      const response = await fetch('/quizzes-ai/generate', {
+        method: 'POST',
+        headers: { 'Authorization': `Bearer ${token}` },
+        body: formData
+      });
+      const data = await response.json();
+      
+      if(data.success) {
+        // Chuyển sang màn hình review
+        window.location.href = `admin-quiz-review.html?id=${data.data._id}`;
+      } else {
+        document.getElementById('loader').style.display = 'none';
+        showToast(data.message, false);
+      }
+    } catch(err) {
+      document.getElementById('loader').style.display = 'none';
+      showToast("Lỗi hệ thống: " + err.message, false);
+    }
+  }
+</script>
+</body>
+</html>

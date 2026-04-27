@@ -232,20 +232,35 @@
       </div>
 
       <!-- Quiz Active Area -->
-      <div id="quiz-active-area" style="display: none;">
-        <div class="timer-bar">
-          <div class="quiz-title"><i class='bx bx-edit text-primary'></i> <span id="quiz-title-text">Bài Kiểm Tra Học Kỳ</span></div>
-          <div class="timer-text" id="timer-text"><i class='bx bx-timer'></i> 00:00</div>
+      <div id="quiz-active-area" style="display: none; display: flex; gap: 24px;">
+        
+        <!-- Left: Question Navigation -->
+        <div class="exam-nav" style="width: 240px; flex-shrink: 0; position: sticky; top: 24px; align-self: flex-start; background: var(--bg-surface); padding: 20px; border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); border: 1px solid var(--border-color);">
+          <h3 class="font-bold text-sm text-muted mb-4 uppercase">Điều hướng</h3>
+          <div class="grid grid-cols-4 gap-2" id="nav-grid">
+            <!-- Navigation buttons injected here -->
+          </div>
+          <hr style="border-top: 1px solid var(--border-color); margin: 20px 0;">
+          <div class="submit-area" style="margin-top: 0;">
+            <button class="btn btn-primary" id="btn-submit" onclick="submitQuiz()" style="width: 100%; box-shadow: var(--shadow-md);">
+              <i class='bx bx-check-circle'></i> Nộp bài
+            </button>
+          </div>
         </div>
 
-        <div class="quiz-container" id="questions-container">
-          <!-- Questions inject here -->
-        </div>
+        <!-- Right: Quiz Content -->
+        <div style="flex: 1; max-width: 800px;">
+          <div class="timer-bar" style="margin-bottom: 24px;">
+            <div class="quiz-title"><i class='bx bx-edit text-primary'></i> <span id="quiz-title-text">Bài Kiểm Tra</span></div>
+            <div id="audio-container" style="display:none; flex: 1; margin: 0 20px;">
+              <audio id="exam-audio" controls style="height: 36px; width: 100%;"></audio>
+            </div>
+            <div class="timer-text" id="timer-text"><i class='bx bx-timer'></i> 00:00</div>
+          </div>
 
-        <div class="submit-area">
-          <button class="btn btn-primary" id="btn-submit" onclick="submitQuiz()" style="padding: 16px 40px; font-size: 18px; width: 100%; max-width: 400px; box-shadow: var(--shadow-md);">
-            <i class='bx bx-check-circle'></i> Nộp bài ngay
-          </button>
+          <div class="quiz-container" id="questions-container" style="max-width: 100%;">
+            <!-- Questions inject here -->
+          </div>
         </div>
       </div>
 
@@ -342,13 +357,18 @@
 
       // Prepare quiz view
       document.getElementById('loading-msg').style.display = 'none';
-      document.getElementById('quiz-active-area').style.display = 'block';
+      document.getElementById('quiz-active-area').style.display = 'flex'; // Changed to flex
 
       // Hide sidebar for full focus mode during the exam
       document.querySelector('.sidebar').style.display = 'none';
       document.querySelector('.main-content').style.marginLeft = '0';
 
       document.getElementById('quiz-title-text').innerText = quiz.title || 'Làm bài kiểm tra';
+
+      if(quiz.audioFile1) {
+        document.getElementById('audio-container').style.display = 'flex';
+        document.getElementById('exam-audio').src = 'https://lms-gzty.onrender.com' + quiz.audioFile1;
+      }
 
       timeLeft = quiz.timeLimit || (questions.length * 60);
       isQuizActive = true;
@@ -394,9 +414,23 @@
       .replace(/'/g, "&#039;");
   }
 
+  function handleSelect(qIdx) {
+    const btn = document.getElementById(`nav-btn-${qIdx}`);
+    if(btn) {
+      btn.style.background = 'var(--success)';
+      btn.style.color = 'white';
+      btn.style.borderColor = 'var(--success)';
+    }
+  }
+
   function renderQuestions() {
     const container = document.getElementById('questions-container');
-    container.innerHTML = questions.map((q, idx) => {
+    const navGrid = document.getElementById('nav-grid');
+    
+    let html = '';
+    let navHtml = '';
+
+    questions.forEach((q, idx) => {
       const optsParams = [
         { key: 'A', val: q.optionA },
         { key: 'B', val: q.optionB },
@@ -408,8 +442,10 @@
         optsParams.sort(() => Math.random() - 0.5);
       }
 
-      return `
-    <div class="q-card">
+      navHtml += `<a href="#q-${idx}" id="nav-btn-${idx}" style="display:flex;align-items:center;justify-content:center;height:36px;border-radius:8px;border:1px solid var(--border-color);font-weight:bold;color:var(--text-muted);font-size:14px;transition:0.2s;">${idx+1}</a>`;
+
+      html += `
+    <div class="q-card" id="q-${idx}">
       ${q.passage ? `
       <div class="passage-box">
         <div class="passage-label"><i class='bx bx-book-open'></i> Đoạn văn đọc hiểu</div>
@@ -419,7 +455,7 @@
       <div class="q-options">
         ${optsParams.map(opt => `
           <label class="q-option-label">
-            <input type="radio" name="${q._id}" value="${opt.key}" style="display:none;" />
+            <input type="radio" name="${q._id}" value="${opt.key}" style="display:none;" onchange="handleSelect(${idx})" />
             <div class="q-option-box">
               <strong style="margin-right: 12px; color: var(--primary);">${opt.key}.</strong> ${escapeHTML(opt.val)}
             </div>
@@ -428,7 +464,10 @@
       </div>
     </div>
   `;
-    }).join('');
+    });
+    
+    container.innerHTML = html;
+    navGrid.innerHTML = navHtml;
   }
 
   async function submitQuiz() {

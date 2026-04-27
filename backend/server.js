@@ -12,6 +12,7 @@ const lessonRoutes = require('./routes/lessonRoutes');
 const quizRoutes = require('./routes/quizRoutes');
 const resultRoutes = require('./routes/resultRoutes');
 const userRoutes = require('./routes/userRoutes');
+const aiRoutes = require('./routes/aiRoutes');
 
 const app = express();
 app.use(express.json());
@@ -34,6 +35,7 @@ app.use('/topics', topicRoutes);
 app.use('/vocabulary', vocabRoutes);
 app.use('/lessons', lessonRoutes);
 app.use('/quizzes', quizRoutes);
+app.use('/quizzes-ai', aiRoutes);
 app.use('/results', resultRoutes);
 
 // Test Route

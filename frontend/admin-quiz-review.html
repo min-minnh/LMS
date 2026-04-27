@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Review AI Quiz</title>
+  <link rel="stylesheet" href="assets/css/design-system.css">
+  <script src="admin-core.js"></script>
+  <style>
+    .split-layout {
+      display: flex;
+      height: calc(100vh - 160px);
+      gap: 24px;
+    }
+    .doc-pane {
+      flex: 1;
+      background: white;
+      border-radius: var(--radius-lg);
+      box-shadow: var(--shadow-sm);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+    .editor-pane {
+      flex: 1;
+      overflow-y: auto;
+      padding-right: 8px;
+    }
+    .question-card {
+      background: white;
+      border: 1px solid var(--border-color);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      margin-bottom: 16px;
+      position: relative;
+    }
+    .question-card.editing {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px var(--primary-light);
+    }
+    .q-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+    .q-badge {
+      background: var(--warning-light);
+      color: var(--warning);
+      font-size: 0.75rem;
+      padding: 4px 8px;
+      border-radius: 4px;
+      font-weight: bold;
+    }
+    .ans-row {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 8px;
+    }
+    .ans-label {
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      background: var(--bg-hover);
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .ans-label.correct {
+      background: var(--success);
+      color: white;
+    }
+  </style>
+</head>
+<body onload="checkAdmin(); initReview()">
+
+<div class="app-container">
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <div class="sidebar-logo"><i class='bx bx-shield-quarter'></i><span>Admin Panel</span></div>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="dashboard.html" class="nav-item"><i class='bx bxs-dashboard'></i> Dashboard</a>
+      <a href="vocabulary.html" class="nav-item"><i class='bx bx-book-bookmark'></i> Vocabulary</a>
+      <a href="lessons.html" class="nav-item"><i class='bx bx-library'></i> Lessons</a>
+      <a href="users.html" class="nav-item"><i class='bx bx-group'></i> Users List</a>
+      <a href="quizzes.html" class="nav-item active"><i class='bx bx-edit'></i> Quizzes</a>
+      <a href="results.html" class="nav-item"><i class='bx bx-bar-chart-alt-2'></i> Student Results</a>
+    </nav>
+  </aside>
+
+  <main class="main-content" style="display: flex; flex-direction: column; overflow: hidden;">
+    <header class="topbar">
+      <div class="flex items-center gap-4">
+        <button class="btn btn-secondary btn-icon" onclick="window.location.href='quizzes.html'"><i class='bx bx-arrow-back'></i></button>
+        <h2 class="m-0 text-main flex items-center gap-2"><i class='bx bx-check-shield text-warning'></i> Kiểm duyệt Đề (Pending Review)</h2>
+      </div>
+      <div class="topbar-actions">
+        <button class="btn btn-primary" onclick="publishQuiz()"><i class='bx bx-check-double'></i> Hoàn tất & Xuất bản (Publish)</button>
+      </div>
+    </header>
+
+    <div class="content-area" style="flex: 1; padding-bottom: 0;">
+      <div class="split-layout">
+        <!-- Left Pane: Document Viewer -->
+        <div class="doc-pane" id="docPane">
+          <div style="padding: 12px 16px; background: var(--bg-hover); border-bottom: 1px solid var(--border-color); font-weight: bold;">
+            Tài liệu gốc
+          </div>
+          <iframe id="docViewer" style="flex:1; width:100%; border:none;"></iframe>
+        </div>
+
+        <!-- Right Pane: Questions List -->
+        <div class="editor-pane" id="qList">
+          <div style="text-align: center; padding: 40px;">
+            <i class='bx bx-loader-alt bx-spin text-3xl text-primary'></i>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>
+
+<script>
+  let quizData = null;
+  const baseUrl = "https://lms-gzty.onrender.com"; // Adjust if local testing
+
+  async function initReview() {
+    const params = new URLSearchParams(window.location.search);
+    const id = params.get('id');
+    if(!id) return window.location.href='quizzes.html';
+
+    const res = await apiFetch(`/quizzes/${id}`);
+    if(res.success) {
+      quizData = res.data;
+      renderDoc();
+      renderQuestions();
+    } else {
+      showToast("Lỗi tải đề thi", false);
+    }
+  }
+
+  function renderDoc() {
+    if(quizData.originalFiles && quizData.originalFiles.length > 0) {
+      const fileUrl = baseUrl + quizData.originalFiles[0];
+      // Use Google Docs viewer
+      document.getElementById('docViewer').src = `https://docs.google.com/gview?url=${encodeURIComponent(fileUrl)}&embedded=true`;
+    } else {
+      document.getElementById('docPane').innerHTML = `<div style="padding:40px; text-align:center; color:gray;">Không tìm thấy tài liệu gốc.</div>`;
+    }
+  }
+
+  function renderQuestions() {
+    const list = document.getElementById('qList');
+    if(!quizData.questions || quizData.questions.length === 0) {
+      list.innerHTML = `<div style="padding:20px; text-align:center;">AI không tìm thấy câu hỏi nào.</div>`;
+      return;
+    }
+
+    let html = '';
+    quizData.questions.forEach((q, index) => {
+      html += `
+        <div class="question-card" id="card-${q._id}">
+          <div class="q-header">
+            <span class="font-bold">Câu ${index + 1}</span>
+            <div class="flex gap-2">
+              <span class="q-badge">AI Generated</span>
+              <button class="btn btn-icon text-danger" onclick="deleteQ('${q._id}')" style="padding:4px;"><i class='bx bx-trash'></i></button>
+            </div>
+          </div>
+          
+          <textarea class="form-control mb-4" rows="2" id="text-${q._id}" onchange="updateQ('${q._id}')">${q.question}</textarea>
+          
+          <div class="ans-row">
+            <div class="ans-label ${q.correct === 'A' ? 'correct' : ''}" onclick="setCorrect('${q._id}', 'A')">A</div>
+            <input type="text" class="form-control" id="optA-${q._id}" value="${q.optionA}" onchange="updateQ('${q._id}')">
+          </div>
+          <div class="ans-row">
+            <div class="ans-label ${q.correct === 'B' ? 'correct' : ''}" onclick="setCorrect('${q._id}', 'B')">B</div>
+            <input type="text" class="form-control" id="optB-${q._id}" value="${q.optionB}" onchange="updateQ('${q._id}')">
+          </div>
+          <div class="ans-row">
+            <div class="ans-label ${q.correct === 'C' ? 'correct' : ''}" onclick="setCorrect('${q._id}', 'C')">C</div>
+            <input type="text" class="form-control" id="optC-${q._id}" value="${q.optionC}" onchange="updateQ('${q._id}')">
+          </div>
+          <div class="ans-row">
+            <div class="ans-label ${q.correct === 'D' ? 'correct' : ''}" onclick="setCorrect('${q._id}', 'D')">D</div>
+            <input type="text" class="form-control" id="optD-${q._id}" value="${q.optionD}" onchange="updateQ('${q._id}')">
+          </div>
+        </div>
+      `;
+    });
+    list.innerHTML = html;
+  }
+
+  async function updateQ(qId) {
+    const question = document.getElementById(`text-${qId}`).value;
+    const optionA = document.getElementById(`optA-${qId}`).value;
+    const optionB = document.getElementById(`optB-${qId}`).value;
+    const optionC = document.getElementById(`optC-${qId}`).value;
+    const optionD = document.getElementById(`optD-${qId}`).value;
+    
+    // Find correct
+    const card = document.getElementById(`card-${qId}`);
+    const correctLabel = card.querySelector('.ans-label.correct');
+    const correct = correctLabel ? correctLabel.innerText : 'A';
+
+    await apiFetch(`/quizzes/${quizData._id}/questions/${qId}`, {
+      method: 'PUT',
+      body: JSON.stringify({ question, optionA, optionB, optionC, optionD, correct })
+    });
+  }
+
+  function setCorrect(qId, choice) {
+    const card = document.getElementById(`card-${qId}`);
+    const labels = card.querySelectorAll('.ans-label');
+    labels.forEach(l => l.classList.remove('correct'));
+    
+    const target = Array.from(labels).find(l => l.innerText === choice);
+    if(target) target.classList.add('correct');
+    
+    updateQ(qId);
+  }
+
+  async function deleteQ(qId) {
+    if(!confirm("Xóa câu hỏi này?")) return;
+    await apiFetch(`/quizzes/${quizData._id}/questions/${qId}`, { method: 'DELETE' });
+    initReview(); // Reload
+  }
+
+  async function publishQuiz() {
+    if(!confirm("Bạn đã kiểm duyệt xong và muốn xuất bản bài thi này cho học viên?")) return;
+    
+    // Cập nhật status
+    // Add endpoint or just use update if we allow updating status
+    const res = await apiFetch(`/quizzes/${quizData._id}`, {
+      method: 'PUT',
+      body: JSON.stringify({ status: 'Published', title: quizData.title, timeLimit: quizData.timeLimit })
+    });
+
+    if(res.success) {
+      showToast("Xuất bản thành công!");
+      setTimeout(() => { window.location.href = 'quizzes.html'; }, 1000);
+    } else {
+      showToast("Lỗi: " + res.message, false);
+    }
+  }
+</script>
+</body>
+</html>
