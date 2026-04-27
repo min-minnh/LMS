@@ -88,6 +88,8 @@ exports.startQuiz = async (req, res) => {
       title: quiz.title,
       timeLimit: quiz.timeLimit,
       shuffleQuestions: quiz.shuffleQuestions,
+      audioFile1: quiz.audioFile1,
+      originalFiles: quiz.originalFiles,
       questions: processedQuestions.map(q => ({
         _id: q._id,
         passage: q.passage || '',   // include passage for reading comprehension questions
