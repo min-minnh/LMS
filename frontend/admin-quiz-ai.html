@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Tạo Quiz tự động bằng AI</title>
+  <title>Tạo Đề Tự Động (Auto Scanner)</title>
   <link rel="stylesheet" href="assets/css/design-system.css">
   <script src="admin-core.js"></script>
   <style>
@@ -74,7 +74,7 @@
 
   <main class="main-content">
     <header class="topbar">
-      <h2 class="m-0 text-primary flex items-center gap-2"><i class='bx bx-bot'></i> AI Quiz Builder</h2>
+      <h2 class="m-0 text-primary flex items-center gap-2"><i class='bx bx-scan'></i> Auto Quiz Scanner</h2>
     </header>
 
     <div class="content-area" style="max-width: 800px; margin: 0 auto;">
@@ -116,12 +116,12 @@
 
         <!-- Answer Key -->
         <div class="mb-6">
-          <label class="form-label">2. File Đáp Án (Tùy chọn)</label>
+          <label class="form-label">2. File Đáp Án (TXT, DOCX) <span class="text-danger">*</span></label>
           <div class="upload-zone" onclick="document.getElementById('ansFile').click()">
             <i class='bx bx-check-shield text-4xl text-success mb-2'></i>
-            <p class="font-medium">Tải lên file Đáp án để AI dò chính xác hơn</p>
+            <p class="font-medium">Tải lên file chứa đáp án (Ví dụ: 1A 2B 3C...)</p>
           </div>
-          <input type="file" id="ansFile" class="file-input" accept=".docx,.pdf,.txt" onchange="showFile('ansFile', 'ansDisplay')">
+          <input type="file" id="ansFile" class="file-input" accept=".docx,.txt" onchange="showFile('ansFile', 'ansDisplay')">
           <div id="ansDisplay"></div>
         </div>
 
@@ -144,7 +144,7 @@
       </div>
 
       <button class="btn btn-primary w-full" style="padding: 16px; font-size: 1.1rem;" onclick="generateAIQuiz()">
-        <i class='bx bx-magic-wand'></i> Bắt đầu Sinh Đề Bằng AI
+        <i class='bx bx-scan'></i> Bắt Đầu Quét Đề
       </button>
     </div>
   </main>
@@ -152,9 +152,9 @@
 
 <!-- Loader -->
 <div class="loader-overlay" id="loader">
-  <i class='bx bx-bot pulse-bot mb-4'></i>
-  <h2 class="text-primary font-bold">AI đang phân tích tài liệu...</h2>
-  <p class="text-muted">Quá trình này có thể mất từ 15 - 30 giây. Vui lòng không đóng trang.</p>
+  <i class='bx bx-scan pulse-bot mb-4'></i>
+  <h2 class="text-primary font-bold">Hệ thống đang quét đáp án...</h2>
+  <p class="text-muted">Quá trình này diễn ra rất nhanh. Vui lòng đợi trong giây lát.</p>
 </div>
 
 <script>
@@ -192,13 +192,16 @@
     if(!docFile) {
       return showToast("⚠️ Vui lòng tải lên file Đề bài!", false);
     }
+    if(!ansFile) {
+      return showToast("⚠️ Vui lòng tải lên file Đáp án!", false);
+    }
 
     const formData = new FormData();
-    formData.append('title', title || 'Bài thi AI');
+    formData.append('title', title || 'Đề thi Quét tự động');
     formData.append('timeLimit', timeLimit * 60);
     formData.append('attemptLimit', attemptLimit || 0);
     formData.append('document', docFile);
-    if(ansFile) formData.append('answerKey', ansFile);
+    formData.append('answerKey', ansFile);
     if(audio1) formData.append('audio1', audio1);
     if(audio2) formData.append('audio2', audio2);
 

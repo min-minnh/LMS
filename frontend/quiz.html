@@ -180,6 +180,29 @@
     }
     
     @keyframes spin { 100% { transform: rotate(360deg); } }
+
+    /* Scantron specific */
+    .ans-circle {
+      width: 36px;
+      height: 36px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      border: 2px solid var(--border-color);
+      font-weight: bold;
+      color: var(--text-muted);
+      transition: all 0.2s;
+      background: white;
+    }
+    .ans-label-scantron input:checked + .ans-circle {
+      background: var(--primary);
+      border-color: var(--primary);
+      color: white;
+    }
+    .ans-label-scantron:hover .ans-circle {
+      border-color: var(--primary);
+    }
   </style>
 </head>
 <body>
@@ -232,34 +255,33 @@
       </div>
 
       <!-- Quiz Active Area -->
-      <div id="quiz-active-area" style="display: none; display: flex; gap: 24px;">
+      <div id="quiz-active-area" style="display: none; height: calc(100vh - 80px); gap: 24px;">
         
-        <!-- Left: Question Navigation -->
-        <div class="exam-nav" style="width: 240px; flex-shrink: 0; position: sticky; top: 24px; align-self: flex-start; background: var(--bg-surface); padding: 20px; border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); border: 1px solid var(--border-color);">
-          <h3 class="font-bold text-sm text-muted mb-4 uppercase">Điều hướng</h3>
-          <div class="grid grid-cols-4 gap-2" id="nav-grid">
-            <!-- Navigation buttons injected here -->
-          </div>
-          <hr style="border-top: 1px solid var(--border-color); margin: 20px 0;">
-          <div class="submit-area" style="margin-top: 0;">
-            <button class="btn btn-primary" id="btn-submit" onclick="submitQuiz()" style="width: 100%; box-shadow: var(--shadow-md);">
-              <i class='bx bx-check-circle'></i> Nộp bài
-            </button>
-          </div>
-        </div>
-
-        <!-- Right: Quiz Content -->
-        <div style="flex: 1; max-width: 800px;">
-          <div class="timer-bar" style="margin-bottom: 24px;">
+        <!-- Left: Document Viewer -->
+        <div class="doc-pane" style="flex: 1; display: flex; flex-direction: column; background: var(--bg-surface); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); overflow: hidden; border: 1px solid var(--border-color);">
+          <div class="timer-bar" style="position: relative; margin: 0; border-radius: 0; box-shadow: none; border-bottom: 1px solid var(--border-color); border-left: none; border-right: none; border-top: none;">
             <div class="quiz-title"><i class='bx bx-edit text-primary'></i> <span id="quiz-title-text">Bài Kiểm Tra</span></div>
             <div id="audio-container" style="display:none; flex: 1; margin: 0 20px;">
               <audio id="exam-audio" controls style="height: 36px; width: 100%;"></audio>
             </div>
             <div class="timer-text" id="timer-text"><i class='bx bx-timer'></i> 00:00</div>
           </div>
+          <iframe id="docViewer" style="flex:1; width:100%; border:none;"></iframe>
+        </div>
 
-          <div class="quiz-container" id="questions-container" style="max-width: 100%;">
+        <!-- Right: Answers Sheet -->
+        <div class="exam-nav" style="width: 320px; flex-shrink: 0; background: var(--bg-surface); padding: 20px; border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); border: 1px solid var(--border-color); display: flex; flex-direction: column;">
+          <h3 class="font-bold text-sm text-muted mb-4 uppercase">Phiếu Trả Lời</h3>
+          
+          <div id="questions-container" style="flex: 1; overflow-y: auto; padding-right: 10px;">
             <!-- Questions inject here -->
+          </div>
+          
+          <hr style="border-top: 1px solid var(--border-color); margin: 20px 0;">
+          <div class="submit-area" style="margin-top: 0;">
+            <button class="btn btn-primary" id="btn-submit" onclick="submitQuiz()" style="width: 100%; box-shadow: var(--shadow-md); padding: 14px;">
+              <i class='bx bx-check-circle'></i> Nộp bài
+            </button>
           </div>
         </div>
       </div>
@@ -369,6 +391,13 @@
         document.getElementById('audio-container').style.display = 'flex';
         document.getElementById('exam-audio').src = 'https://lms-gzty.onrender.com' + quiz.audioFile1;
       }
+      
+      if (quiz.originalFiles && quiz.originalFiles.length > 0) {
+        const fileUrl = 'https://lms-gzty.onrender.com' + quiz.originalFiles[0];
+        document.getElementById('docViewer').src = `https://docs.google.com/gview?url=${encodeURIComponent(fileUrl)}&embedded=true`;
+      } else {
+        document.getElementById('docViewer').srcdoc = `<div style="padding:40px; text-align:center; color:gray; font-family:sans-serif;">Không tìm thấy file đề bài.</div>`;
+      }
 
       timeLeft = quiz.timeLimit || (questions.length * 60);
       isQuizActive = true;
@@ -415,59 +444,33 @@
   }
 
   function handleSelect(qIdx) {
-    const btn = document.getElementById(`nav-btn-${qIdx}`);
-    if(btn) {
-      btn.style.background = 'var(--success)';
-      btn.style.color = 'white';
-      btn.style.borderColor = 'var(--success)';
-    }
+    // Optional feedback when selected
   }
 
   function renderQuestions() {
     const container = document.getElementById('questions-container');
-    const navGrid = document.getElementById('nav-grid');
     
     let html = '';
-    let navHtml = '';
 
     questions.forEach((q, idx) => {
-      const optsParams = [
-        { key: 'A', val: q.optionA },
-        { key: 'B', val: q.optionB },
-        { key: 'C', val: q.optionC },
-        { key: 'D', val: q.optionD }
-      ].filter(o => o.val);
+      const optsParams = ['A', 'B', 'C', 'D'];
       
-      if (shuffleEnabled) {
-        optsParams.sort(() => Math.random() - 0.5);
-      }
-
-      navHtml += `<a href="#q-${idx}" id="nav-btn-${idx}" style="display:flex;align-items:center;justify-content:center;height:36px;border-radius:8px;border:1px solid var(--border-color);font-weight:bold;color:var(--text-muted);font-size:14px;transition:0.2s;">${idx+1}</a>`;
-
       html += `
-    <div class="q-card" id="q-${idx}">
-      ${q.passage ? `
-      <div class="passage-box">
-        <div class="passage-label"><i class='bx bx-book-open'></i> Đoạn văn đọc hiểu</div>
-        ${escapeHTML(q.passage)}
-      </div>` : ''}
-      <h4 class="q-title"><span class="q-number">Câu ${idx + 1}:</span> ${escapeHTML(q.question)}</h4>
-      <div class="q-options">
-        ${optsParams.map(opt => `
-          <label class="q-option-label">
-            <input type="radio" name="${q._id}" value="${opt.key}" style="display:none;" onchange="handleSelect(${idx})" />
-            <div class="q-option-box">
-              <strong style="margin-right: 12px; color: var(--primary);">${opt.key}.</strong> ${escapeHTML(opt.val)}
-            </div>
-          </label>
-        `).join('')}
-      </div>
-    </div>
-  `;
+        <div class="flex items-center mb-3 p-2 hover:bg-gray-50 rounded" id="q-${idx}">
+          <div class="font-bold text-primary w-16" style="flex-shrink:0;">Câu ${idx + 1}:</div>
+          <div class="flex gap-3 flex-1 justify-around">
+            ${optsParams.map(opt => `
+              <label class="ans-label-scantron" style="cursor:pointer;">
+                <input type="radio" name="${q._id}" value="${opt}" style="display:none;" onchange="handleSelect(${idx})" />
+                <div class="ans-circle">${opt}</div>
+              </label>
+            `).join('')}
+          </div>
+        </div>
+      `;
     });
     
     container.innerHTML = html;
-    navGrid.innerHTML = navHtml;
   }
 
   async function submitQuiz() {

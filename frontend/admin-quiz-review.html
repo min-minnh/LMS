@@ -96,7 +96,7 @@
     <header class="topbar">
       <div class="flex items-center gap-4">
         <button class="btn btn-secondary btn-icon" onclick="window.location.href='quizzes.html'"><i class='bx bx-arrow-back'></i></button>
-        <h2 class="m-0 text-main flex items-center gap-2"><i class='bx bx-check-shield text-warning'></i> Kiểm duyệt Đề (Pending Review)</h2>
+        <h2 class="m-0 text-main flex items-center gap-2"><i class='bx bx-check-shield text-warning'></i> Rà soát Đáp án (Review)</h2>
       </div>
       <div class="topbar-actions">
         <button class="btn btn-primary" onclick="publishQuiz()"><i class='bx bx-check-double'></i> Hoàn tất & Xuất bản (Publish)</button>
@@ -164,31 +164,17 @@
     quizData.questions.forEach((q, index) => {
       html += `
         <div class="question-card" id="card-${q._id}">
-          <div class="q-header">
+          <div class="q-header" style="margin-bottom: 0;">
             <span class="font-bold">Câu ${index + 1}</span>
-            <div class="flex gap-2">
-              <span class="q-badge">AI Generated</span>
+            <div class="flex gap-4">
+              <div class="flex gap-2">
+                <div class="ans-label ${q.correct === 'A' ? 'correct' : ''}" onclick="setCorrect('${q._id}', 'A')">A</div>
+                <div class="ans-label ${q.correct === 'B' ? 'correct' : ''}" onclick="setCorrect('${q._id}', 'B')">B</div>
+                <div class="ans-label ${q.correct === 'C' ? 'correct' : ''}" onclick="setCorrect('${q._id}', 'C')">C</div>
+                <div class="ans-label ${q.correct === 'D' ? 'correct' : ''}" onclick="setCorrect('${q._id}', 'D')">D</div>
+              </div>
               <button class="btn btn-icon text-danger" onclick="deleteQ('${q._id}')" style="padding:4px;"><i class='bx bx-trash'></i></button>
             </div>
-          </div>
-          
-          <textarea class="form-control mb-4" rows="2" id="text-${q._id}" onchange="updateQ('${q._id}')">${q.question}</textarea>
-          
-          <div class="ans-row">
-            <div class="ans-label ${q.correct === 'A' ? 'correct' : ''}" onclick="setCorrect('${q._id}', 'A')">A</div>
-            <input type="text" class="form-control" id="optA-${q._id}" value="${q.optionA}" onchange="updateQ('${q._id}')">
-          </div>
-          <div class="ans-row">
-            <div class="ans-label ${q.correct === 'B' ? 'correct' : ''}" onclick="setCorrect('${q._id}', 'B')">B</div>
-            <input type="text" class="form-control" id="optB-${q._id}" value="${q.optionB}" onchange="updateQ('${q._id}')">
-          </div>
-          <div class="ans-row">
-            <div class="ans-label ${q.correct === 'C' ? 'correct' : ''}" onclick="setCorrect('${q._id}', 'C')">C</div>
-            <input type="text" class="form-control" id="optC-${q._id}" value="${q.optionC}" onchange="updateQ('${q._id}')">
-          </div>
-          <div class="ans-row">
-            <div class="ans-label ${q.correct === 'D' ? 'correct' : ''}" onclick="setCorrect('${q._id}', 'D')">D</div>
-            <input type="text" class="form-control" id="optD-${q._id}" value="${q.optionD}" onchange="updateQ('${q._id}')">
           </div>
         </div>
       `;
@@ -197,12 +183,9 @@
   }
 
   async function updateQ(qId) {
-    const question = document.getElementById(`text-${qId}`).value;
-    const optionA = document.getElementById(`optA-${qId}`).value;
-    const optionB = document.getElementById(`optB-${qId}`).value;
-    const optionC = document.getElementById(`optC-${qId}`).value;
-    const optionD = document.getElementById(`optD-${qId}`).value;
-    
+    const qObj = quizData.questions.find(x => x._id === qId);
+    if(!qObj) return;
+
     // Find correct
     const card = document.getElementById(`card-${qId}`);
     const correctLabel = card.querySelector('.ans-label.correct');
@@ -210,7 +193,14 @@
 
     await apiFetch(`/quizzes/${quizData._id}/questions/${qId}`, {
       method: 'PUT',
-      body: JSON.stringify({ question, optionA, optionB, optionC, optionD, correct })
+      body: JSON.stringify({ 
+        question: qObj.question, 
+        optionA: qObj.optionA, 
+        optionB: qObj.optionB, 
+        optionC: qObj.optionC, 
+        optionD: qObj.optionD, 
+        correct 
+      })
     });
   }
 

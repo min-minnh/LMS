@@ -85,7 +85,7 @@ exports.addQuestion = async (req, res) => {
 
 exports.updateQuestion = async (req, res) => {
   try {
-    const { question, optionA, optionB, optionC, optionD, correct } = req.body;
+    const { passage, question, optionA, optionB, optionC, optionD, correct } = req.body;
     const { id, qId } = req.params;
     const quiz = await Quiz.findOneAndUpdate(
       { _id: id, 'questions._id': qId },

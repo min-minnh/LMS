@@ -282,13 +282,13 @@
       }
 
       tbody.innerHTML = data.data.results.map(r => {
-        const isPass = r.score >= (r.total / 2);
+        const isPass = r.score >= 5;
         const badgeClass = isPass ? 'badge-success' : 'badge-danger';
         const dateStr = r.submittedAt ? new Date(r.submittedAt).toLocaleString() : 'Chưa nộp';
         return `
           <tr class="result-row" onclick="viewDetails('${r._id}')">
             <td><strong class="text-primary">${r.quizId?.title || 'Unknown Quiz'}</strong></td>
-            <td><span class="badge ${badgeClass}">${r.score} / ${r.total}</span></td>
+            <td><span class="badge ${badgeClass}">${r.score} / 10</span></td>
             <td class="text-muted text-sm">${dateStr}</td>
             <td><button class="btn btn-secondary btn-sm" style="padding: 6px 12px; font-size: 13px;">Xem chi tiết <i class='bx bx-right-arrow-alt'></i></button></td>
           </tr>`;
@@ -320,7 +320,7 @@
 
       const questions = quizId.questions || [];
       
-      const percentage = total > 0 ? Math.round((score / total) * 100) : 0;
+      const percentage = Math.round((score / 10) * 100);
       const conicBg = `conic-gradient(var(--success) ${percentage}%, var(--danger) 0)`;
 
       document.getElementById('modalTitle').innerHTML = \`
@@ -328,11 +328,11 @@
           <div style="width: 80px; height: 80px; border-radius: 50%; background: \${conicBg}; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 10px rgba(0,0,0,0.1);">
             <div style="width: 64px; height: 64px; background: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-direction: column;">
               <span style="font-size: 20px; font-weight: 800; color: var(--text-main); line-height: 1;">\${score}</span>
-              <span style="font-size: 11px; color: var(--text-muted); font-weight: 600;">/ \${total}</span>
+              <span style="font-size: 11px; color: var(--text-muted); font-weight: 600;">/ 10</span>
             </div>
           </div>
           <div>
-            <div style="font-size: 13px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;">Báo cáo phân tích</div>
+            <div style="font-size: 13px; color: var(--text-muted); font-weight: 600; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 4px;">Báo cáo phân tích (\${total} câu)</div>
             <div style="font-size: 22px; color: var(--primary); line-height: 1.2;">\${escapeHTML(quizId.title)}</div>
           </div>
         </div>
@@ -355,42 +355,15 @@
         let icon = isCorrect ? "<i class='bx bxs-check-circle text-success text-xl'></i>" : "<i class='bx bxs-x-circle text-danger text-xl'></i>";
         if (!selected) icon = "<i class='bx bxs-info-circle text-warning text-xl'></i>";
 
-        const optsParams = [
-          { key: 'A', val: q.optionA }, { key: 'B', val: q.optionB },
-          { key: 'C', val: q.optionC }, { key: 'D', val: q.optionD }
-        ].filter(o => o.val);
+        const correctAns = q.correct ? q.correct.toUpperCase() : '';
+        const selectedAns = selected ? selected.toUpperCase() : 'Chưa chọn';
 
-        html += `<div class="detail-card ${cardClass}">
-                   ${q.passage ? `<div class="passage-review-box"><div class="passage-review-label"><i class='bx bx-book-open'></i> Đoạn văn</div>${escapeHTML(q.passage)}</div>` : ''}
-                   <div class="q-title flex items-center" style="gap:8px;">${icon} <span>Câu ${idx + 1}: ${escapeHTML(q.question)}</span></div>
-                   <div class="q-options">`;
+        let detailText = isCorrect ? `<span class="text-success font-bold">Đúng (Bạn chọn ${selectedAns})</span>` : `<span class="text-danger font-bold">Sai (Bạn chọn ${selectedAns}, Đáp án đúng: ${correctAns})</span>`;
+        if(!selected) detailText = `<span class="text-warning font-bold">Chưa chọn (Đáp án đúng: ${correctAns})</span>`;
 
-        optsParams.forEach(opt => {
-          let optClass = 'opt-row';
-          let badges = '';
-          const correctAns = q.correct ? q.correct.toUpperCase() : '';
-          const selectedAns = selected ? selected.toUpperCase() : '';
-          const currentOpt = opt.key.toUpperCase();
-
-          if (correctAns && currentOpt === correctAns) {
-            optClass = 'opt-row opt-correct';
-            badges += `<span class="opt-selected-badge" style="background:#059669; color:white;">Đáp án đúng</span>`;
-          }
-          if (selectedAns && currentOpt === selectedAns && currentOpt !== correctAns) {
-            optClass = 'opt-row opt-wrong';
-            badges += `<span class="opt-selected-badge" style="background:#dc2626; color:white;">Bạn chọn</span>`;
-          }
-          if (selectedAns && currentOpt === selectedAns && currentOpt === correctAns) {
-            badges += `<span class="opt-selected-badge" style="background:white; color:#059669;">Bạn chọn</span>`;
-          }
-
-          html += `<div class="${optClass}">
-                     <span><strong style="margin-right:8px;">${opt.key}.</strong> ${escapeHTML(opt.val)}</span>
-                     <div>${badges}</div>
-                   </div>`;
-        });
-
-        html += `</div></div>`;
+        html += `<div class="detail-card ${cardClass}" style="padding: 16px;">
+                   <div class="q-title flex items-center m-0" style="gap:8px; margin-bottom: 0;">${icon} <span>Câu ${idx + 1}: ${detailText}</span></div>
+                 </div>`;
       });
 
       document.getElementById('modalBody').innerHTML = html;

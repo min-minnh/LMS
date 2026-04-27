@@ -148,8 +148,12 @@ exports.submitQuiz = async (req, res) => {
       });
     });
 
+    const totalQuestions = quiz.questions.length;
+    const finalScore = totalQuestions > 0 ? (score / totalQuestions) * 10 : 0;
+    const roundedScore = Math.round(finalScore * 100) / 100; // Keep 2 decimal places
+
     result.answers = finalAnswers;
-    result.score = score;
+    result.score = roundedScore;
     result.submittedAt = now;
 
     await result.save();
