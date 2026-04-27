@@ -205,13 +205,10 @@
     document.getElementById('loader').style.display = 'flex';
 
     try {
-      const token = localStorage.getItem('token');
-      const response = await fetch('/quizzes-ai/generate', {
+      const data = await apiFetch('/quizzes-ai/generate', {
         method: 'POST',
-        headers: { 'Authorization': `Bearer ${token}` },
         body: formData
       });
-      const data = await response.json();
       
       if(data.success) {
         // Chuyển sang màn hình review
