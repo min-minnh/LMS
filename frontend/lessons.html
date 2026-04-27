@@ -317,7 +317,13 @@
     const iframe = document.getElementById('previewIframe');
     if (l.fileUrl) {
       attC.style.display = 'flex';
-      iframe.src = 'https://lms-gzty.onrender.com' + l.fileUrl;
+      const fileFullUrl = 'https://lms-gzty.onrender.com' + l.fileUrl;
+      let viewerUrl = fileFullUrl;
+      const ext = fileFullUrl.split('.').pop().toLowerCase();
+      if (['doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx'].includes(ext)) {
+        viewerUrl = `https://docs.google.com/gview?url=${encodeURIComponent(fileFullUrl)}&embedded=true`;
+      }
+      iframe.src = viewerUrl;
     } else {
       attC.style.display = 'none';
       iframe.src = '';

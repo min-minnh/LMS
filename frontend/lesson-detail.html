@@ -215,7 +215,13 @@
         attC.style.display = 'flex';
         const fileFullUrl = 'https://lms-gzty.onrender.com' + l.fileUrl;
         document.getElementById('download-link').href = fileFullUrl;
-        document.getElementById('preview-frame').src = fileFullUrl;
+        
+        let viewerUrl = fileFullUrl;
+        const ext = fileFullUrl.split('.').pop().toLowerCase();
+        if (['doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx'].includes(ext)) {
+          viewerUrl = `https://docs.google.com/gview?url=${encodeURIComponent(fileFullUrl)}&embedded=true`;
+        }
+        document.getElementById('preview-frame').src = viewerUrl;
       }
 
     } catch (err) {
