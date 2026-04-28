@@ -369,6 +369,20 @@
 
       resultId = data.data.resultId;
       const quiz = data.data.quiz;
+      
+      // Fetch full quiz to ensure we get audioFile2 (bypassing backend safeQuiz limitations on old deploys)
+      try {
+        const fullRes = await fetch('https://lms-gzty.onrender.com/quizzes/' + quizId, {
+          headers: { 'Authorization': 'Bearer ' + token }
+        });
+        const fullData = await fullRes.json();
+        if (fullData.success && fullData.data && fullData.data.audioFile2) {
+          quiz.audioFile2 = fullData.data.audioFile2;
+        }
+      } catch (e) {
+        console.warn("Could not fetch full quiz for audio2", e);
+      }
+
       questions = quiz.questions || [];
       shuffleEnabled = !!quiz.shuffleQuestions;
 
@@ -387,13 +401,25 @@
 
       document.getElementById('quiz-title-text').innerText = quiz.title || 'Làm bài kiểm tra';
 
-      if(quiz.audioFile1) {
-        document.getElementById('audio-container').style.display = 'flex';
-        const audioEl = document.getElementById('exam-audio');
-        // Handle Windows backslashes if any
-        const safeAudioPath = quiz.audioFile1.replace(/\\/g, '/');
-        audioEl.src = 'https://lms-gzty.onrender.com' + safeAudioPath;
-        audioEl.load(); // Force browser to reload audio source
+      let hasAudio = false;
+      const audioContainer = document.getElementById('audio-container');
+      audioContainer.innerHTML = ''; // clear it
+
+      if (quiz.audioFile1) {
+        hasAudio = true;
+        const safeAudioPath1 = quiz.audioFile1.replace(/\\/g, '/');
+        audioContainer.innerHTML += `<audio controls style="height: 36px; width: 100%; margin-bottom: 4px;" src="https://lms-gzty.onrender.com${safeAudioPath1}"></audio>`;
+      }
+      
+      if (quiz.audioFile2) {
+        hasAudio = true;
+        const safeAudioPath2 = quiz.audioFile2.replace(/\\/g, '/');
+        audioContainer.innerHTML += `<audio controls style="height: 36px; width: 100%;" src="https://lms-gzty.onrender.com${safeAudioPath2}"></audio>`;
+      }
+
+      if (hasAudio) {
+        audioContainer.style.display = 'flex';
+        audioContainer.style.flexDirection = 'column';
       }
       
       if (quiz.originalFiles && quiz.originalFiles.length > 0) {

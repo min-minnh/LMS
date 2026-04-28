@@ -212,60 +212,34 @@
 <body>
 
 <div class="app-container">
-  <!-- Sidebar -->
-  <aside class="sidebar">
-    <div class="sidebar-header">
-      <div class="sidebar-logo">
-        <i class='bx bxs-graduation'></i>
-        <span>Student</span>
-      </div>
-    </div>
-    
-    <nav class="sidebar-nav">
-      <a href="#" onclick="go('student-dashboard')" class="nav-item">
-        <i class='bx bxs-dashboard'></i> Dashboard
-      </a>
-      <a href="#" onclick="go('vocab')" class="nav-item active">
-        <i class='bx bx-book-bookmark'></i> Vocabulary
-      </a>
-      <a href="#" onclick="go('lesson')" class="nav-item">
-        <i class='bx bx-library'></i> Theory
-      </a>
-      <a href="#" onclick="go('quizzes-student')" class="nav-item">
-        <i class='bx bx-edit'></i> Quizzes
-      </a>
-      <a href="#" onclick="go('my-results')" class="nav-item">
-        <i class='bx bx-bar-chart-alt-2'></i> My Results
-      </a>
-    </nav>
-    
-    <div class="sidebar-footer">
-      <a href="#" id="admin-link" onclick="go('dashboard')" class="nav-item" style="display: none; margin-bottom: 8px; color: var(--warning);">
-        <i class='bx bx-cog'></i> Admin Panel
-      </a>
-      <a href="#" onclick="logout()" class="nav-item text-danger">
-        <i class='bx bx-log-out'></i> Logout
-      </a>
+  <aside class="sidebar-slim">
+    <img src="assets/images/female_student.png" alt="Avatar" class="char-avatar" id="sidebar-avatar" onerror="this.style.display='none'">
+    <a href="#" class="nav-icon" onclick="go('student-dashboard')" title="Dashboard"><i class='bx bxs-home'></i></a>
+    <a href="#" class="nav-icon active" onclick="go('vocab')" title="Vocabulary"><i class='bx bx-book-bookmark'></i></a>
+    <a href="#" class="nav-icon" onclick="go('lesson')" title="Theory"><i class='bx bx-play-circle'></i></a>
+    <a href="#" class="nav-icon" onclick="go('quizzes-student')" title="Quizzes"><i class='bx bx-edit'></i></a>
+    <a href="#" class="nav-icon" onclick="go('my-results')" title="My Results"><i class='bx bx-bar-chart-alt-2'></i></a>
+    <div class="sidebar-bottom">
+      <a href="#" id="admin-link" class="nav-icon" style="display:none;" onclick="go('dashboard')" title="Admin"><i class='bx bx-cog'></i></a>
+      <a href="#" class="nav-icon" onclick="logout()" title="Logout" style="color:#f43f5e;"><i class='bx bx-power-off'></i></a>
     </div>
   </aside>
 
   <!-- Main Content -->
-  <main class="main-content">
-    <header class="topbar">
-      <div class="topbar-search">
-        <i class='bx bx-search'></i>
-        <input type="text" placeholder="Search vocabulary...">
+  <main class="main-area">
+    <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:28px;">
+      <div>
+        <h1 style="font-size:1.5rem; font-weight:800; margin:0; color:#0f172a; display:flex; align-items:center; gap:8px;">
+          <i class='bx bx-book-bookmark' style="color:#0ea5e9;"></i> Vocabulary
+        </h1>
+        <p style="color:#64748b; margin:4px 0 0; font-size:0.9rem;">Pick a topic and start mastering new words 🚀</p>
       </div>
-      <div class="topbar-actions">
-        <button class="btn-icon"><i class='bx bx-bell'></i></button>
-        <div class="user-profile">
-          <div class="avatar" id="user-avatar">S</div>
-          <span class="font-medium" id="user-name-top">Siêu Nhân</span>
-        </div>
+      <div style="display:flex; align-items:center; gap:12px;">
+        <div style="width:40px; height:40px; border-radius:50%; background:linear-gradient(135deg,#0ea5e9,#38bdf8); color:white; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:1rem;" id="user-avatar">S</div>
+        <span style="font-weight:600; color:#0f172a;" id="user-name-top">Student</span>
       </div>
-    </header>
+    </div>
 
-    <div class="content-area">
       <!-- VIEW 1: TOPICS -->
       <div id="topicsView" style="width: 100%;">
         <div class="page-header" style="display: flex; flex-direction: column; align-items: flex-start; margin-bottom: 24px;">
@@ -357,9 +331,9 @@
         </div>
 
       </div>
-    </div>
-  </main>
+    </main>
 </div>
+
 
 <script>
 const token = localStorage.getItem("token");
@@ -369,9 +343,17 @@ if (!token || !userStr) window.location.href = "index.html";
 const user = JSON.parse(userStr);
 if (user.role === 'admin') document.getElementById('admin-link').style.display = "flex";
 
-const displayName = user.name || user.email.split('@')[0];
+const displayName = user.name || (user.email ? user.email.split('@')[0] : 'Student');
 document.getElementById('user-name-top').innerText = displayName;
 document.getElementById('user-avatar').innerText = displayName.charAt(0).toUpperCase();
+
+// Set gender avatar — from user.gender, default male
+function getGenderImg(g) {
+  const v = (g || 'male').toLowerCase();
+  return (v === 'female' || v === 'girl') ? 'assets/images/female_student.png' : 'assets/images/male_student.png';
+}
+const sidebarAvatar = document.getElementById('sidebar-avatar');
+if (sidebarAvatar) { sidebarAvatar.src = getGenderImg(user.gender); sidebarAvatar.onerror = () => sidebarAvatar.style.display='none'; }
 
 function go(page) { window.location.href = page + ".html"; }
 function logout() { localStorage.clear(); window.location.href = "index.html"; }

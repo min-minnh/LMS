@@ -6,76 +6,319 @@
   <title>LMS - Login & Register</title>
   <link rel="stylesheet" href="assets/css/design-system.css">
   <style>
-    /* Specific overrides for Auth page */
     body {
       display: flex;
       justify-content: center;
       align-items: center;
       min-height: 100vh;
-      background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+      background: linear-gradient(135deg, #e0f2fe 0%, #bae6fd 100%);
+      margin: 0;
+      font-family: 'Plus Jakarta Sans', sans-serif;
     }
-    .auth-card {
-      width: 100%;
-      max-width: 420px;
-      padding: 40px;
-      text-align: center;
-      box-shadow: var(--shadow-lg);
-    }
-    .auth-logo {
-      width: 64px;
-      height: 64px;
-      background: var(--primary);
-      border-radius: var(--radius-lg);
-      margin: 0 auto 24px;
+    .auth-container {
       display: flex;
-      align-items: center;
-      justify-content: center;
-      color: white;
-      font-size: 32px;
+      width: 90%;
+      max-width: 1000px;
+      min-height: 600px;
+      background: #ffffff;
+      border-radius: var(--radius-lg);
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+      overflow: hidden;
+      position: relative;
     }
+
+    /* Left Panel - Visuals */
+    .auth-visuals {
+      flex: 1;
+      background: linear-gradient(to bottom, #87CEEB, #E0F6FF);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      padding: 40px;
+      overflow: hidden;
+    }
+
+    /* Clouds background effect */
+    .auth-visuals::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background-image: radial-gradient(circle at 20% 30%, rgba(255,255,255,0.8) 0%, transparent 20%),
+                        radial-gradient(circle at 80% 20%, rgba(255,255,255,0.6) 0%, transparent 15%),
+                        radial-gradient(circle at 50% 80%, rgba(255,255,255,0.9) 0%, transparent 25%);
+      pointer-events: none;
+    }
+
+    .chibi-container {
+      position: relative;
+      z-index: 2;
+      width: 300px;
+      height: 300px;
+      margin-bottom: 20px;
+    }
+
+    .visual-text {
+      position: relative;
+      z-index: 2;
+      text-align: center;
+      margin-top: auto;
+    }
+    .visual-text h1 {
+      font-size: 2.5rem;
+      font-weight: 900;
+      color: #ffffff;
+      text-shadow: 2px 4px 10px rgba(0,0,0,0.15);
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+    }
+
+    /* Right Panel - Form */
+    .auth-form-wrapper {
+      flex: 1;
+      padding: 60px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      background: #ffffff;
+    }
+
+    .auth-header {
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
+    .brand-logo {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      font-weight: 800;
+      font-size: 1.2rem;
+      color: var(--text-main);
+      margin-bottom: 24px;
+    }
+    .brand-logo i {
+      font-size: 1.5rem;
+      color: var(--primary);
+    }
+
     .auth-title {
       font-size: 1.75rem;
+      font-weight: 800;
       color: var(--text-main);
       margin-bottom: 8px;
+      text-transform: uppercase;
     }
     .auth-subtitle {
       color: var(--text-muted);
-      margin-bottom: 32px;
-      font-size: 0.875rem;
+      font-size: 0.9rem;
     }
-    .auth-form {
-      text-align: left;
+
+    .form-group {
+      margin-bottom: 20px;
     }
-    #register-fields {
-      display: none;
+    .form-label {
+      font-size: 0.85rem;
+      font-weight: 600;
+      color: var(--text-main);
+      margin-bottom: 8px;
+      display: block;
     }
+    .form-control {
+      width: 100%;
+      padding: 14px 16px;
+      background: #F8FAFC;
+      border: 1px solid transparent;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      color: var(--text-main);
+      transition: all 0.2s;
+    }
+    .form-control:focus {
+      background: #ffffff;
+      border-color: var(--primary);
+      box-shadow: 0 0 0 3px var(--primary-light);
+      outline: none;
+    }
+
+    .gender-select {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+    .gender-option {
+      flex: 1;
+      padding: 12px;
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      text-align: center;
+      cursor: pointer;
+      font-weight: 600;
+      color: var(--text-muted);
+      transition: all 0.2s;
+      background: #F8FAFC;
+    }
+    .gender-option.active {
+      background: var(--primary-light);
+      border-color: var(--primary);
+      color: var(--primary);
+    }
+
+    .form-options {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+      font-size: 0.85rem;
+    }
+    .remember-me {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+    .forgot-password {
+      color: var(--text-main);
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    .btn-submit {
+      width: 100%;
+      padding: 14px;
+      background: #000000;
+      color: #ffffff;
+      border: none;
+      border-radius: 12px;
+      font-weight: 600;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: transform 0.2s, box-shadow 0.2s;
+      margin-bottom: 16px;
+    }
+    .btn-submit:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+
     .toggle-link {
+      text-align: center;
       margin-top: 24px;
-      font-size: 0.875rem;
+      font-size: 0.85rem;
       color: var(--text-muted);
     }
     .toggle-link span {
-      color: var(--primary);
-      font-weight: 600;
+      color: var(--text-main);
+      font-weight: 700;
       cursor: pointer;
     }
-    .toggle-link span:hover {
-      text-decoration: underline;
+
+    #register-fields {
+      display: none;
+    }
+
+    @media (max-width: 800px) {
+      .auth-container {
+        flex-direction: column;
+        height: auto;
+      }
+      .auth-visuals {
+        display: none;
+      }
+      .auth-form-wrapper {
+        padding: 40px 24px;
+      }
     }
   </style>
 </head>
 <body>
 
-  <div class="card auth-card">
-    <div class="auth-logo"><i class='bx bxs-graduation'></i></div>
-    <h2 id="form-title" class="auth-title">Welcome Back</h2>
-    <p id="form-subtitle" class="auth-subtitle">Log in to continue your learning journey.</p>
+  <div class="auth-container">
+    <!-- Left Visual Panel -->
+    <div class="auth-visuals">
+      <div class="chibi-container">
+        <!-- Cute Chibi Robot SVG with mouse-tracking eyes -->
+        <svg viewBox="0 0 300 300" width="100%" height="100%">
+          <defs>
+            <radialGradient id="bodyGrad" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#ffffff"/>
+              <stop offset="100%" stop-color="#e2e8f0"/>
+            </radialGradient>
+            <radialGradient id="blueGrad" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#60a5fa"/>
+              <stop offset="100%" stop-color="#3b82f6"/>
+            </radialGradient>
+            <filter id="shadow">
+              <feDropShadow dx="0" dy="10" stdDeviation="15" flood-opacity="0.15"/>
+            </filter>
+          </defs>
 
-    <div class="auth-form">
+          <!-- Body -->
+          <path d="M 50 180 C 50 80, 250 80, 250 180 C 250 280, 50 280, 50 180 Z" fill="url(#bodyGrad)" filter="url(#shadow)"/>
+
+          <!-- Fluff/Hair details -->
+          <path d="M 120 70 Q 150 40 180 70 Q 200 50 220 80" fill="none" stroke="#e2e8f0" stroke-width="12" stroke-linecap="round"/>
+
+          <!-- Face area -->
+          <path d="M 80 160 C 80 120, 220 120, 220 160 C 220 200, 80 200, 80 160 Z" fill="url(#blueGrad)"/>
+
+          <!-- Eyes Base (White) -->
+          <circle cx="125" cy="155" r="22" fill="#ffffff"/>
+          <circle cx="175" cy="155" r="22" fill="#ffffff"/>
+
+          <!-- Pupils (Grouped — moved by JS) -->
+          <g id="eyes">
+            <circle cx="125" cy="155" r="12" fill="#0f172a"/>
+            <circle cx="120" cy="150" r="4" fill="#ffffff"/>
+            <circle cx="175" cy="155" r="12" fill="#0f172a"/>
+            <circle cx="170" cy="150" r="4" fill="#ffffff"/>
+          </g>
+
+          <!-- Nose -->
+          <ellipse cx="150" cy="170" rx="6" ry="4" fill="#1e3a8a" opacity="0.8"/>
+
+          <!-- Smile -->
+          <path d="M 135 180 Q 150 195 165 180" fill="none" stroke="#1e3a8a" stroke-width="4" stroke-linecap="round"/>
+
+          <!-- Left Arm -->
+          <path d="M 50 160 Q 30 200 60 220" fill="none" stroke="url(#bodyGrad)" stroke-width="25" stroke-linecap="round"/>
+          <!-- Right Arm (Waving) -->
+          <path d="M 250 160 Q 280 120 260 80" fill="none" stroke="url(#bodyGrad)" stroke-width="25" stroke-linecap="round"/>
+          <circle cx="255" cy="75" r="15" fill="#3b82f6"/>
+
+          <!-- Legs -->
+          <path d="M 110 260 L 110 280" fill="none" stroke="url(#bodyGrad)" stroke-width="25" stroke-linecap="round"/>
+          <path d="M 190 260 L 190 280" fill="none" stroke="url(#bodyGrad)" stroke-width="25" stroke-linecap="round"/>
+        </svg>
+      </div>
+      <div class="visual-text">
+        <h1>EXPLORE.<br>LEARN. GROW.</h1>
+      </div>
+    </div>
+
+    <!-- Right Form Panel -->
+    <div class="auth-form-wrapper">
+      <div class="auth-header">
+        <div class="brand-logo">
+          <i class='bx bxs-graduation'></i> LMS.AI
+        </div>
+        <h2 id="form-title" class="auth-title">Welcome Back</h2>
+        <p id="form-subtitle" class="auth-subtitle">Enter your email and password to access your account</p>
+      </div>
+
       <div id="register-fields">
         <div class="form-group">
+          <label class="form-label">I am a</label>
+          <div class="gender-select">
+            <div class="gender-option" onclick="setGender('male')" id="gender-male">Boy 👦</div>
+            <div class="gender-option active" onclick="setGender('female')" id="gender-female">Girl 👧</div>
+          </div>
+        </div>
+        <div class="form-group">
           <label class="form-label">Full Name</label>
-          <input id="name" class="form-control" placeholder="John Doe">
+          <input id="name" class="form-control" placeholder="Enter your full name">
         </div>
       </div>
 
@@ -89,16 +332,53 @@
         <input id="password" type="password" class="form-control" placeholder="••••••••">
       </div>
 
-      <button id="submit-btn" class="btn btn-primary w-full mt-4" style="padding: 12px; font-size: 1rem;" onclick="submitForm()">Log In</button>
-    </div>
+      <div class="form-options">
+        <label class="remember-me">
+          <input type="checkbox"> Remember me
+        </label>
+        <a href="#" class="forgot-password">Forgot Password</a>
+      </div>
 
-    <p class="toggle-link" id="toggle-desc">
-      New student? <span onclick="toggleMode()">Create an account</span>
-    </p>
+      <button id="submit-btn" class="btn-submit" onclick="submitForm()">Sign In</button>
+
+      <p class="toggle-link" id="toggle-desc">
+        Don't have an account? <span onclick="toggleMode()">Sign up</span>
+      </p>
+    </div>
   </div>
 
   <script>
+    // Eye Tracking Logic
+    document.addEventListener('mousemove', (e) => {
+      const eyes = document.getElementById('eyes');
+      const svg = document.querySelector('.chibi-container svg');
+      if (!eyes || !svg) return;
+
+      const rect = svg.getBoundingClientRect();
+      const scaleX = rect.width / 300;
+      const scaleY = rect.height / 300;
+      const eyeCenterX = rect.left + 150 * scaleX;
+      const eyeCenterY = rect.top + 155 * scaleY;
+
+      const angle = Math.atan2(e.clientY - eyeCenterY, e.clientX - eyeCenterX);
+      const distance = Math.min(8, Math.hypot(e.clientX - eyeCenterX, e.clientY - eyeCenterY) / 20);
+
+      const moveX = Math.cos(angle) * distance;
+      const moveY = Math.sin(angle) * distance;
+
+      eyes.setAttribute('transform', `translate(${moveX}, ${moveY})`);
+    });
+
+    // Form Logic
     let isLoginMode = true;
+    let selectedGender = 'female';
+
+    function setGender(gender) {
+      selectedGender = gender;
+      document.getElementById('gender-male').classList.remove('active');
+      document.getElementById('gender-female').classList.remove('active');
+      document.getElementById('gender-' + gender).classList.add('active');
+    }
 
     function toggleMode() {
       isLoginMode = !isLoginMode;
@@ -111,17 +391,17 @@
 
       if (isLoginMode) {
         title.innerText = "Welcome Back";
-        subtitle.innerText = "Log in to continue your learning journey.";
-        btn.innerText = "Log In";
-        toggleDesc.innerHTML = `New student? <span onclick="toggleMode()">Create an account</span>`;
+        subtitle.innerText = "Enter your email and password to access your account";
+        btn.innerText = "Sign In";
+        toggleDesc.innerHTML = `Don't have an account? <span onclick="toggleMode()">Sign up</span>`;
         regFields.style.display = "none";
         emailLabel.innerText = "Email or Username";
         document.getElementById('email').placeholder = "minmin";
       } else {
-        title.innerText = "Join Us";
-        subtitle.innerText = "Start learning today.";
-        btn.innerText = "Register";
-        toggleDesc.innerHTML = `Already have an account? <span onclick="toggleMode()">Log In</span>`;
+        title.innerText = "Create Account";
+        subtitle.innerText = "Enter your details to create a new account";
+        btn.innerText = "Sign Up";
+        toggleDesc.innerHTML = `Already have an account? <span onclick="toggleMode()">Sign In</span>`;
         regFields.style.display = "block";
         emailLabel.innerText = "Email Address";
         document.getElementById('email').placeholder = "john@example.com";
@@ -134,13 +414,16 @@
 
       if (!email || !password) return alert("Please fill all fields!");
 
-      const url = isLoginMode ? 'https://lms-gzty.onrender.com/auth/login' : 'https://lms-gzty.onrender.com/auth/register';
+      const url = isLoginMode
+        ? 'https://lms-gzty.onrender.com/auth/login'
+        : 'https://lms-gzty.onrender.com/auth/register';
       const bodyData = { email, password };
 
       if (!isLoginMode) {
         const name = document.getElementById('name').value;
         if (!name) return alert("Please fill your name!");
         bodyData.name = name;
+        bodyData.gender = selectedGender;
       }
 
       try {

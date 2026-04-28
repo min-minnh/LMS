@@ -5,13 +5,13 @@ const { sendSuccess, sendError } = require('../utils/responseHandler');
 
 exports.register = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, gender } = req.body;
     const existing = await User.findOne({ email });
     if (existing) {
       return sendError(res, 'Email already exists', 400);
     }
     const hashed = await bcrypt.hash(password, 10);
-    const user = await User.create({ name, email, password: hashed, role: 'student' });
+    const user = await User.create({ name, email, password: hashed, gender: gender || 'female', role: 'student' });
     return sendSuccess(res, 'Success', user, 201);
   } catch (err) {
     return sendError(res, err.message);

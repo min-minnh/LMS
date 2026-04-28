@@ -227,7 +227,7 @@
     }
 
     grid.innerHTML = quizzes.map(q => `
-      <div class="card text-center relative" style="cursor: pointer; transition: transform 0.2s; display: flex; flex-direction: column; align-items: center;" onclick="${q.status === 'Pending Review' ? `window.location.href='admin-quiz-review.html?id=${q._id}'` : `openQuiz('${q._id}', '${q.title.replace(/'/g, "\\\\'")}')`}" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='translateY(0)'">
+      <div class="card text-center relative" style="cursor: pointer; transition: transform 0.2s; display: flex; flex-direction: column; align-items: center;" onclick="${(q.status === 'Pending Review' || q.aiGenerated) ? `window.location.href='admin-quiz-review.html?id=${q._id}'` : `openQuiz('${q._id}', '${q.title.replace(/'/g, "\\\\'")}')`}" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='translateY(0)'">
         <button class="btn btn-danger btn-sm delete-quiz-btn admin-only" onclick="event.stopPropagation(); deleteQuiz('${q._id}')"><i class='bx bx-trash'></i> Delete</button>
         <i class='bx bx-trophy topic-icon'></i>
         <h3 class="font-semibold text-main mb-2">${q.title}</h3>

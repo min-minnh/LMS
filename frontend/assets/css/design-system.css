@@ -6,13 +6,13 @@
 @import url('https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css');
 
 :root {
-  /* Colors - Vibrant but Soft Theme */
-  --primary: #6366F1; /* Indigo 500 */
-  --primary-hover: #4F46E5; /* Indigo 600 */
-  --primary-light: #E0E7FF; /* Indigo 100 */
+  /* Colors - Vibrant but Soft Theme (SaaS Dashboard Style) */
+  --primary: #38bdf8; /* Sky Blue 400 */
+  --primary-hover: #0284c7; /* Light Blue 600 */
+  --primary-light: #e0f2fe; /* Sky 100 */
   
-  --secondary: #A855F7; /* Purple 500 */
-  --secondary-light: #F3E8FF;
+  --secondary: #f59e0b; /* Amber 500 */
+  --secondary-light: #fef3c7; /* Amber 50 */
   
   --success: #10B981;
   --success-light: #D1FAE5;
@@ -553,7 +553,66 @@ tr:hover td {
   background-color: rgba(241, 245, 249, 0.5);
 }
 
-/* Grid Layouts */
+/* ==========================================================================
+   Slim Icon Sidebar (Dashboard Style)
+   ========================================================================== */
+.sidebar-slim {
+  width: 80px;
+  background: #ffffff;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 24px 0;
+  border-right: 1px solid #e2e8f0;
+  z-index: 10;
+  flex-shrink: 0;
+}
+.sidebar-slim .char-avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  margin-bottom: 32px;
+  object-fit: cover;
+  border: 2px solid #e2e8f0;
+}
+.nav-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 16px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-size: 22px;
+  color: #94a3b8;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+  text-decoration: none;
+}
+.nav-icon:hover { background: #f1f5f9; color: #64748b; }
+.nav-icon.active {
+  background: #0ea5e9;
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(14, 165, 233, 0.3);
+}
+.sidebar-bottom {
+  margin-top: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+/* Main area for slim-sidebar pages */
+.main-area {
+  flex: 1;
+  padding: 32px 40px;
+  overflow-y: auto;
+  background: #f7f9fc;
+}
+
+/* ==========================================================================
+   Grid Layouts
+   ========================================================================== */
 .grid { display: grid; }
 .gap-4 { gap: 16px; }
 .gap-6 { gap: 24px; }

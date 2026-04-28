@@ -89,6 +89,7 @@ exports.startQuiz = async (req, res) => {
       timeLimit: quiz.timeLimit,
       shuffleQuestions: quiz.shuffleQuestions,
       audioFile1: quiz.audioFile1,
+      audioFile2: quiz.audioFile2,
       originalFiles: quiz.originalFiles,
       questions: processedQuestions.map(q => ({
         _id: q._id,

@@ -3,149 +3,271 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>AstraLMS - Bảng Điều Khiển Năng Lực</title>
+  <title>LMS - Dashboard</title>
   <link rel="stylesheet" href="assets/css/design-system.css">
   <style>
-    /* Specific overrides for Welcome Banner */
-    .welcome-banner {
-      background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-      border-radius: var(--radius-lg);
-      padding: 40px 48px;
-      color: white;
-      position: relative;
-      overflow: hidden;
-      box-shadow: var(--shadow-md);
-    }
-    .welcome-banner::after {
-      content: '🚀';
-      position: absolute;
-      right: 40px;
-      bottom: -20px;
-      font-size: 140px;
-      opacity: 0.15;
-    }
-    .welcome-banner h1 {
-      color: white;
-      font-size: 2.25rem;
-      font-weight: 800;
-      margin-bottom: 16px;
-      position: relative;
-      z-index: 10;
-    }
-    .welcome-banner p {
-      color: rgba(255, 255, 255, 0.9);
-      font-size: 1.125rem;
-      max-width: 600px;
-      position: relative;
-      z-index: 10;
-    }
+    body { background-color: #f7f9fc; margin: 0; font-family: 'Plus Jakarta Sans', sans-serif; }
+    .app-container { display: flex; height: 100vh; overflow: hidden; background: #f7f9fc; }
 
-    .quote-box {
-      border-left: 4px solid var(--primary);
+    /* ===== SLIM SIDEBAR ===== */
+    .sidebar-slim {
+      width: 80px; background: #ffffff; display: flex; flex-direction: column;
+      align-items: center; padding: 24px 0; border-right: 1px solid #e2e8f0; z-index: 10;
     }
+    .sidebar-slim .char-avatar {
+      width: 52px; height: 52px; border-radius: 50%; margin-bottom: 32px;
+      object-fit: cover; background: #e2e8f0; border: 2px solid #e2e8f0;
+    }
+    .nav-icon {
+      width: 48px; height: 48px; border-radius: 16px; display: flex;
+      justify-content: center; align-items: center; font-size: 22px;
+      color: #94a3b8; margin-bottom: 8px; cursor: pointer;
+      transition: all 0.2s; text-decoration: none;
+    }
+    .nav-icon:hover { background: #f1f5f9; color: #64748b; }
+    .nav-icon.active { background: #0ea5e9; color: #ffffff; box-shadow: 0 4px 12px rgba(14,165,233,0.3); }
+    .sidebar-bottom { margin-top: auto; display: flex; flex-direction: column; align-items: center; }
 
-    .action-icon {
-      font-size: 48px;
-      margin-bottom: 16px;
-      display: inline-block;
+    /* ===== MAIN AREA ===== */
+    .main-area { flex: 1; padding: 32px 40px; overflow-y: auto; }
+    .top-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 28px; }
+    .top-header h1 { font-size: 1.4rem; font-weight: 700; margin: 0; color: #0f172a; }
+    .btn-return {
+      background: #38bdf8; color: white; border: none; padding: 8px 20px;
+      border-radius: 20px; font-weight: 600; font-size: 0.85rem; cursor: pointer;
+      display: flex; align-items: center; gap: 6px; transition: all 0.2s;
+    }
+    .btn-return:hover { background: #0284c7; transform: translateY(-1px); }
+
+    /* ===== HERO BANNER ===== */
+    .hero-banner {
+      background: #ffffff; border-radius: 24px; padding: 28px 36px;
+      display: flex; align-items: center; gap: 32px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.04); margin-bottom: 36px;
+      position: relative; overflow: hidden;
+    }
+    .hero-banner::before {
+      content: ''; position: absolute; top: -40px; right: -40px;
+      width: 200px; height: 200px; border-radius: 50%;
+      background: radial-gradient(circle, #bae6fd 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .hero-char {
+      width: 200px; height: 200px; object-fit: contain; flex-shrink: 0;
+      filter: drop-shadow(0 8px 16px rgba(0,0,0,0.12));
+      animation: float 4s ease-in-out infinite;
+    }
+    @keyframes float { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-10px)} }
+    .hero-text h2 {
+      font-size: 2.2rem; font-weight: 900; color: #0f172a;
+      margin: 0 0 8px 0; line-height: 1.2;
+    }
+    .hero-text h2 .day-num { font-size: 3rem; color: #38bdf8; }
+    .hero-text p { font-size: 1.1rem; color: #64748b; margin: 0; }
+
+    /* ===== SECTION TITLE ===== */
+    .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+    .section-header h3 { font-size: 1.1rem; font-weight: 700; margin: 0; color: #0f172a; display: flex; align-items: center; gap: 8px; }
+
+    /* ===== MISSION CARDS ===== */
+    .mission-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+    .mission-card {
+      background: #ffffff; border-radius: 20px; padding: 22px;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.03); position: relative;
+      border-bottom: 4px solid transparent; cursor: pointer; transition: transform 0.2s;
+    }
+    .mission-card:hover { transform: translateY(-5px); }
+    .mission-card.green { border-bottom-color: #10b981; }
+    .mission-card.blue { border-bottom-color: #38bdf8; }
+    .mission-card.yellow { border-bottom-color: #f59e0b; }
+    .mission-card .card-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    .mission-card h3 { font-size: 1rem; font-weight: 700; margin: 0; }
+    .tag { background: #f1f5f9; color: #94a3b8; font-size: 0.7rem; padding: 3px 8px; border-radius: 10px; font-weight: 700; }
+    .stamp {
+      font-size: 0.72rem; font-weight: 800; padding: 3px 10px; border: 2px dashed;
+      border-radius: 6px; transform: rotate(-10deg); white-space: nowrap;
+    }
+    .stamp.done { color: #38bdf8; border-color: #38bdf8; }
+    .stamp.wip { color: #f59e0b; border-color: #f59e0b; }
+    .mission-icon { height: 90px; display: flex; justify-content: center; align-items: center; margin: 12px 0; }
+    .mission-title { font-size: 1rem; font-weight: 800; margin-bottom: 4px; }
+    .mission-desc { font-size: 0.78rem; color: #64748b; line-height: 1.5; margin-bottom: 12px; }
+    .mission-progress { display: flex; justify-content: flex-end; align-items: center; font-size: 0.78rem; color: #94a3b8; font-weight: 600; gap: 4px; }
+
+    /* ===== RIGHT SIDEBAR ===== */
+    .right-sidebar {
+      width: 320px; background: #ffffff; border-left: 1px solid #e2e8f0;
+      padding: 28px 24px; overflow-y: auto; flex-shrink: 0;
+    }
+    .widget { margin-bottom: 32px; }
+    .widget-title {
+      font-size: 1rem; font-weight: 700; display: flex; justify-content: space-between;
+      align-items: center; margin-bottom: 14px; color: #0f172a;
+    }
+    .calendar-grid {
+      display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px;
+      font-size: 0.72rem; text-align: center;
+    }
+    .cal-day { padding: 5px 2px; border-radius: 50%; color: #64748b; font-weight: 500; }
+    .cal-day.active { background: #38bdf8; color: white; font-weight: 700; }
+    .cal-day.today { border: 1.5px solid #38bdf8; color: #0284c7; font-weight: 700; }
+    .stats-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .stat-card { border: 1px solid #e2e8f0; border-radius: 14px; padding: 14px; text-align: center; }
+    .stat-card.wide { grid-column: 1 / span 2; }
+    .stat-card h4 { font-size: 1.4rem; font-weight: 800; margin: 0 0 2px 0; color: #0f172a; }
+    .stat-card p { font-size: 0.72rem; color: #94a3b8; margin: 0; font-weight: 600; }
+    .ring-wrap {
+      width: 88px; height: 88px; border-radius: 50%;
+      border: 8px solid #38bdf8; border-left-color: #f59e0b;
+      display: flex; justify-content: center; align-items: center;
+      font-size: 1.1rem; font-weight: 800; margin: 0 auto 8px;
     }
   </style>
 </head>
 <body>
 
 <div class="app-container">
-  <!-- Sidebar -->
-  <aside class="sidebar">
-    <div class="sidebar-header">
-      <div class="sidebar-logo">
-        <i class='bx bxs-graduation'></i>
-        <span>Student</span>
-      </div>
-    </div>
-    
-    <nav class="sidebar-nav">
-      <a href="#" onclick="go('student-dashboard')" class="nav-item active">
-        <i class='bx bxs-dashboard'></i> Dashboard
-      </a>
-      <a href="#" onclick="go('vocab')" class="nav-item">
-        <i class='bx bx-book-bookmark'></i> Vocabulary
-      </a>
-      <a href="#" onclick="go('lesson')" class="nav-item">
-        <i class='bx bx-library'></i> Theory
-      </a>
-      <a href="#" onclick="go('quizzes-student')" class="nav-item">
-        <i class='bx bx-edit'></i> Quizzes
-      </a>
-      <a href="#" onclick="go('my-results')" class="nav-item">
-        <i class='bx bx-bar-chart-alt-2'></i> My Results
-      </a>
-    </nav>
-    
-    <div class="sidebar-footer">
-      <a href="#" id="admin-link" onclick="go('dashboard')" class="nav-item" style="display: none; margin-bottom: 8px; color: var(--warning);">
-        <i class='bx bx-cog'></i> Admin Panel
-      </a>
-      <a href="#" onclick="logout()" class="nav-item text-danger">
-        <i class='bx bx-log-out'></i> Logout
-      </a>
+  <!-- Slim Sidebar -->
+  <aside class="sidebar-slim">
+    <img src="assets/images/female_student.png" alt="Avatar" class="char-avatar" id="sidebar-avatar"
+         onerror="this.style.display='none'">
+
+    <a href="#" class="nav-icon active" onclick="go('student-dashboard')" title="Dashboard"><i class='bx bxs-home'></i></a>
+    <a href="#" class="nav-icon" onclick="go('vocab')" title="Vocabulary"><i class='bx bx-book-bookmark'></i></a>
+    <a href="#" class="nav-icon" onclick="go('lesson')" title="Theory"><i class='bx bx-play-circle'></i></a>
+    <a href="#" class="nav-icon" onclick="go('quizzes-student')" title="Quizzes"><i class='bx bx-edit'></i></a>
+    <a href="#" class="nav-icon" onclick="go('my-results')" title="My Results"><i class='bx bx-bar-chart-alt-2'></i></a>
+
+    <div class="sidebar-bottom">
+      <a href="#" id="admin-link" class="nav-icon" style="display:none;" onclick="go('dashboard')" title="Admin Panel"><i class='bx bx-cog'></i></a>
+      <a href="#" class="nav-icon" onclick="logout()" title="Logout" style="color:#f43f5e;"><i class='bx bx-power-off'></i></a>
     </div>
   </aside>
 
-  <!-- Main Content -->
-  <main class="main-content">
-    <header class="topbar">
-      <div class="topbar-search">
-        <i class='bx bx-search'></i>
-        <input type="text" placeholder="Search courses, vocabulary...">
-      </div>
-      <div class="topbar-actions">
-        <button class="btn-icon"><i class='bx bx-bell'></i></button>
-        <div class="user-profile">
-          <div class="avatar" id="user-avatar">S</div>
-          <span class="font-medium" id="user-name-top">Siêu Nhân</span>
-        </div>
-      </div>
-    </header>
+  <!-- Main Area -->
+  <main class="main-area">
+    <div class="top-header">
+      <h1 id="welcome-msg">Hi! Welcome</h1>
+      <button class="btn-return" onclick="go('student-dashboard')">Home <i class='bx bx-home'></i></button>
+    </div>
 
-    <div class="content-area">
-      <!-- Banner -->
-      <div class="welcome-banner mb-4">
-        <h1 id="welcome-msg">Hi, Siêu Nhân! 👋</h1>
-        <p>Hành trình ngàn dặm bắt đầu từ một bước chân. Hãy tiếp tục khám phá kho tàng kiến thức và phá vỡ mọi giới hạn của bản thân ngày hôm nay nhé!</p>
+    <!-- Hero Banner -->
+    <div class="hero-banner">
+      <img src="assets/images/male_student.png" alt="Character" class="hero-char" id="hero-char"
+           onerror="this.style.display='none'">
+      <div class="hero-text">
+        <h2>THIS IS YOUR <span class="day-num">1</span> DAY<br>OF STUDY</h2>
+        <p id="hero-subtitle">Go and study 🚀</p>
+      </div>
+    </div>
+
+    <!-- Mission Cards -->
+    <div class="section-header">
+      <h3><i class='bx bx-check-square'></i> Your Missions</h3>
+      <i class='bx bx-calendar' style="color:#94a3b8; font-size:20px;"></i>
+    </div>
+
+    <div class="mission-grid">
+      <!-- Vocabulary -->
+      <div class="mission-card green" onclick="go('vocab')">
+        <div class="card-head">
+          <h3>Vocabulary <i class='bx bx-chevron-right'></i></h3>
+          <span class="stamp done">Active</span>
+        </div>
+        <span class="tag">Flashcard + Test</span>
+        <div class="mission-icon">
+          <i class='bx bx-book-bookmark' style='font-size:60px; color:#10b981;'></i>
+        </div>
+        <div class="mission-title">Learn New Words</div>
+        <div class="mission-desc">Master vocabulary through flashcards and typing tests. Build your word power daily.</div>
+        <div class="mission-progress"><i class='bx bx-bookmarks'></i> Flash + Type Mode</div>
       </div>
 
-      <!-- Motivational Quote -->
-      <div class="card quote-box mb-4">
-        <h3 class="font-semibold text-main mb-2" id="quote-text" style="font-style: italic;">"Sự đầu tư vào tri thức luôn mang lại lợi nhuận cao nhất."</h3>
-        <p class="text-sm font-semibold text-primary uppercase" id="quote-author" style="margin-bottom: 0;">— Benjamin Franklin</p>
+      <!-- Theory -->
+      <div class="mission-card blue" onclick="go('lesson')">
+        <div class="card-head">
+          <h3>Theory <i class='bx bx-chevron-right'></i></h3>
+          <span class="stamp wip">Reading</span>
+        </div>
+        <span class="tag">Lesson + Topics</span>
+        <div class="mission-icon">
+          <i class='bx bx-library' style='font-size:60px; color:#38bdf8;'></i>
+        </div>
+        <div class="mission-title">Study Lessons</div>
+        <div class="mission-desc">Explore theory lessons organized by topics. Read, understand and master the content.</div>
+        <div class="mission-progress"><i class='bx bx-folder-open'></i> Browse Topics</div>
       </div>
 
-      <!-- Action Grid -->
-      <div class="page-header mt-4 mb-4" style="margin-bottom: 16px;">
-        <h2 style="margin-bottom: 0;">Lựa Chọn Mục Tiêu Của Bạn 🎯</h2>
-      </div>
-      
-      <div class="grid grid-cols-3 gap-6">
-        <div class="card text-center" style="cursor: pointer; transition: transform 0.2s;" onclick="go('vocab')" onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'">
-          <span class="action-icon">📚</span>
-          <h3 class="font-bold mb-2">Từ Vựng (Vocabulary)</h3>
-          <p class="text-sm text-muted" style="margin-bottom: 0;">Mở rộng vốn từ vựng thông qua Flashcard và luyện tập gõ phím.</p>
+      <!-- Quizzes -->
+      <div class="mission-card yellow" onclick="go('quizzes-student')">
+        <div class="card-head">
+          <h3>Quizzes <i class='bx bx-chevron-right'></i></h3>
+          <span class="stamp wip">Challenge</span>
         </div>
-        
-        <div class="card text-center" style="cursor: pointer; transition: transform 0.2s;" onclick="go('lesson')" onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'">
-          <span class="action-icon">📖</span>
-          <h3 class="font-bold mb-2">Lý Thuyết (Theory)</h3>
-          <p class="text-sm text-muted" style="margin-bottom: 0;">Khám phá các bài học mới được soạn thảo cực kỳ chất lượng.</p>
+        <span class="tag">MCQ Test</span>
+        <div class="mission-icon">
+          <i class='bx bx-edit' style='font-size:60px; color:#f59e0b;'></i>
         </div>
-        
-        <div class="card text-center" style="cursor: pointer; transition: transform 0.2s;" onclick="go('quizzes-student')" onmouseover="this.style.transform='translateY(-5px)'" onmouseout="this.style.transform='translateY(0)'">
-          <span class="action-icon">📝</span>
-          <h3 class="font-bold mb-2">Bài Kiểm Tra (Quizzes)</h3>
-          <p class="text-sm text-muted" style="margin-bottom: 0;">Đánh giá nhanh xem bạn đã ghi nhớ bài được bao nhiêu %.</p>
-        </div>
+        <div class="mission-title">Take a Test</div>
+        <div class="mission-desc">Test your knowledge with timed multiple-choice quizzes. Track your score and improve.</div>
+        <div class="mission-progress"><i class='bx bx-trophy'></i> View Results</div>
       </div>
     </div>
   </main>
+
+  <!-- Right Sidebar -->
+  <aside class="right-sidebar">
+    <!-- Calendar -->
+    <div class="widget">
+      <div class="widget-title">
+        Record
+        <span style="font-size:0.8rem; color:#94a3b8; font-weight:500;" id="cal-month-label"></span>
+      </div>
+      <div class="calendar-grid" id="calGrid"></div>
+    </div>
+
+    <!-- Achievement -->
+    <div class="widget">
+      <div class="widget-title">Achievement <span style="font-size:0.75rem; color:#94a3b8; font-weight:400;">this week</span></div>
+      <p style="font-size:0.78rem; color:#94a3b8; margin:0 0 10px;">keep trying~ 💪</p>
+      <svg viewBox="0 0 280 80" style="width:100%; overflow:visible;">
+        <defs>
+          <linearGradient id="lineGrad" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#bae6fd"/>
+            <stop offset="100%" stop-color="#38bdf8"/>
+          </linearGradient>
+        </defs>
+        <path d="M 0 65 C 30 65, 40 20, 80 20 C 120 20, 130 60, 170 55 C 210 50, 220 25, 260 30 C 272 28, 276 40, 280 38"
+              fill="none" stroke="url(#lineGrad)" stroke-width="3" stroke-linecap="round"/>
+        <circle cx="80" cy="20" r="5" fill="#fff" stroke="#38bdf8" stroke-width="2"/>
+        <line x1="80" y1="25" x2="80" y2="78" stroke="#bae6fd" stroke-width="1" stroke-dasharray="4"/>
+        <text x="80" y="13" font-size="11" font-weight="800" fill="#0f172a" text-anchor="middle">80%</text>
+      </svg>
+      <div style="display:flex; justify-content:space-between; font-size:0.68rem; color:#94a3b8; margin-top:6px;">
+        <span>Mon</span><span>Tue</span><span style="color:#0f172a;font-weight:700;">Wed</span>
+        <span>Thu</span><span>Fri</span><span>Sat</span><span>Sun</span>
+      </div>
+    </div>
+
+    <!-- Data Stats -->
+    <div class="widget">
+      <div class="widget-title">Progress</div>
+      <div class="stats-grid">
+        <div class="stat-card wide" style="display:flex; flex-direction:column; align-items:center; padding:20px;">
+          <div class="ring-wrap">60%</div>
+          <p style="margin-top:6px;">More than most!</p>
+        </div>
+        <div class="stat-card">
+          <h4>15 <i class='bx bx-medal' style="color:#f59e0b; font-size:1rem;"></i></h4>
+          <p>Ranking</p>
+        </div>
+        <div class="stat-card">
+          <h4>60% <i class='bx bx-trending-up' style="color:#10b981; font-size:1rem;"></i></h4>
+          <p>Progress</p>
+        </div>
+      </div>
+    </div>
+  </aside>
 </div>
 
 <script>
@@ -156,26 +278,47 @@ if (!token || !userStr) window.location.href = "index.html";
 const user = JSON.parse(userStr);
 if (user.role === 'admin') document.getElementById('admin-link').style.display = "flex";
 
-const displayName = user.name || user.email.split('@')[0];
-document.getElementById('welcome-msg').innerText = `Hi, ${displayName}! 👋`;
-document.getElementById('user-name-top').innerText = displayName;
-document.getElementById('user-avatar').innerText = displayName.charAt(0).toUpperCase();
+const displayName = user.name || (user.email ? user.email.split('@')[0] : 'Student');
+document.getElementById('welcome-msg').innerText = `Hi! ${displayName}, welcome 👋`;
+document.getElementById('hero-subtitle').innerText = `Keep learning, ${displayName}! You're doing great 🌟`;
 
-// Randomly change motivational quotes
-const quotes = [
-  { text: "Đừng nói bạn không có đủ thời gian. Bạn có số giờ mỗi ngày hoàn toàn bằng với Helen Keller, Pasteur, Michaelangelo, Mẹ Teresa, Leonardo da Vinci, Thomas Jefferson và Albert Einstein.", author: "H. Jackson Brown Jr." },
-  { text: "Thành công không phải là chìa khóa mở cánh cửa hạnh phúc. Hạnh phúc là chìa khóa dẫn tới thành công. Nếu bạn yêu điều bạn đang làm, bạn sẽ thành công.", author: "Albert Schweitzer" },
-  { text: "Giáo dục là vũ khí mạnh nhất mà người ta có thể sử dụng để thay đổi thế giới.", author: "Nelson Mandela" },
-  { text: "Học tập không bao giờ làm suy kiệt trí tuệ.", author: "Leonardo da Vinci" },
-  { text: "Tương lai thuộc về những ai tin vào vẻ đẹp trong những giấc mơ của họ.", author: "Eleanor Roosevelt" }
-];
-const q = quotes[Math.floor(Math.random() * quotes.length)];
-document.getElementById('quote-text').innerText = `"${q.text}"`;
-document.getElementById('quote-author').innerText = `— ${q.author}`;
+// Set gender-based character image — from user.gender, default male
+function getGenderImg(g) {
+  const v = (g || 'male').toLowerCase();
+  return (v === 'female' || v === 'girl') ? 'assets/images/female_student.png' : 'assets/images/male_student.png';
+}
+const genderImg = getGenderImg(user.gender);
+const avatarEl = document.getElementById('sidebar-avatar');
+const heroEl   = document.getElementById('hero-char');
+if (avatarEl) { avatarEl.src = genderImg; avatarEl.onerror = () => avatarEl.style.display='none'; }
+if (heroEl)   { heroEl.src   = genderImg; heroEl.onerror   = () => heroEl.style.display='none'; }
 
 function logout() { localStorage.clear(); window.location.href = "index.html"; }
 function go(page) { window.location.href = page + ".html"; }
-</script>
 
+// Build mini calendar
+(function buildCalendar() {
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth();
+  const today = now.getDate();
+  const firstDay = new Date(year, month, 1).getDay(); // 0=Sun
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const monthNames = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  
+  document.getElementById('cal-month-label').innerText = `${monthNames[month]} ${year}`;
+  
+  const grid = document.getElementById('calGrid');
+  const dayLabels = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+  let html = dayLabels.map(d => `<div class="cal-day" style="font-weight:700;color:#0f172a;">${d}</div>`).join('');
+  
+  for (let i = 0; i < firstDay; i++) html += `<div></div>`;
+  for (let d = 1; d <= daysInMonth; d++) {
+    const cls = d === today ? 'cal-day today' : 'cal-day';
+    html += `<div class="${cls}">${d}</div>`;
+  }
+  grid.innerHTML = html;
+})();
+</script>
 </body>
 </html>
