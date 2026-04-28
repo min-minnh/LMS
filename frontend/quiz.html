@@ -389,12 +389,28 @@
 
       if(quiz.audioFile1) {
         document.getElementById('audio-container').style.display = 'flex';
-        document.getElementById('exam-audio').src = 'https://lms-gzty.onrender.com' + quiz.audioFile1;
+        const audioEl = document.getElementById('exam-audio');
+        // Handle Windows backslashes if any
+        const safeAudioPath = quiz.audioFile1.replace(/\\/g, '/');
+        audioEl.src = 'https://lms-gzty.onrender.com' + safeAudioPath;
+        audioEl.load(); // Force browser to reload audio source
       }
       
       if (quiz.originalFiles && quiz.originalFiles.length > 0) {
-        const fileUrl = 'https://lms-gzty.onrender.com' + quiz.originalFiles[0];
-        document.getElementById('docViewer').src = `https://docs.google.com/gview?url=${encodeURIComponent(fileUrl)}&embedded=true`;
+        const rawPath = quiz.originalFiles[0].replace(/\\/g, '/');
+        const fileUrl = 'https://lms-gzty.onrender.com' + rawPath;
+        const lowerUrl = fileUrl.toLowerCase();
+        
+        if (lowerUrl.endsWith('.pdf')) {
+          // Native browser PDF rendering
+          document.getElementById('docViewer').src = fileUrl;
+        } else if (lowerUrl.endsWith('.docx') || lowerUrl.endsWith('.doc')) {
+          // Microsoft Office viewer is generally more reliable for Word docs
+          document.getElementById('docViewer').src = `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(fileUrl)}`;
+        } else {
+          // Fallback to Google Docs viewer
+          document.getElementById('docViewer').src = `https://docs.google.com/gview?url=${encodeURIComponent(fileUrl)}&embedded=true`;
+        }
       } else {
         document.getElementById('docViewer').srcdoc = `<div style="padding:40px; text-align:center; color:gray; font-family:sans-serif;">Không tìm thấy file đề bài.</div>`;
       }

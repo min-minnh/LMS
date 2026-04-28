@@ -145,9 +145,17 @@
 
   function renderDoc() {
     if(quizData.originalFiles && quizData.originalFiles.length > 0) {
-      const fileUrl = baseUrl + quizData.originalFiles[0];
-      // Use Google Docs viewer
-      document.getElementById('docViewer').src = `https://docs.google.com/gview?url=${encodeURIComponent(fileUrl)}&embedded=true`;
+      const rawPath = quizData.originalFiles[0].replace(/\\/g, '/');
+      const fileUrl = baseUrl + rawPath;
+      const lowerUrl = fileUrl.toLowerCase();
+      
+      if (lowerUrl.endsWith('.pdf')) {
+        document.getElementById('docViewer').src = fileUrl;
+      } else if (lowerUrl.endsWith('.docx') || lowerUrl.endsWith('.doc')) {
+        document.getElementById('docViewer').src = `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(fileUrl)}`;
+      } else {
+        document.getElementById('docViewer').src = `https://docs.google.com/gview?url=${encodeURIComponent(fileUrl)}&embedded=true`;
+      }
     } else {
       document.getElementById('docPane').innerHTML = `<div style="padding:40px; text-align:center; color:gray;">Không tìm thấy tài liệu gốc.</div>`;
     }
