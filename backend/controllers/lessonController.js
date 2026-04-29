@@ -1,5 +1,6 @@
 const Lesson = require('../models/Lesson');
 const { sendSuccess, sendError } = require('../utils/responseHandler');
+const { uploadToGridFS } = require('../utils/gridfs');
 
 exports.getAll = async (req, res) => {
   try {
@@ -34,14 +35,18 @@ exports.create = async (req, res) => {
     const { title, content, topicId } = req.body;
     let imageUrl = req.body.imageUrl || null;
     let fileUrl = req.body.fileUrl || null;
-    
-    // If multer uploaded an image or file
+
+    // Upload files to GridFS (stored in MongoDB, survives server restarts)
     if (req.files) {
       if (req.files.image && req.files.image.length > 0) {
-        imageUrl = '/uploads/' + req.files.image[0].filename;
+        const f = req.files.image[0];
+        const gridId = await uploadToGridFS(f.buffer, f.originalname, f.mimetype);
+        imageUrl = `/files/${gridId}`;
       }
       if (req.files.file && req.files.file.length > 0) {
-        fileUrl = '/uploads/' + req.files.file[0].filename;
+        const f = req.files.file[0];
+        const gridId = await uploadToGridFS(f.buffer, f.originalname, f.mimetype);
+        fileUrl = `/files/${gridId}`;
       }
     }
 
@@ -56,19 +61,23 @@ exports.update = async (req, res) => {
   try {
     const { title, content, topicId } = req.body;
     let updateData = { title, content, topicId };
-    
+
     if (req.files) {
       if (req.files.image && req.files.image.length > 0) {
-        updateData.imageUrl = '/uploads/' + req.files.image[0].filename;
+        const f = req.files.image[0];
+        const gridId = await uploadToGridFS(f.buffer, f.originalname, f.mimetype);
+        updateData.imageUrl = `/files/${gridId}`;
       }
       if (req.files.file && req.files.file.length > 0) {
-        updateData.fileUrl = '/uploads/' + req.files.file[0].filename;
+        const f = req.files.file[0];
+        const gridId = await uploadToGridFS(f.buffer, f.originalname, f.mimetype);
+        updateData.fileUrl = `/files/${gridId}`;
       }
     }
 
     const lesson = await Lesson.findByIdAndUpdate(req.params.id, updateData, { new: true });
     if (!lesson) return sendError(res, 'Lesson not found', 404);
-    
+
     return sendSuccess(res, 'Lesson updated', lesson);
   } catch (err) {
     return sendError(res, err.message);
@@ -78,7 +87,7 @@ exports.update = async (req, res) => {
 exports.remove = async (req, res) => {
   try {
     const lesson = await Lesson.findByIdAndDelete(req.params.id);
-    if (!lesson) return sendError(res, 'Lesson not found', 404);
+    if (!lesson) return sendError(res, 'Lesson deleted', lesson);
     return sendSuccess(res, 'Lesson deleted', lesson);
   } catch (err) {
     return sendError(res, err.message);

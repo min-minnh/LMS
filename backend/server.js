@@ -13,13 +13,17 @@ const quizRoutes = require('./routes/quizRoutes');
 const resultRoutes = require('./routes/resultRoutes');
 const userRoutes = require('./routes/userRoutes');
 const aiRoutes = require('./routes/aiRoutes');
+const { streamFromGridFS } = require('./utils/gridfs');
 
 const app = express();
 app.use(express.json());
 app.use(cors());
 
-// Serve uploads dir for static images
-app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
+// Serve files from MongoDB GridFS (replaces ephemeral /uploads folder)
+// Any URL like /files/:id will stream the file directly from MongoDB
+app.get('/files/:id', async (req, res) => {
+  await streamFromGridFS(req.params.id, res);
+});
 
 // Connect Database
 mongoose.connect(process.env.MONGO_URI || "mongodb+srv://caom2k6_db_user:1412kaitokid@cluster0.ylpbpan.mongodb.net/lms")

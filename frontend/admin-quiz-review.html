@@ -148,8 +148,11 @@
       const rawPath = quizData.originalFiles[0].replace(/\\/g, '/');
       const fileUrl = baseUrl + rawPath;
       const lowerUrl = fileUrl.toLowerCase();
-      
-      if (lowerUrl.endsWith('.pdf')) {
+
+      // GridFS /files/:id URLs have no extension — use Google Docs viewer by default
+      if (rawPath.startsWith('/files/')) {
+        document.getElementById('docViewer').src = `https://docs.google.com/gview?url=${encodeURIComponent(fileUrl)}&embedded=true`;
+      } else if (lowerUrl.endsWith('.pdf')) {
         document.getElementById('docViewer').src = fileUrl;
       } else if (lowerUrl.endsWith('.docx') || lowerUrl.endsWith('.doc')) {
         document.getElementById('docViewer').src = `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(fileUrl)}`;

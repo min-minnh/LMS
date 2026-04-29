@@ -1,8 +1,7 @@
 const Vocabulary = require('../models/Vocabulary');
 const Topic = require('../models/Topic');
 const { sendSuccess, sendError } = require('../utils/responseHandler');
-const { parseXLSX } = require('../utils/csvParser');
-const fs = require('fs');
+const { parseXLSXBuffer } = require('../utils/csvParser');
 
 exports.getAll = async (req, res) => {
   try {
@@ -83,7 +82,7 @@ exports.uploadCSV = async (req, res) => {
     } else {
       const file = req.file;
       if (!file) return sendError(res, 'Please upload a CSV file or paste content', 400);
-      data = await parseXLSX(file.path);
+      data = await parseXLSXBuffer(file.buffer, file.originalname);
     }
     let successCount = 0;
     let errorRows = [];
@@ -138,12 +137,8 @@ exports.uploadCSV = async (req, res) => {
       successCount++;
     }
 
-    // Cleanup uploaded file
-    if (req.file) fs.unlinkSync(req.file.path);
-
     return sendSuccess(res, 'Upload processed', { successCount, errorRows });
   } catch (err) {
-    if (req.file) fs.unlinkSync(req.file.path);
     return sendError(res, err.message);
   }
 };

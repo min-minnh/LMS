@@ -1,37 +1,28 @@
 const multer = require('multer');
 const path = require('path');
-const fs = require('fs');
 
-// Ensure uploads folder exists
-const uploadDir = path.join(__dirname, '..', 'uploads');
-if (!fs.existsSync(uploadDir)){
-    fs.mkdirSync(uploadDir);
-}
+// === Memory Storage ===
+// Files are kept in RAM as buffers, then streamed to MongoDB GridFS.
+// This avoids writing to Render's ephemeral disk (which gets wiped on restart).
+const memStorage = multer.memoryStorage();
 
-// Multer generic storage
-const storage = multer.diskStorage({
-  destination: function (req, file, cb) {
-    cb(null, uploadDir); 
-  },
-  filename: function (req, file, cb) {
-    const ext = path.extname(file.originalname);
-    cb(null, Date.now() + '-' + Math.round(Math.random() * 1E9) + ext);
-  }
-});
+// Generic memory-based upload (accepts any file type)
+exports.uploadAny = multer({ storage: memStorage });
 
-// CSV / Excel file filter
+// CSV / Excel only (still memory-based, caller reads buffer)
 const fileFilterCSV = (req, file, cb) => {
-  const allowedMimeTypes = ['text/csv', 'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'];
   const ext = path.extname(file.originalname).toLowerCase();
-  
-  if (allowedMimeTypes.includes(file.mimetype) || ext === '.csv' || ext === '.xlsx') {
+  const allowedMimes = ['text/csv', 'application/vnd.ms-excel',
+    'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'];
+  if (allowedMimes.includes(file.mimetype) || ext === '.csv' || ext === '.xlsx') {
     cb(null, true);
   } else {
     cb(new Error('Only .csv and .xlsx formats allowed!'), false);
   }
 };
+exports.uploadCSV = multer({ storage: memStorage, fileFilter: fileFilterCSV });
 
-// Image filter
+// Image only
 const fileFilterImage = (req, file, cb) => {
   if (file.mimetype.startsWith('image/')) {
     cb(null, true);
@@ -39,7 +30,4 @@ const fileFilterImage = (req, file, cb) => {
     cb(new Error('Only images allowed!'), false);
   }
 };
-
-exports.uploadCSV = multer({ storage: storage, fileFilter: fileFilterCSV });
-exports.uploadImage = multer({ storage: storage, fileFilter: fileFilterImage });
-exports.uploadAny = multer({ storage: storage });
+exports.uploadImage = multer({ storage: memStorage, fileFilter: fileFilterImage });

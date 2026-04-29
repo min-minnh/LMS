@@ -216,9 +216,14 @@
         const fileFullUrl = 'https://lms-gzty.onrender.com' + l.fileUrl;
         document.getElementById('download-link').href = fileFullUrl;
         
-        let viewerUrl = fileFullUrl;
-        const ext = fileFullUrl.split('.').pop().toLowerCase();
-        if (['doc', 'docx', 'ppt', 'pptx', 'xls', 'xlsx'].includes(ext)) {
+        // GridFS URLs (/files/:id) have no extension — use Google Docs viewer by default
+        // which handles PDF, DOCX, PPTX etc. Fallback: direct embed for images
+        let viewerUrl;
+        const ext = l.fileUrl.split('.').pop().toLowerCase();
+        if (['jpg','jpeg','png','gif','webp'].includes(ext)) {
+          viewerUrl = fileFullUrl; // embed image directly
+        } else {
+          // Use Google Docs viewer for all document types (PDF, DOCX, PPTX, or GridFS /files/ URLs)
           viewerUrl = `https://docs.google.com/gview?url=${encodeURIComponent(fileFullUrl)}&embedded=true`;
         }
         document.getElementById('preview-frame').src = viewerUrl;
