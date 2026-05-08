@@ -6,55 +6,123 @@
   <title>AstraLMS - Vocabulary Topics</title>
   <link rel="stylesheet" href="assets/css/design-system.css">
   <style>
-    /* Specific overrides for Vocab page */
+    /* Specific overrides for Vocab page - White Minimal Gen Z */
+    body { background-color: #ffffff; color: #111827; }
+    
     .topic-icon {
-      font-size: 40px;
-      margin-bottom: 16px;
+      font-size: 48px;
+      margin-bottom: 24px;
       display: inline-block;
-      color: var(--text-light);
+      color: #93C5FD;
+      background: #eff6ff;
+      padding: 16px;
+      border-radius: 20px;
     }
     .empty-state-card {
-      background: var(--bg-surface);
-      padding: 40px;
-      border-radius: var(--radius-lg);
+      background: #ffffff;
+      padding: 64px 40px;
+      border-radius: 24px;
       text-align: center;
-      color: var(--text-muted);
+      color: #64748b;
       width: 100%;
-      border: 1px dashed var(--border-color);
+      border: 2px dashed #cbd5e1; /* clearer dashed border */
+      grid-column: 1/-1;
+      font-weight: 600;
+    }
+
+    /* Topic Folders Grid (No Tailwind) */
+    .topic-card {
+      background: #ffffff;
+      border-radius: 24px;
+      border: 1px solid #e2e8f0;
+      padding: 32px;
+      box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05), 0 2px 4px -1px rgba(0,0,0,0.03);
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      cursor: pointer;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .topic-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 12px 40px rgba(0,0,0,0.08);
+      border-color: #cbd5e1;
+    }
+    .topic-card-icon {
+      width: 64px;
+      height: 64px;
+      margin: 0 auto 24px auto;
+      border-radius: 16px;
+      background: #eff6ff;
+      color: #3b82f6;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      transition: transform 0.3s ease;
+      box-shadow: inset 0 2px 4px rgba(0,0,0,0.02);
+    }
+    .topic-card:hover .topic-card-icon {
+      transform: scale(1.1);
+    }
+    .topic-card-title {
+      font-weight: 800;
+      color: #0f172a;
+      font-size: 1.25rem;
+      margin-bottom: 8px;
+    }
+    .topic-card-subtitle {
+      color: #64748b;
+      font-size: 0.875rem;
+      font-weight: 600;
+    }
+    .topic-card-glow {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 4px;
+      background: linear-gradient(90deg, transparent, #3b82f6, transparent);
+      opacity: 0;
+      transition: opacity 0.3s;
+    }
+    .topic-card:hover .topic-card-glow {
+      opacity: 1;
     }
 
     /* Mode Toggler */
     .mode-toggle {
       display: flex;
-      gap: 12px;
-      margin-bottom: 24px;
-      background: var(--bg-hover);
-      padding: 6px;
-      border-radius: var(--radius-md);
+      gap: 8px;
+      margin-bottom: 32px;
+      background: #f8fafc;
+      padding: 8px;
+      border-radius: 100px;
       width: 100%;
       max-width: 420px;
       justify-content: center;
+      border: 1px solid #f1f5f9;
     }
     .mode-btn {
       flex: 1;
-      padding: 10px 16px;
-      border-radius: var(--radius-sm);
+      padding: 12px 24px;
+      border-radius: 100px;
       border: none;
-      font-size: 0.875rem;
+      font-size: 0.9375rem;
       font-weight: 600;
       cursor: pointer;
       background: transparent;
-      color: var(--text-muted);
-      transition: all var(--transition-fast);
+      color: #6b7280;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
       display: flex;
       justify-content: center;
       align-items: center;
       gap: 8px;
     }
     .mode-btn.active {
-      background: var(--bg-surface);
-      color: var(--primary);
-      box-shadow: var(--shadow-sm);
+      background: #ffffff;
+      color: #93C5FD;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.03);
     }
 
     /* --- Flashcard Mode --- */
@@ -67,20 +135,21 @@
       animation: fadeIn 0.4s ease;
     }
     .card-wrap {
-      width: 460px;
-      height: 320px;
+      width: 680px;
+      height: 420px;
       perspective: 1500px;
       cursor: pointer;
-      margin-bottom: 24px;
+      margin-bottom: 32px;
     }
     .card-inner {
       width: 100%;
       height: 100%;
-      transition: transform 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
       transform-style: preserve-3d;
       position: relative;
-      border-radius: var(--radius-lg);
-      box-shadow: var(--shadow-lg);
+      border-radius: 24px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.04);
+      border: 1px solid #f1f5f9;
     }
     .card-inner.flip {
       transform: rotateX(180deg);
@@ -93,59 +162,62 @@
       justify-content: center;
       align-items: center;
       flex-direction: column;
-      border-radius: var(--radius-lg);
+      border-radius: 24px;
       backface-visibility: hidden;
       text-align: center;
-      padding: 40px;
-      border: 1px solid rgba(255,255,255,0.4);
-    }
-    .card-front {
-      background: var(--bg-surface);
-      color: var(--text-main);
+      padding: 48px;
+      background: #ffffff;
     }
     .card-front .word {
-      font-size: 2.25rem;
-      font-weight: 700;
-      color: var(--primary-hover);
+      font-size: 3.5rem;
+      font-weight: 800;
+      color: #111827;
+      letter-spacing: -0.02em;
     }
     .card-back {
-      background: var(--primary);
-      color: white;
+      background: linear-gradient(135deg, #eff6ff, #ffffff);
       transform: rotateX(180deg);
+      border: 2px solid #eff6ff;
     }
     .card-back .meaning {
-      font-size: 2rem;
-      font-weight: 700;
+      font-size: 3rem;
+      font-weight: 800;
       margin-bottom: 16px;
+      color: #93C5FD;
     }
     .card-back .example {
-      font-size: 1rem;
-      font-weight: 400;
-      opacity: 0.9;
+      font-size: 1.25rem;
+      font-weight: 500;
+      opacity: 0.8;
       font-style: italic;
-      background: rgba(0,0,0,0.1);
-      padding: 12px 16px;
-      border-radius: var(--radius-md);
+      background: #ffffff;
+      padding: 16px 24px;
+      border-radius: 16px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+      color: #6b7280;
     }
 
     .card-progress {
       text-align: center;
-      margin-top: 16px;
-      font-size: 0.875rem;
-      color: var(--text-muted);
-      font-weight: 500;
+      margin-top: 24px;
+      font-size: 0.9375rem;
+      color: #9ca3af;
+      font-weight: 600;
+      background: #f8fafc;
+      padding: 8px 16px;
+      border-radius: 100px;
     }
 
     /* --- Typed Test Mode --- */
     .test-container {
-      background: var(--bg-surface);
-      border: 1px solid var(--border-color);
-      padding: 40px;
-      border-radius: var(--radius-lg);
+      background: #ffffff;
+      border: 1px solid #f1f5f9;
+      padding: 48px 56px;
+      border-radius: 24px;
       width: 100%;
-      max-width: 600px;
+      max-width: 640px;
       margin: 0 auto;
-      box-shadow: var(--shadow-md);
+      box-shadow: 0 10px 40px rgba(0,0,0,0.03);
       animation: fadeIn 0.4s ease;
       position: relative;
       overflow: hidden;
@@ -154,57 +226,62 @@
       position: absolute;
       top: 0;
       left: 0;
-      height: 4px;
-      background: var(--primary);
-      transition: width 0.3s ease;
+      height: 6px;
+      background: #93C5FD;
+      transition: width 0.4s cubic-bezier(0.4, 0, 0.2, 1);
     }
     .test-status {
       text-align: center;
-      color: var(--text-muted);
+      color: #9ca3af;
       font-weight: 600;
-      margin-bottom: 24px;
-      font-size: 0.875rem;
+      margin-bottom: 32px;
+      font-size: 0.9375rem;
     }
     .test-word {
-      font-size: 2.25rem;
-      font-weight: 700;
-      margin-bottom: 32px;
-      color: var(--primary-hover);
+      font-size: 3rem;
+      font-weight: 800;
+      margin-bottom: 40px;
+      color: #111827;
       text-align: center;
+      letter-spacing: -0.03em;
     }
     .test-input {
       width: 100%;
-      padding: 16px 20px;
-      font-size: 1.125rem;
-      border: 2px solid var(--border-color);
-      border-radius: var(--radius-md);
+      padding: 20px 24px;
+      font-size: 1.25rem;
+      border: 2px solid #e5e7eb;
+      border-radius: 16px;
       outline: none;
-      transition: all var(--transition-fast);
-      background: var(--bg-app);
-      color: var(--text-main);
-      font-weight: 500;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+      background: #f8fafc;
+      color: #111827;
+      font-weight: 600;
+      text-align: center;
     }
     .test-input:focus {
-      border-color: var(--primary);
-      background: white;
-      box-shadow: 0 0 0 4px var(--primary-light);
+      border-color: #93C5FD;
+      background: #ffffff;
+      box-shadow: 0 0 0 4px #eff6ff;
+      transform: translateY(-2px);
     }
     .test-feedback {
       text-align: center;
       min-height: 24px;
-      font-size: 0.875rem;
+      font-size: 1rem;
       font-weight: 600;
-      margin-bottom: 24px;
+      margin-bottom: 32px;
       opacity: 0;
       transition: opacity 0.3s;
+      padding: 12px;
+      border-radius: 12px;
     }
     .test-feedback.show { opacity: 1; }
-    .test-feedback.correct { color: var(--success); }
-    .test-feedback.wrong { color: var(--danger); }
-    .test-feedback.info { color: var(--warning); }
+    .test-feedback.correct { color: #16a34a; background: #dcfce7; }
+    .test-feedback.wrong { color: #e11d48; background: #ffe4e6; }
+    .test-feedback.info { color: #d97706; background: #fef3c7; }
     
     .test-completion { text-align: center; display: none; }
-    .completion-icon { font-size: 56px; margin-bottom: 16px; display: block; }
+    .completion-icon { font-size: 72px; margin-bottom: 24px; display: block; }
 
     @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
   </style>
@@ -226,7 +303,7 @@
   </aside>
 
   <!-- Main Content -->
-  <main class="main-area">
+  <main class="main-area" style="background: #f8fafc;">
     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:28px;">
       <div>
         <h1 style="font-size:1.5rem; font-weight:800; margin:0; color:#0f172a; display:flex; align-items:center; gap:8px;">
@@ -234,9 +311,12 @@
         </h1>
         <p style="color:#64748b; margin:4px 0 0; font-size:0.9rem;">Pick a topic and start mastering new words 🚀</p>
       </div>
-      <div style="display:flex; align-items:center; gap:12px;">
-        <div style="width:40px; height:40px; border-radius:50%; background:linear-gradient(135deg,#0ea5e9,#38bdf8); color:white; display:flex; align-items:center; justify-content:center; font-weight:700; font-size:1rem;" id="user-avatar">S</div>
-        <span style="font-weight:600; color:#0f172a;" id="user-name-top">Student</span>
+      <div style="display:flex; align-items:center; gap:16px;">
+        <button style="background: white; border: 1px solid #e2e8f0; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; color: #64748b; cursor: pointer; transition: all 0.2s; font-size: 20px;"><i class='bx bx-bell'></i></button>
+        <div style="display: flex; align-items: center; gap: 12px; background: white; padding: 6px 16px 6px 6px; border-radius: 30px; border: 1px solid #e2e8f0; cursor: pointer; transition: all 0.2s;">
+          <div style="width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg,#0ea5e9,#38bdf8); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9rem;" id="user-avatar">S</div>
+          <span style="font-weight: 600; color: #0f172a; font-size: 0.9rem;" id="user-name-top">Student</span>
+        </div>
       </div>
     </div>
 
@@ -247,7 +327,7 @@
           <p class="text-muted">Pick a topic and start mastering new words 🚀</p>
         </div>
         
-        <div class="grid grid-cols-4 gap-6" id="topicGrid">
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 24px;" id="topicGrid">
           <div class="empty-state-card" style="grid-column: 1/-1;">
             Loading amazing topics...
           </div>
@@ -385,9 +465,13 @@ async function loadTopics() {
     }
 
     grid.innerHTML = data.data.topics.map(t => `
-      <div class="card text-center" style="cursor: pointer; transition: transform 0.2s;" onclick="openTopic('${t._id}', '${t.name.replace(/'/g, "\\'")}')" onmouseover="this.style.transform='translateY(-4px)'" onmouseout="this.style.transform='translateY(0)'">
-        <i class='bx bx-folder topic-icon'></i>
-        <div class="font-semibold text-main">${t.name}</div>
+      <div class="topic-card" onclick="openTopic('${t._id}', '${t.name.replace(/'/g, "\\'")}')">
+        <div class="topic-card-icon">
+          <i class='bx bx-book-open'></i>
+        </div>
+        <div class="topic-card-title">${t.name}</div>
+        <div class="topic-card-subtitle">Click to learn</div>
+        <div class="topic-card-glow"></div>
       </div>
     `).join('');
   } catch(err) {
@@ -604,6 +688,108 @@ document.getElementById('test-input').addEventListener('keypress', function (e) 
 });
 
 loadTopics();
+
+
+// Global Dropdown Handler for Student Topbar
+document.addEventListener('click', function(e) {
+  // Profile Dropdown
+  const profileEl = document.getElementById('user-name-top')?.parentElement;
+  if (profileEl && profileEl.contains(e.target)) {
+    let drop = document.getElementById('student-dropdown');
+    if (!drop) {
+      drop = document.createElement('div');
+      drop.id = 'student-dropdown';
+      const rect = profileEl.getBoundingClientRect();
+      drop.style.cssText = `
+        position: fixed;
+        top: ${rect.bottom + 10}px;
+        right: ${window.innerWidth - rect.right}px;
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        padding: 8px 0;
+        z-index: 9999;
+        min-width: 180px;
+        animation: slideDown 0.2s ease-out;
+      `;
+      drop.innerHTML = `
+        <div style="padding: 12px 16px; border-bottom: 1px solid #e2e8f0; margin-bottom: 4px;">
+          <div style="font-weight: 700; color: #0f172a;" id="drop-name"></div>
+          <div style="font-size: 0.8rem; color: #64748b;">Student Account</div>
+        </div>
+        <a href="#" onclick="logout()" style="display: flex; align-items: center; gap: 8px; padding: 10px 16px; color: #ef4444; text-decoration: none; transition: background 0.2s; font-weight: 600;">
+          <i class='bx bx-log-out'></i> Log out
+        </a>
+      `;
+      document.body.appendChild(drop);
+      document.getElementById('drop-name').innerText = document.getElementById('user-name-top').innerText;
+      
+      const animStyle = document.createElement('style');
+      animStyle.innerHTML = "@keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } } #student-dropdown a:hover { background: #fef2f2; }";
+      document.head.appendChild(animStyle);
+    } else {
+      drop.style.display = drop.style.display === 'none' ? 'block' : 'none';
+      if(drop.style.display === 'block') {
+        const rect = profileEl.getBoundingClientRect();
+        drop.style.top = `${rect.bottom + 10}px`;
+        drop.style.right = `${window.innerWidth - rect.right}px`;
+      }
+    }
+  } else {
+    const drop = document.getElementById('student-dropdown');
+    if (drop && !e.target.closest('#student-dropdown')) {
+      drop.style.display = 'none';
+    }
+  }
+  
+  // Notification Bell
+  const bellBtn = e.target.closest('button');
+  if (bellBtn && bellBtn.querySelector('.bx-bell')) {
+    let notif = document.getElementById('student-notif');
+    if (!notif) {
+      notif = document.createElement('div');
+      notif.id = 'student-notif';
+      const rect = bellBtn.getBoundingClientRect();
+      notif.style.cssText = `
+        position: fixed;
+        top: ${rect.bottom + 10}px;
+        right: ${window.innerWidth - rect.right}px;
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        padding: 0;
+        z-index: 9999;
+        min-width: 280px;
+        animation: slideDown 0.2s ease-out;
+      `;
+      notif.innerHTML = `
+        <div style="padding: 12px 16px; border-bottom: 1px solid #e2e8f0; font-weight: 700; color: #0f172a;">
+          Notifications
+        </div>
+        <div style="padding: 20px 16px; text-align: center; color: #64748b; font-size: 0.9rem;">
+          <i class='bx bx-bell-off' style="font-size: 24px; color: #cbd5e1; margin-bottom: 8px; display: block;"></i>
+          No new notifications
+        </div>
+      `;
+      document.body.appendChild(notif);
+    } else {
+      notif.style.display = notif.style.display === 'none' ? 'block' : 'none';
+      if(notif.style.display === 'block') {
+        const rect = bellBtn.getBoundingClientRect();
+        notif.style.top = `${rect.bottom + 10}px`;
+        notif.style.right = `${window.innerWidth - rect.right}px`;
+      }
+    }
+  } else {
+    const notif = document.getElementById('student-notif');
+    if (notif && !e.target.closest('#student-notif')) {
+      notif.style.display = 'none';
+    }
+  }
+});
+
 </script>
 </body>
 </html>

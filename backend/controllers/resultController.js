@@ -166,3 +166,15 @@ exports.submitQuiz = async (req, res) => {
     return sendError(res, err.message);
   }
 };
+
+exports.deleteResult = async (req, res) => {
+  try {
+    const result = await Result.findById(req.params.id);
+    if (!result) return sendError(res, 'Result not found', 404);
+
+    await Result.findByIdAndDelete(req.params.id);
+    return sendSuccess(res, 'Result deleted successfully');
+  } catch (err) {
+    return sendError(res, err.message);
+  }
+};

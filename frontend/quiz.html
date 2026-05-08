@@ -6,7 +6,10 @@
   <title>AstraLMS - Làm Bài Kiểm Tra</title>
   <link rel="stylesheet" href="assets/css/design-system.css">
   <style>
-    /* Specific overrides for Quiz */
+  <style>
+    /* Specific overrides for Quiz - White Minimal Gen Z */
+    body { background-color: #f8fafc; }
+    
     .timer-bar {
       position: sticky;
       top: 0;
@@ -14,106 +17,35 @@
       background: rgba(255, 255, 255, 0.95);
       backdrop-filter: blur(10px);
       padding: 16px 32px;
-      border-radius: var(--radius-lg);
-      box-shadow: var(--shadow-sm);
       display: flex;
       justify-content: space-between;
       align-items: center;
-      margin-bottom: 32px;
-      border: 1px solid var(--border-color);
+      border-bottom: 1px solid #f1f5f9;
     }
 
     .timer-text {
       font-size: 1.5rem;
-      font-weight: 700;
-      color: var(--danger);
+      font-weight: 800;
+      color: #e11d48;
       display: flex;
       align-items: center;
       gap: 12px;
-      transition: transform 0.2s;
+      transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1);
     }
 
     .quiz-title {
       font-size: 1.25rem;
-      font-weight: 700;
-      color: var(--text-main);
+      font-weight: 800;
+      color: #111827;
       display: flex;
       align-items: center;
       gap: 12px;
+      letter-spacing: -0.01em;
     }
 
-    .quiz-container {
-      display: flex;
-      flex-direction: column;
-      gap: 24px;
-      max-width: 900px;
-      margin: 0 auto;
-      padding-bottom: 40px;
-    }
-
-    .q-card {
-      background: var(--bg-surface);
-      padding: 32px 40px;
-      border-radius: var(--radius-lg);
-      box-shadow: var(--shadow-sm);
-      border: 1px solid var(--border-color);
-    }
-
-    .q-title {
-      font-size: 1.125rem;
-      font-weight: 600;
-      color: var(--text-main);
-      margin-bottom: 24px;
-      line-height: 1.6;
-    }
-
-    .q-number {
-      color: var(--primary);
-      margin-right: 8px;
-    }
-
-    .q-options {
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
-    }
-
-    .q-option-label {
-      cursor: pointer;
-      display: block;
-    }
-
-    .q-option-box {
-      padding: 16px 20px;
-      background: var(--bg-app);
-      border: 2px solid var(--border-color);
-      border-radius: var(--radius-md);
-      font-size: 1rem;
-      font-weight: 500;
-      color: var(--text-main);
-      transition: all var(--transition-fast);
-      display: flex;
-      align-items: center;
-    }
-
-    .q-option-box:hover {
-      background: var(--bg-hover);
-      border-color: #cbd5e1;
-    }
-
-    .q-option-label input:checked+.q-option-box {
-      background: var(--primary-light);
-      border-color: var(--primary);
-      color: var(--primary-hover);
-      font-weight: 600;
-    }
-
-    .submit-area {
-      text-align: center;
-      margin-top: 32px;
-      max-width: 900px;
-      margin-left: auto;
-      margin-right: auto;
+    #quiz-active-area {
+      height: calc(100vh - 40px); /* Adjusted for padding */
+      animation: fadeInUp 0.5s ease-out both;
     }
 
     /* Result Screen overlay */
@@ -122,50 +54,27 @@
       text-align: center;
       max-width: 600px;
       margin: 40px auto;
-      background: var(--bg-surface);
+      background: #ffffff;
       padding: 48px;
-      border-radius: var(--radius-lg);
-      box-shadow: var(--shadow-lg);
-    }
-
-    .result-screen h2 {
-      font-size: 2rem;
-      color: var(--text-main);
-      margin-bottom: 16px;
+      border-radius: 24px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.04);
+      border: 1px solid #f1f5f9;
+      animation: fadeInUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
     }
 
     .score-text {
-      font-size: 4.5rem;
+      font-size: 5rem;
       font-weight: 800;
-      color: var(--success);
+      background: linear-gradient(135deg, #16a34a, #059669);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
       margin: 24px 0;
-    }
-
-    /* Passage box */
-    .passage-box {
-      background: var(--primary-light);
-      border-left: 4px solid var(--primary);
-      border-radius: var(--radius-md);
-      padding: 20px 24px;
-      margin-bottom: 24px;
-      font-size: 1rem;
-      color: var(--text-main);
-      line-height: 1.75;
-      white-space: pre-wrap;
-    }
-    .passage-label {
-      font-size: 0.75rem;
-      font-weight: 700;
-      text-transform: uppercase;
-      letter-spacing: 1px;
-      color: var(--primary);
-      margin-bottom: 8px;
     }
 
     #loading-msg {
       text-align: center;
       font-size: 1.125rem;
-      color: var(--text-muted);
+      color: #6b7280;
       margin-top: 100px;
       display: flex;
       flex-direction: column;
@@ -175,7 +84,7 @@
     
     .loading-spinner {
       font-size: 48px;
-      color: var(--primary);
+      color: #93C5FD;
       animation: spin 1s linear infinite;
     }
     
@@ -183,124 +92,172 @@
 
     /* Scantron specific */
     .ans-circle {
-      width: 36px;
-      height: 36px;
+      width: 44px;
+      height: 44px;
       display: flex;
       align-items: center;
       justify-content: center;
       border-radius: 50%;
-      border: 2px solid var(--border-color);
-      font-weight: bold;
-      color: var(--text-muted);
-      transition: all 0.2s;
+      border: 2px solid #e5e7eb;
+      font-weight: 700;
+      color: #6b7280;
+      transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
       background: white;
+      cursor: pointer;
     }
     .ans-label-scantron input:checked + .ans-circle {
-      background: var(--primary);
-      border-color: var(--primary);
-      color: white;
+      background: #eff6ff;
+      border-color: #93C5FD;
+      color: #93C5FD;
+      transform: scale(1.05);
+      box-shadow: 0 4px 12px rgba(147, 197, 253, 0.2);
     }
     .ans-label-scantron:hover .ans-circle {
-      border-color: var(--primary);
+      border-color: #93C5FD;
+      background: #f8fafc;
+    }
+
+    .doc-pane {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      background: white;
+      border-radius: 24px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.02);
+      overflow: hidden;
+      border: 1px solid #f1f5f9;
+    }
+
+    .exam-nav {
+      width: 360px;
+      flex-shrink: 0;
+      background: #ffffff;
+      padding: 24px;
+      border-radius: 24px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.02);
+      border: 1px solid #f1f5f9;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .question-row {
+      display: flex;
+      align-items: center;
+      margin-bottom: 12px;
+      padding: 12px;
+      border-radius: 16px;
+      transition: background 0.2s;
+    }
+
+    .question-row:hover {
+      background: #f8fafc;
+    }
+
+    .question-number {
+      font-weight: 800;
+      color: #111827;
+      width: 70px;
+      flex-shrink: 0;
     }
   </style>
 </head>
 <body>
 
 <div class="app-container">
-  <!-- Sidebar -->
-  <aside class="sidebar">
-    <div class="sidebar-header">
-      <div class="sidebar-logo">
-        <i class='bx bxs-graduation'></i>
-        <span>Student</span>
-      </div>
-    </div>
-    
-    <nav class="sidebar-nav">
-      <a href="#" onclick="go('student-dashboard')" class="nav-item">
-        <i class='bx bxs-dashboard'></i> Dashboard
-      </a>
-      <a href="#" onclick="go('vocab')" class="nav-item">
-        <i class='bx bx-book-bookmark'></i> Vocabulary
-      </a>
-      <a href="#" onclick="go('lesson')" class="nav-item">
-        <i class='bx bx-library'></i> Theory
-      </a>
-      <a href="#" onclick="go('quizzes-student')" class="nav-item active">
-        <i class='bx bx-edit'></i> Quizzes
-      </a>
-      <a href="#" onclick="go('my-results')" class="nav-item">
-        <i class='bx bx-bar-chart-alt-2'></i> My Results
-      </a>
-    </nav>
-    
-    <div class="sidebar-footer">
-      <a href="#" id="admin-link" onclick="go('dashboard')" class="nav-item" style="display: none; margin-bottom: 8px; color: var(--warning);">
-        <i class='bx bx-cog'></i> Admin Panel
-      </a>
-      <a href="#" onclick="logout()" class="nav-item text-danger">
-        <i class='bx bx-log-out'></i> Logout
-      </a>
+  <!-- Sidebar Slim -->
+  <aside class="sidebar-slim" id="main-sidebar">
+    <img src="assets/images/male_student.png" alt="Avatar" class="char-avatar" id="sidebar-avatar" onerror="this.style.display='none'">
+    <a href="#" class="nav-icon" onclick="go('student-dashboard')" title="Dashboard"><i class='bx bxs-home'></i></a>
+    <a href="#" class="nav-icon" onclick="go('vocab')" title="Vocabulary"><i class='bx bx-book-bookmark'></i></a>
+    <a href="#" class="nav-icon" onclick="go('lesson')" title="Theory"><i class='bx bx-play-circle'></i></a>
+    <a href="#" class="nav-icon active" onclick="go('quizzes-student')" title="Quizzes"><i class='bx bx-edit'></i></a>
+    <a href="#" class="nav-icon" onclick="go('my-results')" title="My Results"><i class='bx bx-bar-chart-alt-2'></i></a>
+    <div class="sidebar-bottom">
+      <a href="#" id="admin-link" class="nav-icon" style="display:none;" onclick="go('dashboard')" title="Admin"><i class='bx bx-cog'></i></a>
+      <a href="#" class="nav-icon" onclick="logout()" title="Logout" style="color:#f43f5e;"><i class='bx bx-power-off'></i></a>
     </div>
   </aside>
 
   <!-- Main Content -->
-  <main class="main-content">
-    <div class="content-area" style="padding-top: 40px;">
-
-      <div id="loading-msg">
-        <i class='bx bx-loader-alt loading-spinner'></i>
-        Đang tải bài kiểm tra...
+  <main class="main-area" id="main-area">
+    <!-- Header for Loading/Result Screens -->
+    <div id="standard-header" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:32px;">
+      <div>
+        <h1 style="font-size:1.5rem; font-weight:800; margin:0; color:#0f172a; display:flex; align-items:center; gap:8px;">
+          <i class='bx bx-edit' style="color:#0ea5e9;"></i> <span id="header-title">Quizzes</span>
+        </h1>
+        <p style="color:#64748b; margin:4px 0 0; font-size:0.9rem;">Hệ thống đang chuẩn bị bài thi cho bạn.</p>
       </div>
-
-      <!-- Quiz Active Area -->
-      <div id="quiz-active-area" style="display: none; height: calc(100vh - 80px); gap: 24px;">
-        
-        <!-- Left: Document Viewer -->
-        <div class="doc-pane" style="flex: 1; display: flex; flex-direction: column; background: var(--bg-surface); border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); overflow: hidden; border: 1px solid var(--border-color);">
-          <div class="timer-bar" style="position: relative; margin: 0; border-radius: 0; box-shadow: none; border-bottom: 1px solid var(--border-color); border-left: none; border-right: none; border-top: none;">
-            <div class="quiz-title"><i class='bx bx-edit text-primary'></i> <span id="quiz-title-text">Bài Kiểm Tra</span></div>
-            <div id="audio-container" style="display:none; flex: 1; margin: 0 20px;">
-              <audio id="exam-audio" controls style="height: 36px; width: 100%;"></audio>
-            </div>
-            <div class="timer-text" id="timer-text"><i class='bx bx-timer'></i> 00:00</div>
-          </div>
-          <iframe id="docViewer" style="flex:1; width:100%; border:none;"></iframe>
-        </div>
-
-        <!-- Right: Answers Sheet -->
-        <div class="exam-nav" style="width: 320px; flex-shrink: 0; background: var(--bg-surface); padding: 20px; border-radius: var(--radius-lg); box-shadow: var(--shadow-sm); border: 1px solid var(--border-color); display: flex; flex-direction: column;">
-          <h3 class="font-bold text-sm text-muted mb-4 uppercase">Phiếu Trả Lời</h3>
-          
-          <div id="questions-container" style="flex: 1; overflow-y: auto; padding-right: 10px;">
-            <!-- Questions inject here -->
-          </div>
-          
-          <hr style="border-top: 1px solid var(--border-color); margin: 20px 0;">
-          <div class="submit-area" style="margin-top: 0;">
-            <button class="btn btn-primary" id="btn-submit" onclick="submitQuiz()" style="width: 100%; box-shadow: var(--shadow-md); padding: 14px;">
-              <i class='bx bx-check-circle'></i> Nộp bài
-            </button>
-          </div>
+      <div style="display:flex; align-items:center; gap:16px;">
+        <button style="background: white; border: 1px solid #e2e8f0; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; color: #64748b; cursor: pointer; transition: all 0.2s; font-size: 20px;"><i class='bx bx-bell'></i></button>
+        <div style="display: flex; align-items: center; gap: 12px; background: white; padding: 6px 16px 6px 6px; border-radius: 30px; border: 1px solid #e2e8f0; cursor: pointer; transition: all 0.2s;">
+          <div style="width: 32px; height: 32px; border-radius: 50%; background: linear-gradient(135deg,#0ea5e9,#38bdf8); color: white; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.9rem;" id="user-avatar">S</div>
+          <span style="font-weight: 600; color: #0f172a; font-size: 0.9rem;" id="user-name-top">Student</span>
         </div>
       </div>
+    </div>
 
-      <!-- Result Screen -->
-      <div class="result-screen" id="result-box">
-        <div class="flex justify-center mb-4"><i class='bx bxs-party text-warning' style="font-size: 64px;"></i></div>
-        <h2 id="result-title">Hoàn thành bài kiểm tra!</h2>
-        <div class="score-text" id="score-text">0 / 0</div>
-        <p class="text-muted" style="margin-bottom: 32px; font-size: 16px;" id="result-msg">Kết quả của bạn đã được hệ thống lưu lại an toàn.</p>
-        
-        <button class="btn btn-primary w-full mb-4" onclick="window.location.href='my-results.html'" style="padding: 14px; font-size: 16px;">
-          <i class='bx bx-bar-chart-alt-2'></i> Xem điểm số
-        </button>
-        <button class="btn btn-secondary w-full" onclick="window.location.href='quizzes-student.html'" style="padding: 14px; font-size: 16px;">
-          <i class='bx bx-arrow-back'></i> Quay về danh sách
-        </button>
+    <div id="loading-msg">
+      <i class='bx bx-loader-alt loading-spinner'></i>
+      <p class="font-semibold text-lg">Đang tải bài kiểm tra...</p>
+    </div>
+
+    <!-- Quiz Active Area -->
+    <div id="quiz-active-area" style="display: none; gap: 24px; position: fixed; top: 20px; left: 20px; right: 20px; bottom: 20px; z-index: 1000;">
+      
+      <!-- Left: Document Viewer -->
+      <div class="doc-pane">
+        <div class="timer-bar">
+          <div class="quiz-title"><i class='bx bx-edit text-[#93C5FD]'></i> <span id="quiz-title-text">Bài Kiểm Tra</span></div>
+          <div id="audio-container" style="display:none; flex: 1; margin: 0 40px;">
+            <!-- Audio elements inject here -->
+          </div>
+          <div class="timer-text" id="timer-text"><i class='bx bx-timer'></i> 00:00</div>
+        </div>
+        <iframe id="docViewer" style="flex:1; width:100%; border:none; background: #525659;"></iframe>
       </div>
 
+      <!-- Right: Answers Sheet -->
+      <div class="exam-nav">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+          <h3 class="font-extrabold text-sm text-[#9ca3af] uppercase tracking-wider m-0">Phiếu Trả Lời</h3>
+          <span class="px-3 py-1 bg-[#eff6ff] text-[#93C5FD] rounded-full text-xs font-bold border border-[#bfdbfe]" id="question-count-badge">0 Câu hỏi</span>
+        </div>
+        
+        <div id="questions-container" style="flex: 1; overflow-y: auto; padding-right: 8px;">
+          <!-- Questions inject here -->
+        </div>
+        
+        <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #f1f5f9;">
+          <button class="w-full text-white font-bold rounded-2xl flex items-center justify-center gap-2 transition-all" id="btn-submit" onclick="submitQuiz()" style="padding: 16px; font-size: 1rem; background: linear-gradient(135deg, #93C5FD, #C4B5FD); box-shadow: 0 4px 14px rgba(147, 197, 253, 0.3);">
+            <i class='bx bx-check-double'></i> Nộp bài thi ngay
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Result Screen -->
+    <div class="result-screen" id="result-box">
+      <div style="width: 80px; height: 80px; background: #fef3c7; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 24px;">
+        <i class='bx bxs-trophy text-[#d97706]' style="font-size: 40px;"></i>
+      </div>
+      <h2 id="result-title" style="font-weight: 800; margin-bottom: 8px; color: #111827;">Hoàn thành bài kiểm tra!</h2>
+      <p class="text-[#6b7280]">Chúc mừng bạn đã hoàn thành thử thách này.</p>
+      
+      <div class="score-text" id="score-text">0 / 0</div>
+      
+      <div style="background: #f8fafc; padding: 20px; border-radius: 16px; margin-bottom: 32px; border: 1px solid #f1f5f9;">
+        <p class="text-[#6b7280] m-0" id="result-msg">Kết quả của bạn đã được hệ thống lưu lại an toàn.</p>
+      </div>
+      
+      <div style="display: grid; gap: 12px;">
+        <button class="w-full text-white font-bold rounded-2xl flex items-center justify-center gap-2 transition-all" onclick="window.location.href='my-results.html'" style="padding: 16px; font-size: 1rem; background: linear-gradient(135deg, #93C5FD, #C4B5FD); box-shadow: 0 4px 14px rgba(147, 197, 253, 0.3);">
+          <i class='bx bx-bar-chart-alt-2'></i> Xem bảng điểm chi tiết
+        </button>
+        <button class="w-full bg-[#f8fafc] text-[#111827] border border-[#e5e7eb] font-bold rounded-2xl flex items-center justify-center gap-2 transition-all hover:bg-[#f1f5f9]" onclick="window.location.href='quizzes-student.html'" style="padding: 16px; font-size: 1rem;">
+          <i class='bx bx-arrow-back'></i> Quay về danh sách bài tập
+        </button>
+      </div>
     </div>
   </main>
 </div>
@@ -313,9 +270,25 @@
   if (!quizId) window.location.href = "quizzes-student.html";
 
   const userStr = localStorage.getItem("user");
-  if (userStr) {
-    const user = JSON.parse(userStr);
+  const user = userStr ? JSON.parse(userStr) : null;
+  
+  if (user) {
     if (user.role === 'admin') document.getElementById('admin-link').style.display = "flex";
+    
+    const displayName = user.name || (user.email ? user.email.split('@')[0] : 'Student');
+    document.getElementById('user-name-top').innerText = displayName;
+    document.getElementById('user-avatar').innerText = displayName.charAt(0).toUpperCase();
+
+    // Set gender avatar
+    function getGenderImg(g) {
+      const v = (g || 'male').toLowerCase();
+      return (v === 'female' || v === 'girl') ? 'assets/images/female_student.png' : 'assets/images/male_student.png';
+    }
+    const sidebarAvatar = document.getElementById('sidebar-avatar');
+    if (sidebarAvatar) { 
+      sidebarAvatar.src = getGenderImg(user.gender); 
+      sidebarAvatar.onerror = () => sidebarAvatar.style.display='none'; 
+    }
   }
 
   function go(page) { window.location.href = page + ".html"; }
@@ -323,8 +296,6 @@
 
   let resultId = null;
   let questions = [];
-  let shuffleEnabled = false;
-
   let timeLeft = 60;
   let timerInterval;
   let cheatCount = 0;
@@ -363,14 +334,14 @@
       const data = await res.json();
 
       if (!data.success) {
-        document.getElementById('loading-msg').innerHTML = `<i class='bx bx-error-circle text-danger' style="font-size:48px;"></i>${data.message || "Không thể tải bài kiểm tra."}`;
+        document.getElementById('loading-msg').innerHTML = `<i class='bx bx-error-circle text-danger' style="font-size:48px;"></i><p>${data.message || "Không thể tải bài kiểm tra."}</p>`;
         return;
       }
 
       resultId = data.data.resultId;
       const quiz = data.data.quiz;
       
-      // Fetch full quiz to ensure we get audioFile2 (bypassing backend safeQuiz limitations on old deploys)
+      // Fetch full quiz to ensure we get audioFile2
       try {
         const fullRes = await fetch('https://lms-gzty.onrender.com/quizzes/' + quizId, {
           headers: { 'Authorization': 'Bearer ' + token }
@@ -379,65 +350,50 @@
         if (fullData.success && fullData.data && fullData.data.audioFile2) {
           quiz.audioFile2 = fullData.data.audioFile2;
         }
-      } catch (e) {
-        console.warn("Could not fetch full quiz for audio2", e);
-      }
+      } catch (e) { console.warn("Audio2 fetch fallback failed", e); }
 
       questions = quiz.questions || [];
-      shuffleEnabled = !!quiz.shuffleQuestions;
 
       if (questions.length === 0) {
-        document.getElementById('loading-msg').innerHTML = `<i class='bx bx-info-circle text-warning' style="font-size:48px;"></i>Bài kiểm tra này chưa có câu hỏi nào.`;
+        document.getElementById('loading-msg').innerHTML = `<i class='bx bx-info-circle text-warning' style="font-size:48px;"></i><p>Bài kiểm tra này chưa có câu hỏi nào.</p>`;
         return;
       }
 
-      // Prepare quiz view
+      // FOCUS MODE: Hide sidebar and normal header
       document.getElementById('loading-msg').style.display = 'none';
-      document.getElementById('quiz-active-area').style.display = 'flex'; // Changed to flex
-
-      // Hide sidebar for full focus mode during the exam
-      document.querySelector('.sidebar').style.display = 'none';
-      document.querySelector('.main-content').style.marginLeft = '0';
-
+      document.getElementById('standard-header').style.display = 'none';
+      document.getElementById('main-sidebar').style.display = 'none';
+      document.getElementById('main-area').style.padding = '0';
+      document.body.style.background = '#f1f5f9';
+      
+      document.getElementById('quiz-active-area').style.display = 'flex';
       document.getElementById('quiz-title-text').innerText = quiz.title || 'Làm bài kiểm tra';
+      document.getElementById('question-count-badge').innerText = `${questions.length} Câu hỏi`;
 
-      let hasAudio = false;
       const audioContainer = document.getElementById('audio-container');
-      audioContainer.innerHTML = ''; // clear it
+      audioContainer.innerHTML = '';
+      let hasAudio = false;
 
       if (quiz.audioFile1) {
         hasAudio = true;
-        const safeAudioPath1 = quiz.audioFile1.replace(/\\/g, '/');
-        audioContainer.innerHTML += `<audio controls style="height: 36px; width: 100%; margin-bottom: 4px;" src="https://lms-gzty.onrender.com${safeAudioPath1}"></audio>`;
+        const safePath = quiz.audioFile1.replace(/\\/g, '/');
+        audioContainer.innerHTML += `<audio controls style="height: 32px; width: 100%; margin-bottom: 4px;" src="https://lms-gzty.onrender.com${safePath}"></audio>`;
       }
-      
       if (quiz.audioFile2) {
         hasAudio = true;
-        const safeAudioPath2 = quiz.audioFile2.replace(/\\/g, '/');
-        audioContainer.innerHTML += `<audio controls style="height: 36px; width: 100%;" src="https://lms-gzty.onrender.com${safeAudioPath2}"></audio>`;
+        const safePath = quiz.audioFile2.replace(/\\/g, '/');
+        audioContainer.innerHTML += `<audio controls style="height: 32px; width: 100%;" src="https://lms-gzty.onrender.com${safePath}"></audio>`;
       }
-
-      if (hasAudio) {
-        audioContainer.style.display = 'flex';
-        audioContainer.style.flexDirection = 'column';
-      }
+      if (hasAudio) audioContainer.style.display = 'block';
       
       if (quiz.originalFiles && quiz.originalFiles.length > 0) {
         const rawPath = quiz.originalFiles[0].replace(/\\/g, '/');
         const fileUrl = 'https://lms-gzty.onrender.com' + rawPath;
-        const lowerUrl = fileUrl.toLowerCase();
-        
-        // GridFS /files/:id URLs have no extension — use Google Docs viewer by default
         if (rawPath.startsWith('/files/')) {
           document.getElementById('docViewer').src = `https://docs.google.com/gview?url=${encodeURIComponent(fileUrl)}&embedded=true`;
-        } else if (lowerUrl.endsWith('.pdf')) {
-          // Native browser PDF rendering for old URLs
+        } else if (fileUrl.toLowerCase().endsWith('.pdf')) {
           document.getElementById('docViewer').src = fileUrl;
-        } else if (lowerUrl.endsWith('.docx') || lowerUrl.endsWith('.doc')) {
-          // Microsoft Office viewer for old URLs
-          document.getElementById('docViewer').src = `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(fileUrl)}`;
         } else {
-          // Fallback to Google Docs viewer
           document.getElementById('docViewer').src = `https://docs.google.com/gview?url=${encodeURIComponent(fileUrl)}&embedded=true`;
         }
       } else {
@@ -450,7 +406,7 @@
       renderQuestions();
     } catch (err) {
       console.error(err);
-      document.getElementById('loading-msg').innerHTML = `<i class='bx bx-wifi-off text-danger' style="font-size:48px;"></i>Lỗi kết nối mạng.`;
+      document.getElementById('loading-msg').innerHTML = `<i class='bx bx-wifi-off text-danger' style="font-size:48px;"></i><p>Lỗi kết nối mạng.</p>`;
     }
   }
 
@@ -459,63 +415,35 @@
       timeLeft--;
       const m = Math.floor(timeLeft / 60);
       const s = timeLeft % 60;
+      document.getElementById('timer-text').innerHTML = `<i class='bx bx-timer'></i> ${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
 
-      const formattedTimer = `<i class='bx bx-timer'></i> ${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
-      document.getElementById('timer-text').innerHTML = formattedTimer;
-
-      // Warning effect when time is under 1 minute
       if (timeLeft <= 60 && timeLeft > 0) {
-        document.getElementById('timer-text').style.color = '#DC2626';
-        if (timeLeft % 2 === 0) document.getElementById('timer-text').style.transform = 'scale(1.05)';
-        else document.getElementById('timer-text').style.transform = 'scale(1)';
+        document.getElementById('timer-text').style.color = 'var(--danger)';
+        document.getElementById('timer-text').style.transform = timeLeft % 2 === 0 ? 'scale(1.1)' : 'scale(1)';
       }
 
       if (timeLeft <= 0) {
         clearInterval(timerInterval);
-        document.getElementById('timer-text').innerHTML = "<i class='bx bx-time'></i> Hết giờ!";
         submitQuiz(); 
       }
     }, 1000);
   }
 
-  function escapeHTML(str) {
-    if (!str) return '';
-    return String(str)
-      .replace(/&/g, "&amp;")
-      .replace(/</g, "&lt;")
-      .replace(/>/g, "&gt;")
-      .replace(/"/g, "&quot;")
-      .replace(/'/g, "&#039;");
-  }
-
-  function handleSelect(qIdx) {
-    // Optional feedback when selected
-  }
-
   function renderQuestions() {
     const container = document.getElementById('questions-container');
-    
-    let html = '';
-
-    questions.forEach((q, idx) => {
-      const optsParams = ['A', 'B', 'C', 'D'];
-      
-      html += `
-        <div class="flex items-center mb-3 p-2 hover:bg-gray-50 rounded" id="q-${idx}">
-          <div class="font-bold text-primary w-16" style="flex-shrink:0;">Câu ${idx + 1}:</div>
-          <div class="flex gap-3 flex-1 justify-around">
-            ${optsParams.map(opt => `
-              <label class="ans-label-scantron" style="cursor:pointer;">
-                <input type="radio" name="${q._id}" value="${opt}" style="display:none;" onchange="handleSelect(${idx})" />
-                <div class="ans-circle">${opt}</div>
-              </label>
-            `).join('')}
-          </div>
+    container.innerHTML = questions.map((q, idx) => `
+      <div class="question-row" id="q-${idx}">
+        <div class="question-number">Câu ${idx + 1}</div>
+        <div style="display: flex; gap: 8px; flex: 1; justify-content: space-between;">
+          ${['A', 'B', 'C', 'D'].map(opt => `
+            <label class="ans-label-scantron">
+              <input type="radio" name="${q._id}" value="${opt}" style="display:none;" />
+              <div class="ans-circle">${opt}</div>
+            </label>
+          `).join('')}
         </div>
-      `;
-    });
-    
-    container.innerHTML = html;
+      </div>
+    `).join('');
   }
 
   async function submitQuiz() {
@@ -531,47 +459,142 @@
     let clientAnswers = [];
     questions.forEach(q => {
       const selectedRadio = document.querySelector(`input[name="${q._id}"]:checked`);
-      if (selectedRadio) {
-        clientAnswers.push({ questionId: q._id, selected: selectedRadio.value });
-      }
+      if (selectedRadio) clientAnswers.push({ questionId: q._id, selected: selectedRadio.value });
     });
 
+    // RESTORE UI
     document.getElementById('quiz-active-area').style.display = 'none';
-    document.querySelector('.main-content').style.marginLeft = '260px'; // Restore sidebar space
-    document.querySelector('.sidebar').style.display = 'flex'; // Show sidebar again
+    document.getElementById('main-sidebar').style.display = 'flex';
+    document.getElementById('main-area').style.padding = '32px 40px';
+    document.getElementById('standard-header').style.display = 'flex';
+    document.getElementById('header-title').innerText = "Kết Quả Bài Thi";
     document.getElementById('result-box').style.display = 'block';
     document.getElementById('score-text').innerHTML = "<i class='bx bx-loader-alt bx-spin'></i>";
 
     try {
       const res = await fetch(`https://lms-gzty.onrender.com/results/quiz/${quizId}/submit`, {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + token
-        },
-        body: JSON.stringify({
-          resultId: resultId,
-          clientAnswers: clientAnswers
-        })
+        headers: { 'Content-Type': 'application/json', 'Authorization': 'Bearer ' + token },
+        body: JSON.stringify({ resultId, clientAnswers })
       });
 
       const data = await res.json();
       if (data.success) {
         document.getElementById('score-text').innerText = `${data.data.score} / ${data.data.total}`;
-        if (data.data.score === data.data.total) {
-          document.getElementById('result-title').innerText = "Điểm 10 tuyệt đối! 🏆";
-        }
+        if (data.data.score === data.data.total) document.getElementById('result-title').innerText = "Điểm 10 tuyệt đối! 🏆";
       } else {
         document.getElementById('score-text').innerText = "Lỗi";
         document.getElementById('result-msg').innerText = data.message;
       }
     } catch (err) {
-      console.error("Failed to save result", err);
+      console.error(err);
       document.getElementById('score-text').innerText = "Lỗi Mạng";
     }
   }
 
   startQuiz();
+
+
+// Global Dropdown Handler for Student Topbar
+document.addEventListener('click', function(e) {
+  // Profile Dropdown
+  const profileEl = document.getElementById('user-name-top')?.parentElement;
+  if (profileEl && profileEl.contains(e.target)) {
+    let drop = document.getElementById('student-dropdown');
+    if (!drop) {
+      drop = document.createElement('div');
+      drop.id = 'student-dropdown';
+      const rect = profileEl.getBoundingClientRect();
+      drop.style.cssText = `
+        position: fixed;
+        top: ${rect.bottom + 10}px;
+        right: ${window.innerWidth - rect.right}px;
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        padding: 8px 0;
+        z-index: 9999;
+        min-width: 180px;
+        animation: slideDown 0.2s ease-out;
+      `;
+      drop.innerHTML = `
+        <div style="padding: 12px 16px; border-bottom: 1px solid #e2e8f0; margin-bottom: 4px;">
+          <div style="font-weight: 700; color: #0f172a;" id="drop-name"></div>
+          <div style="font-size: 0.8rem; color: #64748b;">Student Account</div>
+        </div>
+        <a href="#" onclick="logout()" style="display: flex; align-items: center; gap: 8px; padding: 10px 16px; color: #ef4444; text-decoration: none; transition: background 0.2s; font-weight: 600;">
+          <i class='bx bx-log-out'></i> Log out
+        </a>
+      `;
+      document.body.appendChild(drop);
+      document.getElementById('drop-name').innerText = document.getElementById('user-name-top').innerText;
+      
+      const animStyle = document.createElement('style');
+      animStyle.innerHTML = "@keyframes slideDown { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } } #student-dropdown a:hover { background: #fef2f2; }";
+      document.head.appendChild(animStyle);
+    } else {
+      drop.style.display = drop.style.display === 'none' ? 'block' : 'none';
+      if(drop.style.display === 'block') {
+        const rect = profileEl.getBoundingClientRect();
+        drop.style.top = `${rect.bottom + 10}px`;
+        drop.style.right = `${window.innerWidth - rect.right}px`;
+      }
+    }
+  } else {
+    const drop = document.getElementById('student-dropdown');
+    if (drop && !e.target.closest('#student-dropdown')) {
+      drop.style.display = 'none';
+    }
+  }
+  
+  // Notification Bell
+  const bellBtn = e.target.closest('button');
+  if (bellBtn && bellBtn.querySelector('.bx-bell')) {
+    let notif = document.getElementById('student-notif');
+    if (!notif) {
+      notif = document.createElement('div');
+      notif.id = 'student-notif';
+      const rect = bellBtn.getBoundingClientRect();
+      notif.style.cssText = `
+        position: fixed;
+        top: ${rect.bottom + 10}px;
+        right: ${window.innerWidth - rect.right}px;
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 12px;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        padding: 0;
+        z-index: 9999;
+        min-width: 280px;
+        animation: slideDown 0.2s ease-out;
+      `;
+      notif.innerHTML = `
+        <div style="padding: 12px 16px; border-bottom: 1px solid #e2e8f0; font-weight: 700; color: #0f172a;">
+          Notifications
+        </div>
+        <div style="padding: 20px 16px; text-align: center; color: #64748b; font-size: 0.9rem;">
+          <i class='bx bx-bell-off' style="font-size: 24px; color: #cbd5e1; margin-bottom: 8px; display: block;"></i>
+          No new notifications
+        </div>
+      `;
+      document.body.appendChild(notif);
+    } else {
+      notif.style.display = notif.style.display === 'none' ? 'block' : 'none';
+      if(notif.style.display === 'block') {
+        const rect = bellBtn.getBoundingClientRect();
+        notif.style.top = `${rect.bottom + 10}px`;
+        notif.style.right = `${window.innerWidth - rect.right}px`;
+      }
+    }
+  } else {
+    const notif = document.getElementById('student-notif');
+    if (notif && !e.target.closest('#student-notif')) {
+      notif.style.display = 'none';
+    }
+  }
+});
+
 </script>
 </body>
 </html>

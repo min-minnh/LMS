@@ -133,3 +133,110 @@ function buildPagination(page, totalPages, fetchFn) {
 
   container.innerHTML = html;
 }
+
+// Global click handler for Topbar Dropdowns (Profile & Notifications)
+document.addEventListener('click', function(e) {
+  // Handle Profile Dropdown
+  const profile = e.target.closest('.user-profile');
+  if (profile) {
+    let dropdown = document.getElementById('profile-dropdown');
+    if (!dropdown) {
+      dropdown = document.createElement('div');
+      dropdown.id = 'profile-dropdown';
+      // Calculate position relative to the profile element
+      const rect = profile.getBoundingClientRect();
+      dropdown.style.cssText = `
+        position: fixed;
+        top: ${rect.bottom + 10}px;
+        right: ${window.innerWidth - rect.right}px;
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        padding: 8px 0;
+        z-index: 1000;
+        min-width: 160px;
+        animation: slideDown 0.2s ease-out;
+      `;
+      dropdown.innerHTML = `
+        <div style="padding: 8px 16px; border-bottom: 1px solid #e2e8f0; margin-bottom: 4px;">
+          <div style="font-weight: 600; color: #0f172a;">Admin Account</div>
+          <div style="font-size: 0.8rem; color: #64748b;">Manage system</div>
+        </div>
+        <a href="#" onclick="localStorage.clear(); window.location.href='index.html'" style="display: flex; align-items: center; gap: 8px; padding: 10px 16px; color: #ef4444; text-decoration: none; transition: background 0.2s;">
+          <i class='bx bx-log-out'></i> Logout
+        </a>
+      `;
+      document.body.appendChild(dropdown);
+    } else {
+      dropdown.style.display = dropdown.style.display === 'none' ? 'block' : 'none';
+      if (dropdown.style.display === 'block') {
+        const rect = profile.getBoundingClientRect();
+        dropdown.style.top = `${rect.bottom + 10}px`;
+        dropdown.style.right = `${window.innerWidth - rect.right}px`;
+      }
+    }
+  } else {
+    const dropdown = document.getElementById('profile-dropdown');
+    if (dropdown && !e.target.closest('#profile-dropdown')) {
+      dropdown.style.display = 'none';
+    }
+  }
+
+  // Handle Notification Dropdown
+  const bell = e.target.closest('.btn-icon');
+  if (bell && bell.querySelector('.bx-bell')) {
+    let notif = document.getElementById('notif-dropdown');
+    if (!notif) {
+      notif = document.createElement('div');
+      notif.id = 'notif-dropdown';
+      const rect = bell.getBoundingClientRect();
+      notif.style.cssText = `
+        position: fixed;
+        top: ${rect.bottom + 10}px;
+        right: ${window.innerWidth - rect.right}px;
+        background: white;
+        border: 1px solid #e2e8f0;
+        border-radius: 8px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        padding: 0;
+        z-index: 1000;
+        min-width: 280px;
+        animation: slideDown 0.2s ease-out;
+      `;
+      notif.innerHTML = `
+        <div style="padding: 12px 16px; border-bottom: 1px solid #e2e8f0; font-weight: 600; color: #0f172a;">
+          Notifications
+        </div>
+        <div style="padding: 20px 16px; text-align: center; color: #64748b; font-size: 0.9rem;">
+          <i class='bx bx-bell-off' style="font-size: 24px; color: #cbd5e1; margin-bottom: 8px; display: block;"></i>
+          No new notifications
+        </div>
+      `;
+      document.body.appendChild(notif);
+    } else {
+      notif.style.display = notif.style.display === 'none' ? 'block' : 'none';
+      if (notif.style.display === 'block') {
+        const rect = bell.getBoundingClientRect();
+        notif.style.top = `${rect.bottom + 10}px`;
+        notif.style.right = `${window.innerWidth - rect.right}px`;
+      }
+    }
+  } else {
+    const notif = document.getElementById('notif-dropdown');
+    if (notif && !e.target.closest('#notif-dropdown')) {
+      notif.style.display = 'none';
+    }
+  }
+});
+
+// Add slideDown animation to document
+const animStyle = document.createElement('style');
+animStyle.innerHTML = \`
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  #profile-dropdown a:hover { background: #fef2f2; }
+\`;
+document.head.appendChild(animStyle);

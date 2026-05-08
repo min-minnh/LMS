@@ -6,53 +6,53 @@
 @import url('https://unpkg.com/boxicons@2.1.4/css/boxicons.min.css');
 
 :root {
-  /* Colors - Vibrant but Soft Theme (SaaS Dashboard Style) */
-  --primary: #38bdf8; /* Sky Blue 400 */
-  --primary-hover: #0284c7; /* Light Blue 600 */
-  --primary-light: #e0f2fe; /* Sky 100 */
+  /* Colors - White Minimal Gen Z (Premium Editorial Style) */
+  --primary: #93C5FD; /* Soft Pastel Blue */
+  --primary-hover: #BFDBFE; 
+  --primary-light: #EFF6FF; 
   
-  --secondary: #f59e0b; /* Amber 500 */
-  --secondary-light: #fef3c7; /* Amber 50 */
+  --secondary: #C4B5FD; /* Soft Pastel Violet (Alternative Accent) */
+  --secondary-light: #F5F3FF; 
   
-  --success: #10B981;
-  --success-light: #D1FAE5;
+  --success: #86EFAC;
+  --success-light: #DCFCE7;
   
-  --danger: #F43F5E; /* Rose 500 */
+  --danger: #FDA4AF;
   --danger-light: #FFE4E6;
   
-  --warning: #F59E0B;
+  --warning: #FCD34D;
   --warning-light: #FEF3C7;
 
   /* Surface & Backgrounds */
-  --bg-app: #F8FAFC; 
-  --bg-surface: rgba(255, 255, 255, 0.85); /* For glassmorphism */
+  --bg-app: #FFFFFF; /* Pure white primary background */
+  --bg-surface: #FFFFFF; /* Pure white cards */
   --bg-solid: #FFFFFF;
-  --bg-hover: #F1F5F9; 
+  --bg-hover: #F8FAFC; /* Secondary background for hover states */
   
   /* Text */
-  --text-main: #0F172A;
-  --text-muted: #64748B;
-  --text-light: #94A3B8;
+  --text-main: #111827; /* Near black for high contrast */
+  --text-muted: #6B7280; /* Soft gray */
+  --text-light: #9CA3AF;
   
-  /* Borders */
-  --border-color: rgba(226, 232, 240, 0.8);
+  /* Borders (Subtle) */
+  --border-color: #E5E7EB;
   
-  /* Shadows - Soft & Diffused */
-  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.04);
-  --shadow-md: 0 8px 24px -4px rgba(0, 0, 0, 0.06);
-  --shadow-lg: 0 20px 40px -8px rgba(99, 102, 241, 0.1);
-  --shadow-card: 0 10px 40px -10px rgba(0, 0, 0, 0.08);
+  /* Shadows - Extremely soft, editorial look */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.02);
+  --shadow-md: 0 4px 20px rgba(0, 0, 0, 0.04);
+  --shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.06);
+  --shadow-card: 0 4px 24px -4px rgba(0, 0, 0, 0.05);
   
-  /* Border Radius - More rounded for Gen-Z feel */
+  /* Border Radius - Modern Gen-Z feel */
   --radius-sm: 12px;
   --radius-md: 16px;
-  --radius-lg: 24px;
+  --radius-lg: 20px;
   --radius-full: 9999px;
   
-  /* Transitions */
-  --transition-fast: 0.2s cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-normal: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-bounce: 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  /* Transitions - Smooth and subtle */
+  --transition-fast: 0.15s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-normal: 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  --transition-bounce: 0.3s cubic-bezier(0.4, 0, 0.2, 1); /* Toned down bounce */
 }
 
 /* ==========================================================================
@@ -86,13 +86,7 @@
 
 body {
   font-family: 'Plus Jakarta Sans', sans-serif;
-  /* Subtle animated mesh background */
   background-color: var(--bg-app);
-  background-image: 
-    radial-gradient(at 10% 20%, hsla(250, 100%, 85%, 0.4) 0px, transparent 50%),
-    radial-gradient(at 90% 10%, hsla(189, 100%, 80%, 0.4) 0px, transparent 50%),
-    radial-gradient(at 50% 90%, hsla(355, 100%, 93%, 0.6) 0px, transparent 50%);
-  background-attachment: fixed;
   color: var(--text-main);
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;

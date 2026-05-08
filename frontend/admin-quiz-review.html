@@ -98,8 +98,14 @@
         <button class="btn btn-secondary btn-icon" onclick="window.location.href='quizzes.html'"><i class='bx bx-arrow-back'></i></button>
         <h2 class="m-0 text-main flex items-center gap-2"><i class='bx bx-check-shield text-warning'></i> Rà soát Đáp án (Review)</h2>
       </div>
-      <div class="topbar-actions">
+      <div class="topbar-actions" style="display: flex; align-items: center; gap: 16px;">
         <button class="btn btn-primary" onclick="publishQuiz()"><i class='bx bx-check-double'></i> Hoàn tất & Xuất bản (Publish)</button>
+        <div style="width: 1px; height: 24px; background: var(--border-color);"></div>
+        <button class="btn-icon"><i class='bx bx-bell'></i></button>
+        <div class="user-profile" style="display: flex; align-items: center; gap: 12px; cursor: pointer;">
+          <div class="avatar" style="background: var(--warning-light); color: var(--warning);">A</div>
+          <span class="font-medium">Administrator</span>
+        </div>
       </div>
     </header>
 

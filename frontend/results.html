@@ -98,8 +98,9 @@
         <i class='bx bx-search'></i>
         <input type="text" placeholder="Search...">
       </div>
-      <div class="topbar-actions">
-        <div class="user-profile">
+      <div class="topbar-actions" style="display: flex; align-items: center; gap: 16px;">
+        <button class="btn-icon"><i class='bx bx-bell'></i></button>
+        <div class="user-profile" style="display: flex; align-items: center; gap: 12px; cursor: pointer;">
           <div class="avatar" style="background: var(--warning-light); color: var(--warning);">A</div>
           <span class="font-medium">Administrator</span>
         </div>
@@ -142,8 +143,9 @@
                 <th>Email</th>
                 <th>Score</th>
                 <th>Total</th>
+                <th>Duration</th>
                 <th>Date Submitted</th>
-                <th width="120">Actions</th>
+                <th width="150">Actions</th>
               </tr>
             </thead>
             <tbody id="tableBody"></tbody>
@@ -243,6 +245,15 @@
     applySortAndRender();
   }
 
+  function formatDuration(start, end) {
+    if (!start || !end) return '---';
+    const diff = new Date(end) - new Date(start);
+    const seconds = Math.floor(diff / 1000);
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}m ${secs}s`;
+  }
+
   function applySortAndRender() {
     const tbody = document.getElementById('tableBody');
     if (allResultsData.length === 0) {
@@ -261,6 +272,7 @@
       const scoreClass = isDoing ? 'text-danger' : (r.score >= (r.total/2) ? 'text-success' : 'text-danger');
       const scoreView = isDoing ? '<span class="pulsing-red"><i class="bx bx-radio-circle-marked bx-burst"></i> Đang Thi...</span>' : r.score;
       const dateView = isDoing ? '<span class="text-warning font-semibold">System is monitoring...</span>' : new Date(r.submittedAt).toLocaleString();
+      const duration = isDoing ? '---' : formatDuration(r.startTime, r.submittedAt);
 
       return `
       <tr style="${isDoing ? 'background: var(--danger-light);' : ''}">
@@ -268,13 +280,28 @@
         <td><small class="${isDoing ? 'text-danger font-bold' : 'text-muted'}">${r.userId?.email || 'N/A'}</small></td>
         <td class="font-bold ${scoreClass}">${scoreView}</td>
         <td>${r.total}</td>
+        <td class="font-medium">${duration}</td>
         <td class="text-sm">${dateView}</td>
         <td>
-           ${isDoing ? '' : `<button class="btn btn-secondary btn-sm" onclick="viewDetails('${r._id}')">Chi tiết <i class='bx bx-right-arrow-alt'></i></button>`}
+           <div style="display: flex; gap: 8px;">
+             ${isDoing ? '' : `<button class="btn btn-secondary btn-sm" onclick="viewDetails('${r._id}')" title="Chi tiết"><i class='bx bx-show'></i></button>`}
+             <button class="btn btn-danger btn-sm" onclick="deleteResult('${r._id}')" title="Xóa"><i class='bx bx-trash'></i></button>
+           </div>
         </td>
       </tr>
       `;
     }).join('');
+  }
+
+  async function deleteResult(id) {
+    if (!confirm('Bạn có chắc chắn muốn xóa kết quả này không? Hành động này không thể hoàn tác.')) return;
+    const res = await apiFetch(`/results/${id}`, { method: 'DELETE' });
+    if (res.success) {
+      showToast('Đã xóa kết quả thành công');
+      fetchResults();
+    } else {
+      showToast(res.message, false);
+    }
   }
 
   function escapeHTML(str) {

@@ -11,5 +11,6 @@ router.get('/:id', resultController.getById);
 // Action endpoints for quizzes
 router.post('/quiz/:quizId/start', resultController.startQuiz);
 router.post('/quiz/:quizId/submit', resultController.submitQuiz);
+router.delete('/:id', requireAdmin, resultController.deleteResult);
 
 module.exports = router;

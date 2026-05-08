@@ -73,8 +73,15 @@
   </aside>
 
   <main class="main-content">
-    <header class="topbar">
+    <header class="topbar" style="display: flex; justify-content: space-between; align-items: center;">
       <h2 class="m-0 text-primary flex items-center gap-2"><i class='bx bx-scan'></i> Auto Quiz Scanner</h2>
+      <div class="topbar-actions" style="display: flex; align-items: center; gap: 16px;">
+        <button class="btn-icon"><i class='bx bx-bell'></i></button>
+        <div class="user-profile" style="display: flex; align-items: center; gap: 12px; cursor: pointer;">
+          <div class="avatar" style="background: var(--warning-light); color: var(--warning);">A</div>
+          <span class="font-medium">Administrator</span>
+        </div>
+      </div>
     </header>
 
     <div class="content-area" style="max-width: 800px; margin: 0 auto;">
