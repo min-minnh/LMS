@@ -47,6 +47,7 @@ async function apiFetch(endpoint, options = {}) {
     const data = await response.json();
     return data;
   } catch (err) {
+    console.error('API Fetch Error:', err);
     return { success: false, message: 'Network error or server down', data: null };
   }
 }
@@ -232,11 +233,11 @@ document.addEventListener('click', function(e) {
 
 // Add slideDown animation to document
 const animStyle = document.createElement('style');
-animStyle.innerHTML = \`
+animStyle.innerHTML = `
   @keyframes slideDown {
     from { opacity: 0; transform: translateY(-10px); }
     to { opacity: 1; transform: translateY(0); }
   }
   #profile-dropdown a:hover { background: #fef2f2; }
-\`;
+`;
 document.head.appendChild(animStyle);

@@ -198,8 +198,12 @@
     </div>
 
     <div id="loading-msg">
-      <i class='bx bx-loader-alt loading-spinner'></i>
-      <p class="font-semibold text-lg">Đang tải bài kiểm tra...</p>
+      <i class='bx bx-laptop text-primary' style="font-size: 64px; margin-bottom: 24px;"></i>
+      <h2 class="font-bold text-2xl mb-4 text-main">Sẵn sàng làm bài thi?</h2>
+      <p class="text-muted mb-6">Lưu ý: Bài thi yêu cầu chế độ Toàn màn hình (Full-screen).<br><strong class="text-danger">Nếu bạn thoát toàn màn hình hoặc chuyển tab, hệ thống sẽ bắt buộc nộp bài ngay lập tức!</strong></p>
+      <button class="btn btn-primary" style="padding: 16px 32px; font-size: 1.1rem; border-radius: 16px;" onclick="enterFullScreenAndStart()" id="btn-enter-exam">
+        <i class='bx bx-play-circle'></i> Bắt Đầu Làm Bài
+      </button>
     </div>
 
     <!-- Quiz Active Area -->
@@ -315,15 +319,34 @@
 
   document.addEventListener('visibilitychange', () => {
     if (document.hidden && isQuizActive && timeLeft > 0) {
-      cheatCount++;
-      alert(`⚠️ HỆ THỐNG CHỐNG GIAN LẬN:\nBạn vừa thoát khỏi ranh giới màn hình bài thi hoặc chuyển sang Tab khác.\nHành vi này đã được ghi nhận. Số lần vi phạm: ${cheatCount}`);
-
-      if (cheatCount >= 3) {
-        alert('⛔ CẢNH BÁO: Vì bạn đã vi phạm rời màn hình 3 lần, hệ thống sẽ khoá và tự động nộp bài thi của bạn ngay bây giờ!');
-        submitQuiz();
-      }
+      alert('⛔ CẢNH BÁO: Hệ thống phát hiện bạn đã chuyển Tab hoặc ẩn trình duyệt.\nBài thi của bạn sẽ được nộp ngay lập tức!');
+      submitQuiz(true);
     }
   });
+
+  document.addEventListener('fullscreenchange', () => {
+    if (!document.fullscreenElement && isQuizActive && timeLeft > 0) {
+      alert('⛔ CẢNH BÁO: Hệ thống phát hiện bạn đã thoát chế độ Toàn màn hình.\nBài thi của bạn sẽ được nộp ngay lập tức!');
+      submitQuiz(true);
+    }
+  });
+
+  async function enterFullScreenAndStart() {
+    const btn = document.getElementById('btn-enter-exam');
+    btn.innerHTML = "<i class='bx bx-loader-alt bx-spin'></i> Đang tải...";
+    btn.disabled = true;
+
+    try {
+      if (document.documentElement.requestFullscreen) {
+        await document.documentElement.requestFullscreen();
+      }
+    } catch(e) {
+      console.warn("Fullscreen request failed", e);
+      alert("Trình duyệt của bạn không hỗ trợ Fullscreen hoặc bị chặn. Bài thi vẫn sẽ tiếp tục nhưng xin lưu ý không chuyển tab.");
+    }
+    
+    await startQuiz();
+  }
 
   async function startQuiz() {
     try {
@@ -424,7 +447,7 @@
 
       if (timeLeft <= 0) {
         clearInterval(timerInterval);
-        submitQuiz(); 
+        submitQuiz(true); 
       }
     }, 1000);
   }
@@ -446,8 +469,8 @@
     `).join('');
   }
 
-  async function submitQuiz() {
-    if (timeLeft > 0 && cheatCount < 3) {
+  async function submitQuiz(isForced = false) {
+    if (!isForced && timeLeft > 0) {
       if (!confirm("Bạn có chắc chắn muốn nộp bài? Hãy kiểm tra kỹ các câu trả lời!")) return;
     }
 
@@ -492,7 +515,7 @@
     }
   }
 
-  startQuiz();
+  // Removed auto start on load: startQuiz();
 
 
 // Global Dropdown Handler for Student Topbar
